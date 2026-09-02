@@ -1,0 +1,43 @@
+[project]
+name = "apartment-finder"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.19.1",
+    "azure-identity>=1.25.3",
+    "azure-keyvault-secrets>=4.11.2",
+    "azure-storage-blob>=12.30.0",
+    "playwright>=1.62.0",
+    "psycopg[binary]>=3.3.4",
+    "pydantic>=2.13.4",
+    "python-dotenv>=1.2.3",
+    "sqlalchemy>=2.0.52",
+]
+
+[project.scripts]
+apartment-finder-scrape = "apartment_finder.interface.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes (unused imports/variables, etc.)
+    "I",   # isort — automatic import sorting
+    "UP",  # pyupgrade — flags outdated Python patterns
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "ruff>=0.16.5",
+]
