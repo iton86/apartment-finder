@@ -9,7 +9,14 @@ and the unique constraint actually behave as expected together.
 
 import pytest
 
-from apartment_finder.domain.entities import Currency, Listing, ListingId, Money
+from apartment_finder.domain.entities import (
+    Currency,
+    Listing,
+    ListingId,
+    Money,
+    SearchListingsResult,
+    TransactionType,
+)
 from apartment_finder.infrastructure.persistence.postgres_listing_repository import (
     PostgresListingRepository,
 )
@@ -37,10 +44,23 @@ def make_test_listing(external_id: str) -> Listing:
         url=f"https://example.test/{external_id}",
         title="Test apartment",
         price=Money(amount=100000, currency=Currency.EUR),
+        transaction_type=TransactionType.SALE,
         area_sqm=55.0,
-        floor="3rd of 6",
-        location="Sofia, Lozenets",
+        floor=3,
+        city="София",
+        area="Лозенец",
+        street="ул. Мур",
         description="A nice test apartment",
+    )
+
+
+def make_search_result(source: str, external_id: str) -> SearchListingsResult:
+    return SearchListingsResult(
+        id=ListingId(source=source, external_id=external_id),
+        url=f"https://example.test/{external_id}",
+        title=f"Result {external_id}",
+        price=None,
+        transaction_type=TransactionType.SALE,
     )
 
 
@@ -68,3 +88,19 @@ def test_duplicate_source_and_external_id_is_rejected(repository):
 
     with pytest.raises(Exception):  # IntegrityError from the UNIQUE constraint
         repository.save(listing)
+
+
+def test_filter_unseen_returns_only_results_absent_from_database(repository):
+    repository.save(make_test_listing("stored"))
+    stored = make_search_result("test-source", "stored")
+    unseen = make_search_result("test-source", "unseen")
+    same_external_id_from_another_source = make_search_result("another-source", "stored")
+
+    assert repository.filter_unseen([stored, unseen, same_external_id_from_another_source]) == [
+        unseen,
+        same_external_id_from_another_source,
+    ]
+
+
+def test_filter_unseen_accepts_an_empty_list(repository):
+    assert repository.filter_unseen([]) == []

@@ -10,6 +10,7 @@ Rules for this layer:
 
 from dataclasses import dataclass, field
 from enum import StrEnum
+from uuid import UUID
 
 
 class Currency(StrEnum):
@@ -27,6 +28,11 @@ class Money:
             raise ValueError("Price cannot be negative")
 
 
+class TransactionType(StrEnum):
+    SALE = "sale"
+    RENT = "rent"
+
+
 @dataclass(frozen=True)
 class ListingId:
     """Wraps the raw external ID so it can't accidentally be confused with
@@ -40,6 +46,19 @@ class ListingId:
 
 
 @dataclass
+class SearchListingsResult:
+    """
+    Stores ads details visible in the search result page
+    """
+
+    id: ListingId
+    title: str
+    url: str
+    price: Money | None
+    transaction_type: TransactionType
+
+
+@dataclass
 class Listing:
     """The core business entity — a real estate ad, independent of where
     it came from or how it will be stored."""
@@ -48,10 +67,17 @@ class Listing:
     url: str
     title: str
     price: Money | None
+    transaction_type: TransactionType
     area_sqm: float | None
-    floor: str | None
-    location: str
+    floor: int | None
+    city: str
+    area: str
+    street: str | None
     description: str
+    rooms: int | None = None
+    building_floors: int | None = None
+    agency_name: str | None = None
+    apartment_id: UUID | None = None
     phone: str | None = None
     image_urls: list[str] = field(default_factory=list)
 

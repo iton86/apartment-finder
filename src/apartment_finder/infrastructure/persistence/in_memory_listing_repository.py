@@ -6,7 +6,7 @@ file here — the use case and domain layers never change.
 """
 
 from apartment_finder.application.ports import ListingRepository
-from apartment_finder.domain.entities import Listing
+from apartment_finder.domain.entities import Listing, SearchListingsResult
 
 
 class InMemoryListingRepository(ListingRepository):
@@ -18,6 +18,9 @@ class InMemoryListingRepository(ListingRepository):
 
     def exists(self, listing_id) -> bool:
         return str(listing_id) in self._listings
+
+    def filter_unseen(self, results: list[SearchListingsResult]) -> list[SearchListingsResult]:
+        return [result for result in results if str(result.id) not in self._listings]
 
     def all(self) -> list[Listing]:
         return list(self._listings.values())

@@ -1,0 +1,120 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Everyday debugging: local Postgres (make up + make migrate first).
+            // Launches the CLI as a module so the src-layout package imports the
+            // same way `uv run apartment-finder-scrape` does.
+            // --log-level debug traces every results page, parsed field and
+            // image URL — the point of attaching a debugger in the first place.
+            "name": "CLI: scrape (local)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "apartment_finder.interface.cli",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "envFile": "${workspaceFolder}/.env",
+            "env": {
+                "APP_ENV": "local"
+            },
+            "args": [
+                "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/manastirski-livadi/ednostaen?type_home=2~",
+                "--max-pages",
+                "30",
+                "--request-delay",
+                "1",
+                "--log-level",
+                "debug"
+            ]
+        },
+        {
+            // Local scraping execution without debugging attached.
+            // Runs the CLI module with standard logging output.
+            "name": "CLI: scrape (local - no debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "apartment_finder.interface.cli",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env",
+            "env": {
+                "APP_ENV": "local"
+            },
+            "args": [
+                "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/manastirski-livadi/ednostaen?type_home=2~",
+                "--max-pages",
+                "25",
+                "--log-level",
+                "info"
+            ]
+        },
+        {
+            // Same as above, but asks for the URL and page count each run.
+            "name": "CLI: scrape (local, prompt for args)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "apartment_finder.interface.cli",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "envFile": "${workspaceFolder}/.env",
+            "env": {
+                "APP_ENV": "local"
+            },
+            "args": [
+                "${input:searchUrl}",
+                "--max-pages",
+                "${input:maxPages}"
+            ]
+        },
+        {
+            // Hits the REAL Azure database and needs an Azure login
+            // (DefaultAzureCredential). Only pick this deliberately.
+            "name": "CLI: scrape (CLOUD — real database)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "apartment_finder.interface.cli",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "envFile": "${workspaceFolder}/.env",
+            "env": {
+                "APP_ENV": "cloud"
+            },
+            "args": [
+                "${input:searchUrl}",
+                "--max-pages",
+                "${input:maxPages}"
+            ]
+        },
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "envFile": "${workspaceFolder}/.env",
+            "args": "${command:pickArgs}"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "searchUrl",
+            "type": "promptString",
+            "description": "imot.bg search/results page URL to scrape",
+            "default": "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya"
+        },
+        {
+            "id": "maxPages",
+            "type": "promptString",
+            "description": "Max result pages to scrape",
+            "default": "1"
+        }
+    ]
+}

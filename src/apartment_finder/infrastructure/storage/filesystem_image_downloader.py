@@ -4,12 +4,15 @@ context (reuses browser session/cookies). Swappable later for an
 Azure Blob Storage implementation without touching the use case.
 """
 
+import logging
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
 from apartment_finder.application.ports import ImageDownloader
 from apartment_finder.domain.entities import DownloadedImage, Listing
+
+logger = logging.getLogger(__name__)
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -46,10 +49,21 @@ class FilesystemImageDownloader(ImageDownloader):
                                 storage_path=str(path),
                             )
                         )
-                except Exception as e:
-                    print(f"  Warning: failed to download {image_url}: {e}")
+                        logger.debug("Wrote %s (%d bytes)", path, len(response.body()))
+                    else:
+                        logger.warning("Skipping image %s — HTTP %d", image_url, response.status)
+                except Exception:
+                    logger.warning("Failed to download %s", image_url, exc_info=True)
 
             browser.close()
+
+        logger.info(
+            "Downloaded %d/%d image(s) for %s to %s",
+            len(downloaded),
+            len(listing.image_urls),
+            listing.id,
+            listing_dir,
+        )
 
         return downloaded
 

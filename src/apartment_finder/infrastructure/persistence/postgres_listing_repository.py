@@ -4,7 +4,10 @@ knows SQLAlchemy exists — the use case that calls it only sees the
 abstract ListingRepository port, exactly like InMemoryListingRepository.
 """
 
-from sqlalchemy import create_engine, select
+import logging
+from decimal import Decimal
+
+from sqlalchemy import create_engine, make_url, select, tuple_
 from sqlalchemy.orm import Session
 
 from apartment_finder.application.ports import ListingRepository
@@ -13,10 +16,13 @@ from apartment_finder.domain.entities import (
     Listing,
     ListingId,
     Money,
+    SearchListingsResult,
 )
 from apartment_finder.infrastructure.persistence.models import (
     ListingModel,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class PostgresListingRepository(ListingRepository):
@@ -24,6 +30,10 @@ class PostgresListingRepository(ListingRepository):
         # pool_pre_ping avoids using a dead connection after the DB has
         # been idle — cheap safety net for a server that isn't hit constantly.
         self._engine = create_engine(connection_url, pool_pre_ping=True)
+        # NEVER log connection_url directly — it carries the password, and in
+        # cloud mode that's the Key Vault secret. render_as_string masks it.
+        safe_url = make_url(connection_url).render_as_string(hide_password=True)
+        logger.info("Connected to %s", safe_url)
 
     def save(self, listing: Listing) -> None:
         with Session(self._engine) as session:
@@ -32,16 +42,24 @@ class PostgresListingRepository(ListingRepository):
                 external_id=listing.id.external_id,
                 url=listing.url,
                 title=listing.title,
-                price_amount=listing.price.amount if listing.price else None,
+                transaction_type=listing.transaction_type,
+                rooms=listing.rooms,
+                price_amount=Decimal(str(listing.price.amount)) if listing.price else None,
                 price_currency=listing.price.currency.value if listing.price else None,
-                area_sqm=listing.area_sqm,
+                area_sqm=Decimal(str(listing.area_sqm)) if listing.area_sqm is not None else None,
                 floor=listing.floor,
-                location=listing.location,
+                building_floors=listing.building_floors,
+                city=listing.city,
+                area=listing.area,
+                street=listing.street,
                 description=listing.description,
+                agency_name=listing.agency_name,
+                apartment_id=listing.apartment_id,
                 phone=listing.phone,
             )
             session.add(model)
             session.commit()
+            logger.debug("Committed listing %s (row id=%s)", listing.id, model.id)
 
     def exists(self, listing_id: ListingId) -> bool:
         with Session(self._engine) as session:
@@ -49,11 +67,40 @@ class PostgresListingRepository(ListingRepository):
                 ListingModel.source == listing_id.source,
                 ListingModel.external_id == listing_id.external_id,
             )
-            return session.execute(stmt).first() is not None
+            found = session.execute(stmt).first() is not None
+            logger.debug("Dedup check %s -> %s", listing_id, "hit" if found else "miss")
+            return found
+
+    def filter_unseen(self, results: list[SearchListingsResult]) -> list[SearchListingsResult]:
+        """Return results without a matching ``(source, external_id)`` database row."""
+        if not results:
+            return []
+
+        candidate_keys = {(result.id.source, result.id.external_id) for result in results}
+
+        with Session(self._engine) as session:
+            stmt = select(ListingModel.source, ListingModel.external_id).where(
+                tuple_(ListingModel.source, ListingModel.external_id).in_(candidate_keys)
+            )
+            stored_keys = {tuple(row) for row in session.execute(stmt)}
+
+        unseen_results = [
+            result
+            for result in results
+            if (result.id.source, result.id.external_id) not in stored_keys
+        ]
+        logger.debug(
+            "Filtered %d search result(s): %d unseen, %d already stored",
+            len(results),
+            len(unseen_results),
+            len(results) - len(unseen_results),
+        )
+        return unseen_results
 
     def all(self) -> list[Listing]:
         with Session(self._engine) as session:
             models = session.execute(select(ListingModel)).scalars().all()
+            logger.debug("Loaded %d listing(s) from the database", len(models))
             return [self._to_entity(m) for m in models]
 
     @staticmethod
@@ -67,9 +114,16 @@ class PostgresListingRepository(ListingRepository):
             url=model.url,
             title=model.title,
             price=price,
+            transaction_type=model.transaction_type,
             area_sqm=float(model.area_sqm) if model.area_sqm is not None else None,
             floor=model.floor,
-            location=model.location,
+            city=model.city,
+            area=model.area,
+            street=model.street,
             description=model.description or "",
+            rooms=model.rooms,
+            building_floors=model.building_floors,
+            agency_name=model.agency_name,
+            apartment_id=model.apartment_id,
             phone=model.phone,
         )

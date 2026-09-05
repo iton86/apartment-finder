@@ -13,9 +13,12 @@ wrong database.
                                Azure database only.
 """
 
+import logging
 import os
 
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 # Loads .env into os.environ if present. Safe to call even if the file
 # doesn't exist (e.g. in CI, where real env vars are set directly) —
@@ -27,8 +30,12 @@ def build_postgres_connection_url() -> str:
     app_env = os.environ.get("APP_ENV", "local")
 
     if app_env == "local":
+        logger.debug("APP_ENV=local — building connection URL from env vars only")
         return _build_local_url()
     elif app_env == "cloud":
+        # INFO, not DEBUG: 'am I about to write to production?' is the one
+        # question worth answering without turning verbosity up.
+        logger.info("APP_ENV=cloud — targeting the REAL Azure database")
         return _build_cloud_url()
     else:
         raise ValueError(f"Unknown APP_ENV '{app_env}' — expected 'local' or 'cloud'")
@@ -57,7 +64,10 @@ def _build_cloud_url() -> str:
     secret_name = os.environ.get("POSTGRES_PASSWORD_SECRET_NAME", "postgres-admin-password")
 
     vault_url = f"https://{key_vault_name}.vault.azure.net"
+    logger.debug("Fetching secret %r from %s", secret_name, vault_url)
     client = SecretClient(vault_url=vault_url, credential=DefaultAzureCredential())
     password = client.get_secret(secret_name).value
+    # The secret's name and length, never its value.
+    logger.debug("Retrieved secret %r (%d chars)", secret_name, len(password or ""))
 
     return f"postgresql+psycopg://{username}:{password}@{host}:5432/{database}?sslmode=require"

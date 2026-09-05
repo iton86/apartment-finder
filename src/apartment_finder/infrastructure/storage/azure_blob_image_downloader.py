@@ -11,6 +11,7 @@ This means the exact same code works unchanged on your laptop and in
 production — no connection strings or account keys stored anywhere.
 """
 
+import logging
 from io import BytesIO
 
 from azure.identity import DefaultAzureCredential
@@ -19,6 +20,8 @@ from playwright.sync_api import sync_playwright
 
 from apartment_finder.application.ports import ImageDownloader
 from apartment_finder.domain.entities import DownloadedImage, Listing
+
+logger = logging.getLogger(__name__)
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -38,6 +41,12 @@ class AzureBlobImageDownloader(ImageDownloader):
     def download(self, listing: Listing) -> list[DownloadedImage]:
         listing_prefix = str(listing.id).replace(":", "_")
         downloaded: list[DownloadedImage] = []
+        logger.debug(
+            "Uploading %d image(s) for %s to container %r",
+            len(listing.image_urls),
+            listing.id,
+            self._container_name,
+        )
 
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
@@ -47,6 +56,7 @@ class AzureBlobImageDownloader(ImageDownloader):
                 try:
                     response = context.request.get(image_url)
                     if not response.ok:
+                        logger.warning("Skipping image %s — HTTP %d", image_url, response.status)
                         continue
 
                     ext = self._guess_extension(image_url)
@@ -71,10 +81,24 @@ class AzureBlobImageDownloader(ImageDownloader):
                             storage_path=f"{self._container_name}/{blob_name}",
                         )
                     )
-                except Exception as e:
-                    print(f"  Warning: failed to upload image {image_url}: {e}")
+                    logger.debug("Uploaded %s -> %s", image_url, blob_name)
+                except Exception:
+                    # exc_info here, unlike in _safe_text: an upload failure
+                    # can be auth, network or a bad container, and the
+                    # traceback is what distinguishes them.
+                    logger.warning("Failed to upload image %s", image_url, exc_info=True)
 
             browser.close()
+
+        if len(downloaded) != len(listing.image_urls):
+            logger.warning(
+                "Uploaded only %d of %d image(s) for %s",
+                len(downloaded),
+                len(listing.image_urls),
+                listing.id,
+            )
+        else:
+            logger.info("Uploaded %d image(s) for %s", len(downloaded), listing.id)
 
         return downloaded
 

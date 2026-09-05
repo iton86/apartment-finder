@@ -1,0 +1,28 @@
+# The build only needs pyproject.toml, uv.lock, README.md, src/, alembic.ini
+# and db_migrations/. Everything else is excluded so that touching a test or
+# a local venv file doesn't invalidate the Docker layer cache.
+.venv
+__pycache__/
+*.py[oc]
+*.egg-info
+build/
+dist/
+wheels/
+
+# Secrets. .env holds real Azure values and must never be baked into an
+# image layer — pass it at run time with `docker run --env-file .env`.
+.env
+.env.local
+
+.git
+.github
+.idea
+.vscode
+.claude
+.pytest_cache
+.ruff_cache
+.pre-commit-config.yaml
+tests
+docker-compose.yml
+Dockerfile
+Makefile
