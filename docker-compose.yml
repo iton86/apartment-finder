@@ -1,4 +1,20 @@
 services:
+  temporal:
+    image: temporalio/temporal:latest
+    # The local dev server must be able to write the root-owned named volume.
+    user: "0:0"
+    profiles: [temporal]
+    command:
+      - server
+      - start-dev
+      - --ip=0.0.0.0
+      - --db-filename=/data/temporal.db
+    ports:
+      - "127.0.0.1:7233:7233"
+      - "127.0.0.1:8233:8233"
+    volumes:
+      - temporal_data:/data
+
   postgres:
     image: postgres:16
     environment:
@@ -17,3 +33,4 @@ services:
 
 volumes:
   postgres_data:
+  temporal_data:

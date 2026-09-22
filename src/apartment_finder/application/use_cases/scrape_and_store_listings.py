@@ -25,7 +25,7 @@ class ScrapeResult:
     total_found: int
     new_listings: list[Listing]
     skipped_duplicates: int
-    inactive_ads: int
+    inactive_ads: int = 0
     # Listings whose page couldn't be scraped at all. Defaulted so existing
     # callers and tests constructing this by hand keep working.
     failed: int = 0
@@ -55,7 +55,8 @@ class ScrapeAndStoreListings:
         logger.info("Discovering listing URLs from %s (max_pages=%d)", search_url, max_pages)
         search_results = self._scraper.discover_listing_urls(search_url, max_pages)
         unseen_results = self._repository.filter_unseen(search_results)
-        inactive_ads = self._repository.mark_inactive(search_results)
+        # Search results may be partial or scoped to one neighbourhood. Absence
+        # here is not evidence that a stored ad has been removed from the site.
         logger.info("Discovered %d listing(s)", len(search_results))
         unseen_ids = {result.id for result in unseen_results}
         for result in search_results:
@@ -110,11 +111,10 @@ class ScrapeAndStoreListings:
             new_listings.append(listing)
 
         logger.info(
-            "Scrape complete | found=%d new=%d duplicates=%d inactive=%d failed=%d",
+            "Scrape complete | found=%d new=%d duplicates=%d failed=%d",
             total,
             len(new_listings),
             skipped,
-            len(inactive_ads),
             failed,
         )
 
@@ -122,6 +122,5 @@ class ScrapeAndStoreListings:
             total_found=len(search_results),
             new_listings=new_listings,
             skipped_duplicates=skipped,
-            inactive_ads=len(inactive_ads),
             failed=failed,
         )

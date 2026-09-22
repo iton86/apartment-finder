@@ -7,6 +7,8 @@ tested in milliseconds, with no network, no browser, no DB.
 
 import logging
 
+import pytest
+
 from apartment_finder.application.ports import ImageDownloader, SiteScraper
 from apartment_finder.application.use_cases.scrape_and_store_listings import (
     ScrapeAndStoreListings,
@@ -79,6 +81,39 @@ class FlakyScraper(FakeScraper):
 class FakeImageDownloader(ImageDownloader):
     def download(self, listing: Listing) -> list:
         return []  # no-op — image downloading isn't what this test verifies
+
+
+@pytest.mark.parametrize("empty", [False, True])
+def test_search_never_deactivates_ads_missing_from_results(monkeypatch, empty):
+    repository = InMemoryListingRepository()
+    scraper = FakeScraper()
+    outside_search = scraper.scrape_listing("https://fake.test/listing/elsewhere")
+    repository.save(outside_search)
+    if empty:
+        monkeypatch.setattr(scraper, "discover_listing_urls", lambda *args: [])
+    use_case = ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository)
+
+    result = use_case.execute("https://fake.test/search", max_pages=1)
+
+    assert result.inactive_ads == 0
+    assert outside_search.is_active
+    assert outside_search.deactivated_at is None
+
+
+def test_failed_discovery_does_not_deactivate_stored_ads(monkeypatch):
+    repository = InMemoryListingRepository()
+    scraper = FakeScraper()
+    existing = scraper.scrape_listing("https://fake.test/listing/1")
+    repository.save(existing)
+
+    def fail(*args):
+        raise RuntimeError("discovery failed")
+
+    monkeypatch.setattr(scraper, "discover_listing_urls", fail)
+    with pytest.raises(RuntimeError, match="discovery failed"):
+        ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository).execute("search")
+    assert existing.is_active
+    assert existing.deactivated_at is None
 
 
 def test_scrapes_and_saves_new_listings():

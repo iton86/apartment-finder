@@ -78,6 +78,14 @@ class ListingRepository(ABC):
     @abstractmethod
     def all(self) -> list[Listing]: ...
 
+    @abstractmethod
+    def mark_inactive(self, listings: list[Listing] | list[SearchListingsResult]) -> list[Listing]:
+        """Reconcile against a complete inventory; never pass scoped search results.
+
+        Return newly deactivated listings. An empty inventory deactivates all.
+        """
+        ...
+
 
 class NotificationSender(ABC):
     @abstractmethod

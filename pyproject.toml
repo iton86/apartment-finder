@@ -14,10 +14,12 @@ dependencies = [
     "pydantic>=2.13.4",
     "python-dotenv>=1.2.3",
     "sqlalchemy>=2.0.52",
+    "temporalio>=1.33.0",
 ]
 
 [project.scripts]
 apartment-finder-scrape = "apartment_finder.interface.cli:main"
+apartment-finder-temporal = "apartment_finder.interface.temporal_cli:main"
 
 [build-system]
 requires = ["uv_build>=0.11.7,<0.12.0"]

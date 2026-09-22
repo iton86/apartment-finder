@@ -120,6 +120,73 @@ are baked in:
 docker run --rm --env-file .env --entrypoint alembic apartment-finder upgrade head
 ```
 
+## Scheduling with Temporal (every 10 minutes)
+
+Install the updated dependencies with `uv sync`, and ensure Chromium is installed
+(`uv run playwright install chromium`). Start the local services and migrate:
+
+```bash
+docker compose --profile temporal up -d
+make migrate
+```
+
+In one terminal, keep the worker running:
+
+```bash
+APP_ENV=local uv run apartment-finder-temporal worker
+```
+
+In another terminal, create the schedule once:
+
+```bash
+uv run apartment-finder-temporal schedule \
+  "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/manastirski-livadi/ednostaen?type_home=2~" \
+  --max-pages 25 --max-workers 4 --request-delay 3
+```
+
+The first run starts at the next 10-minute interval. Repeating this command updates
+the same schedule and preserves its paused state. Inspect runs, manually trigger,
+pause, or resume the schedule in the Temporal UI at <http://localhost:8233>.
+The schedule ID defaults to `apartment-finder-every-10-minutes`.
+
+The workflow executes a `scrape_listings` activity, which runs the existing CLI in
+a subprocess. Individual ads still use the existing four-worker scraper; logs and
+the scrape summary appear in the worker terminal. The activity heartbeats every
+15 seconds and terminates the scraper process group on cancellation or timeout.
+This worker supports Linux/WSL/Docker. The default run limit is 60 minutes; change
+it with `schedule --timeout-minutes`. Activity retries are disabled: a failed run
+is tried again at the next scheduled interval. Per-ad failures retain the existing
+CLI behavior (logged and counted, without failing the whole workflow).
+
+If a run lasts more than 10 minutes, overlapping scheduled ticks are skipped.
+The worker processes one scraping activity at a time. Keep both Temporal and the
+worker running; Temporal state persists in the `temporal_data` Docker volume.
+The Compose Temporal service is for local development, not production hosting.
+
+The worker inherits the same `.env`, database, Azure, and logging settings as the
+CLI. To use an existing Temporal service, set `TEMPORAL_ADDRESS`,
+`TEMPORAL_NAMESPACE`, and optionally `TEMPORAL_TASK_QUEUE`. Temporal Cloud can use
+`TEMPORAL_API_KEY` (enables TLS); `TEMPORAL_TLS=true` also enables TLS explicitly.
+No database credentials are stored in the workflow input.
+
+**Search coverage:** scraping never deactivates stored ads based on their absence
+from search results. Searches can be partial, empty, or cover different areas.
+Automatic deactivation is disabled until search membership and discovery completion
+are tracked. The repository's explicit `mark_inactive` operation requires a complete
+inventory across the database; an empty inventory deactivates all active ads.
+
+The Docker image can also host the worker by overriding its default entry point:
+
+```bash
+docker run --rm --env-file .env --ipc=host \
+  --network apartment-finder_default \
+  -e APP_ENV=local -e POSTGRES_HOST=postgres -e TEMPORAL_ADDRESS=temporal:7233 \
+  --entrypoint apartment-finder-temporal apartment-finder worker
+```
+
+See [Temporal schedules](https://docs.temporal.io/develop/python/workflows/schedules)
+and [the local Temporal server](https://docs.temporal.io/cli/command-reference/server).
+
 ## Adding a schema change
 
 ```bash
