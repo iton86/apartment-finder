@@ -68,7 +68,7 @@ def upgrade() -> None:
             sa.ForeignKey("apartments.id"),
             nullable=True,
         ),
-        sa.UniqueConstraint("source", "external_id"),
+        sa.UniqueConstraint("source", "external_id", "price_amount"),
     )
     op.create_index("idx_listings_city_area", "listings", ["city", "area"])
     op.create_index(

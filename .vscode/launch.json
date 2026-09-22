@@ -24,7 +24,7 @@
             "args": [
                 "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/manastirski-livadi/ednostaen?type_home=2~",
                 "--max-pages",
-                "30",
+                "1",
                 "--request-delay",
                 "1",
                 "--log-level",
@@ -47,7 +47,7 @@
             "args": [
                 "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/manastirski-livadi/ednostaen?type_home=2~",
                 "--max-pages",
-                "25",
+                "1",
                 "--log-level",
                 "info"
             ]

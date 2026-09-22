@@ -9,6 +9,7 @@ Rules for this layer:
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
@@ -80,6 +81,8 @@ class Listing:
     apartment_id: UUID | None = None
     phone: str | None = None
     image_urls: list[str] = field(default_factory=list)
+    is_active: bool = True
+    deactivated_at: datetime | None = None
 
     @property
     def price_per_sqm(self) -> float | None:

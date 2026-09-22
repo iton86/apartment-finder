@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     DateTime,
     Enum,
     ForeignKey,
@@ -47,7 +48,7 @@ class ApartmentModel(Base):
 class ListingModel(Base):
     __tablename__ = "listings"
     __table_args__ = (
-        UniqueConstraint("source", "external_id"),
+        UniqueConstraint("source", "external_id", "price_amount"),
         Index("idx_listings_city_area", "city", "area"),
         Index("idx_listings_price_per_sqm", "area_sqm", "price_amount"),
     )
@@ -82,6 +83,8 @@ class ListingModel(Base):
     scraped_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    deactivated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     apartment_id: Mapped[UUID | None] = mapped_column(
         Uuid, ForeignKey("apartments.id"), nullable=True
     )

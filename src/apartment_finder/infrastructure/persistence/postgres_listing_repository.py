@@ -5,9 +5,10 @@ abstract ListingRepository port, exactly like InMemoryListingRepository.
 """
 
 import logging
+from datetime import UTC, datetime
 from decimal import Decimal
 
-from sqlalchemy import create_engine, make_url, select, tuple_
+from sqlalchemy import create_engine, make_url, select, tuple_, update
 from sqlalchemy.orm import Session
 
 from apartment_finder.application.ports import ListingRepository
@@ -40,6 +41,10 @@ class PostgresListingRepository(ListingRepository):
             model = ListingModel(
                 source=listing.id.source,
                 external_id=listing.id.external_id,
+                is_active=listing.is_active,
+                deactivated_at=(
+                    listing.deactivated_at or datetime.now(UTC) if not listing.is_active else None
+                ),
                 url=listing.url,
                 title=listing.title,
                 transaction_type=listing.transaction_type,
@@ -72,22 +77,27 @@ class PostgresListingRepository(ListingRepository):
             return found
 
     def filter_unseen(self, results: list[SearchListingsResult]) -> list[SearchListingsResult]:
-        """Return results without a matching ``(source, external_id)`` database row."""
+        """Return results without a matching source, external ID, and price amount."""
         if not results:
             return []
 
         candidate_keys = {(result.id.source, result.id.external_id) for result in results}
 
         with Session(self._engine) as session:
-            stmt = select(ListingModel.source, ListingModel.external_id).where(
-                tuple_(ListingModel.source, ListingModel.external_id).in_(candidate_keys)
-            )
+            stmt = select(
+                ListingModel.source, ListingModel.external_id, ListingModel.price_amount
+            ).where(tuple_(ListingModel.source, ListingModel.external_id).in_(candidate_keys))
             stored_keys = {tuple(row) for row in session.execute(stmt)}
 
         unseen_results = [
             result
             for result in results
-            if (result.id.source, result.id.external_id) not in stored_keys
+            if (
+                result.id.source,
+                result.id.external_id,
+                Decimal(str(result.price.amount)) if result.price is not None else None,
+            )
+            not in stored_keys
         ]
         logger.debug(
             "Filtered %d search result(s): %d unseen, %d already stored",
@@ -103,6 +113,26 @@ class PostgresListingRepository(ListingRepository):
             logger.debug("Loaded %d listing(s) from the database", len(models))
             return [self._to_entity(m) for m in models]
 
+    def mark_inactive(self, listings: list[Listing] | list[SearchListingsResult]) -> list[Listing]:
+        """Return newly deactivated ads absent from the list; an empty list deactivates all."""
+        active_keys = {(listing.id.source, listing.id.external_id) for listing in listings}
+
+        stmt = update(ListingModel).where(ListingModel.is_active.is_(True))
+        if active_keys:
+            stmt = stmt.where(
+                tuple_(ListingModel.source, ListingModel.external_id).not_in(active_keys)
+            )
+
+        with Session(self._engine) as session:
+            models = session.scalars(
+                stmt.values(is_active=False, deactivated_at=datetime.now(UTC)).returning(
+                    ListingModel
+                )
+            ).all()
+            updated_listings = [self._to_entity(model) for model in models]
+            session.commit()
+            return updated_listings
+
     @staticmethod
     def _to_entity(model: ListingModel) -> Listing:
         price = None
@@ -111,6 +141,8 @@ class PostgresListingRepository(ListingRepository):
 
         return Listing(
             id=ListingId(source=model.source, external_id=model.external_id),
+            is_active=model.is_active,
+            deactivated_at=model.deactivated_at,
             url=model.url,
             title=model.title,
             price=price,
