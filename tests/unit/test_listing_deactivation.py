@@ -1,76 +1,59 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from apartment_finder.domain.entities import Listing, ListingId, TransactionType
+from apartment_finder.domain.entities import ListingId, ListingStatus
+from apartment_finder.infrastructure.persistence.in_memory_listing_repository import (
+    InMemoryListingRepository,
+)
 from apartment_finder.infrastructure.persistence.models import Base
 from apartment_finder.infrastructure.persistence.postgres_listing_repository import (
     PostgresListingRepository,
 )
+from tests.unit.test_scrape_and_store_listings import FakeScraper
 
 
-@pytest.fixture
-def repository():
-    repo = PostgresListingRepository("sqlite:///:memory:")
-    Base.metadata.create_all(repo._engine)
-    yield repo
-    repo._engine.dispose()
+@pytest.fixture(params=["memory", "sql"])
+def repository(request):
+    if request.param == "memory":
+        yield InMemoryListingRepository()
+    else:
+        repo = PostgresListingRepository("sqlite:///:memory:")
+        Base.metadata.create_all(repo._engine)
+        yield repo
+        repo._engine.dispose()
 
 
-def listing(external_id, **kwargs):
-    return Listing(
-        id=ListingId("test", external_id),
-        is_active=kwargs.pop("is_active", True),
-        url="https://example.test",
-        title="Apartment",
-        price=None,
-        transaction_type=TransactionType.SALE,
-        area_sqm=None,
-        floor=None,
-        city="City",
-        area="Area",
-        street=None,
-        description="",
-        **kwargs,
-    )
+@pytest.mark.parametrize(
+    ("age", "expected"),
+    [
+        (timedelta(days=2), ListingStatus.UNREACHABLE),
+        (timedelta(days=3), ListingStatus.UNREACHABLE),
+        (timedelta(days=3, microseconds=1), ListingStatus.EXPIRED),
+    ],
+)
+def test_failure_preserves_sighting_and_recovery_restores_active(repository, age, expected):
+    now = datetime.now(UTC)
+    listing = FakeScraper().scrape_listing("https://fake.test/listing/1")
+    listing.last_seen_at = now - age
+    other = FakeScraper().scrape_listing("https://fake.test/listing/2")
+    other.id = ListingId("other", "1")
+    repository.save(listing)
+    repository.save(other)
+    repository.record_unreachable(listing.id, now)
+    stored = {ad.id: ad for ad in repository.all()}
+    assert stored[listing.id].status == expected
+    assert stored[listing.id].last_seen_at == now - age
+    assert stored[other.id].status == ListingStatus.ACTIVE
+    repository.record_seen({listing.id}, now)
+    stored = {ad.id: ad for ad in repository.all()}
+    assert stored[listing.id].status == ListingStatus.ACTIVE
+    assert stored[listing.id].last_seen_at == now
 
 
-def test_deactivation_sets_date_only_once_and_leaves_present_ads_active(repository):
-    present, missing = listing("present"), listing("missing")
-    repository.save(present)
-    repository.save(missing)
-    before = datetime.now(UTC).replace(tzinfo=None)
-    updated = repository.mark_inactive([present])
-    stored = {ad.id.external_id: ad for ad in repository.all()}
-    assert updated == [stored["missing"]]
-    assert stored["present"].is_active
-    assert stored["present"].deactivated_at is None
-    assert not stored["missing"].is_active
-    first_date = stored["missing"].deactivated_at
-    # SQLite drops timezone information; Postgres stores a timezone-aware timestamp.
-    assert before <= first_date <= datetime.now(UTC).replace(tzinfo=None)
-    updated = repository.mark_inactive([])
-    stored = {ad.id.external_id: ad for ad in repository.all()}
-    assert updated == [stored["present"]]
-    assert stored["missing"].deactivated_at == first_date
-    assert not stored["present"].is_active
-    assert stored["present"].deactivated_at is not None
-    assert repository.mark_inactive([]) == []
-
-
-def test_mark_inactive_returns_empty_when_all_ads_are_present(repository):
-    present = listing("present")
-    repository.save(present)
-    assert repository.mark_inactive([present]) == []
-    assert repository.all()[0].is_active
-
-
-def test_save_inactive_listing_records_date(repository):
-    repository.save(listing("inactive", is_active=False))
-    assert repository.all()[0].deactivated_at is not None
-
-
-def test_save_preserves_supplied_deactivation_date(repository):
-    deactivated_at = datetime(2026, 1, 1, tzinfo=UTC)
-    repository.save(listing("inactive", is_active=False, deactivated_at=deactivated_at))
-    assert repository.all()[0].deactivated_at == deactivated_at.replace(tzinfo=None)
+def test_unknown_ids_and_empty_sightings_do_not_modify_records(repository):
+    listing = FakeScraper().scrape_listing("https://fake.test/listing/1")
+    repository.save(listing)
+    repository.record_seen(set(), datetime.now(UTC))
+    repository.record_unreachable(ListingId("other", "1"), datetime.now(UTC))
+    assert repository.all()[0].status == ListingStatus.ACTIVE

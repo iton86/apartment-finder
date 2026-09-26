@@ -5,10 +5,10 @@ abstract ListingRepository port, exactly like InMemoryListingRepository.
 """
 
 import logging
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
-from sqlalchemy import create_engine, make_url, select, tuple_, update
+from sqlalchemy import case, create_engine, make_url, select, tuple_, update
 from sqlalchemy.orm import Session
 
 from apartment_finder.application.ports import ListingRepository
@@ -16,6 +16,7 @@ from apartment_finder.domain.entities import (
     Currency,
     Listing,
     ListingId,
+    ListingStatus,
     Money,
     SearchListingsResult,
 )
@@ -41,10 +42,8 @@ class PostgresListingRepository(ListingRepository):
             model = ListingModel(
                 source=listing.id.source,
                 external_id=listing.id.external_id,
-                is_active=listing.is_active,
-                deactivated_at=(
-                    listing.deactivated_at or datetime.now(UTC) if not listing.is_active else None
-                ),
+                status=listing.status,
+                last_seen_at=listing.last_seen_at,
                 url=listing.url,
                 title=listing.title,
                 transaction_type=listing.transaction_type,
@@ -113,25 +112,37 @@ class PostgresListingRepository(ListingRepository):
             logger.debug("Loaded %d listing(s) from the database", len(models))
             return [self._to_entity(m) for m in models]
 
-    def mark_inactive(self, listings: list[Listing] | list[SearchListingsResult]) -> list[Listing]:
-        """Return newly deactivated ads absent from the list; an empty list deactivates all."""
-        active_keys = {(listing.id.source, listing.id.external_id) for listing in listings}
-
-        stmt = update(ListingModel).where(ListingModel.is_active.is_(True))
-        if active_keys:
-            stmt = stmt.where(
-                tuple_(ListingModel.source, ListingModel.external_id).not_in(active_keys)
-            )
-
+    def record_seen(self, listing_ids: set[ListingId], seen_at: datetime) -> None:
+        if not listing_ids:
+            return
+        keys = {(key.source, key.external_id) for key in listing_ids}
         with Session(self._engine) as session:
-            models = session.scalars(
-                stmt.values(is_active=False, deactivated_at=datetime.now(UTC)).returning(
-                    ListingModel
-                )
-            ).all()
-            updated_listings = [self._to_entity(model) for model in models]
+            session.execute(
+                update(ListingModel)
+                .where(tuple_(ListingModel.source, ListingModel.external_id).in_(keys))
+                .values(status=ListingStatus.ACTIVE, last_seen_at=seen_at)
+            )
             session.commit()
-            return updated_listings
+
+    def record_unreachable(self, listing_id: ListingId, checked_at: datetime) -> None:
+        with Session(self._engine) as session:
+            session.execute(
+                update(ListingModel)
+                .where(
+                    ListingModel.source == listing_id.source,
+                    ListingModel.external_id == listing_id.external_id,
+                )
+                .values(
+                    status=case(
+                        (
+                            ListingModel.last_seen_at < checked_at - timedelta(days=3),
+                            ListingStatus.EXPIRED.value,
+                        ),
+                        else_=ListingStatus.UNREACHABLE.value,
+                    )
+                )
+            )
+            session.commit()
 
     @staticmethod
     def _to_entity(model: ListingModel) -> Listing:
@@ -141,8 +152,12 @@ class PostgresListingRepository(ListingRepository):
 
         return Listing(
             id=ListingId(source=model.source, external_id=model.external_id),
-            is_active=model.is_active,
-            deactivated_at=model.deactivated_at,
+            status=model.status,
+            last_seen_at=(
+                model.last_seen_at.replace(tzinfo=UTC)
+                if model.last_seen_at.tzinfo is None
+                else model.last_seen_at
+            ),
             url=model.url,
             title=model.title,
             price=price,

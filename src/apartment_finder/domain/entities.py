@@ -9,7 +9,7 @@ Rules for this layer:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from uuid import UUID
 
@@ -27,6 +27,12 @@ class Money:
     def __post_init__(self):
         if self.amount < 0:
             raise ValueError("Price cannot be negative")
+
+
+class ListingStatus(StrEnum):
+    ACTIVE = "active"
+    UNREACHABLE = "unreachable"
+    EXPIRED = "expired"
 
 
 class TransactionType(StrEnum):
@@ -81,8 +87,8 @@ class Listing:
     apartment_id: UUID | None = None
     phone: str | None = None
     image_urls: list[str] = field(default_factory=list)
-    is_active: bool = True
-    deactivated_at: datetime | None = None
+    status: ListingStatus = ListingStatus.ACTIVE
+    last_seen_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     @property
     def price_per_sqm(self) -> float | None:

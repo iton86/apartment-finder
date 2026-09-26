@@ -17,6 +17,7 @@ from apartment_finder.domain.entities import (
     Currency,
     Listing,
     ListingId,
+    ListingStatus,
     Money,
     SearchListingsResult,
     TransactionType,
@@ -28,6 +29,8 @@ from apartment_finder.infrastructure.persistence.in_memory_listing_repository im
 
 class FakeScraper(SiteScraper):
     """A test double — returns canned data instead of hitting a real site."""
+
+    source = "fake.test"
 
     def discover_listing_urls(self, search_url: str, max_pages: int) -> list[SearchListingsResult]:
         return [self._search_result("1"), self._search_result("2")]
@@ -93,11 +96,9 @@ def test_search_never_deactivates_ads_missing_from_results(monkeypatch, empty):
         monkeypatch.setattr(scraper, "discover_listing_urls", lambda *args: [])
     use_case = ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository)
 
-    result = use_case.execute("https://fake.test/search", max_pages=1)
+    use_case.execute("https://fake.test/search", max_pages=1)
 
-    assert result.inactive_ads == 0
-    assert outside_search.is_active
-    assert outside_search.deactivated_at is None
+    assert outside_search.status == ListingStatus.ACTIVE
 
 
 def test_failed_discovery_does_not_deactivate_stored_ads(monkeypatch):
@@ -112,8 +113,7 @@ def test_failed_discovery_does_not_deactivate_stored_ads(monkeypatch):
     monkeypatch.setattr(scraper, "discover_listing_urls", fail)
     with pytest.raises(RuntimeError, match="discovery failed"):
         ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository).execute("search")
-    assert existing.is_active
-    assert existing.deactivated_at is None
+    assert existing.status == ListingStatus.ACTIVE
 
 
 def test_scrapes_and_saves_new_listings():
@@ -195,3 +195,84 @@ def test_duplicate_skips_stay_out_of_info_output(caplog):
         use_case.execute("https://fake.test/search", max_pages=1)
 
     assert sum("already stored" in r.getMessage() for r in caplog.records) == 2
+
+
+@pytest.mark.parametrize("removed", [True, False])
+def test_missing_ads_become_unreachable_for_removals_and_temporary_failures(removed):
+    from apartment_finder.application.ports import ListingUnavailableError
+
+    class CheckingScraper(FakeScraper):
+        source = "fake.test"
+
+        def scrape_listing(self, url):
+            if url.endswith("missing"):
+                if removed:
+                    raise ListingUnavailableError("removed")
+                raise TimeoutError("temporary failure")
+            return super().scrape_listing(url)
+
+    repository = InMemoryListingRepository()
+    missing = FakeScraper().scrape_listing("https://fake.test/listing/missing")
+    unrelated = FakeScraper().scrape_listing("https://other.test/listing/missing")
+    unrelated.id = ListingId("other.test", "missing")
+    repository.save(missing)
+    repository.save(unrelated)
+    result = ScrapeAndStoreListings(CheckingScraper(), FakeImageDownloader(), repository).execute(
+        "search"
+    )
+    assert missing.status == ListingStatus.UNREACHABLE
+    assert unrelated.status == ListingStatus.ACTIVE
+    assert result.failed == 1
+    assert len(result.new_listings) == 2
+
+
+def test_successful_status_check_does_not_save_or_count_a_duplicate():
+    scraper = FakeScraper()
+    scraper.source = "fake.test"
+    repository = InMemoryListingRepository()
+    existing = scraper.scrape_listing("https://fake.test/listing/outside")
+    repository.save(existing)
+    result = ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository).execute("search")
+    assert existing.status == ListingStatus.ACTIVE
+    assert result.skipped_duplicates == 0
+    assert len(repository.all()) == 3
+
+
+@pytest.mark.parametrize("present", [True, False])
+def test_expired_ads_recover_from_search_or_successful_parse(monkeypatch, present):
+    from datetime import UTC, datetime, timedelta
+
+    scraper = FakeScraper()
+    repository = InMemoryListingRepository()
+    existing = scraper.scrape_listing("https://fake.test/listing/1")
+    existing.status = ListingStatus.EXPIRED
+    existing.last_seen_at = datetime.now(UTC) - timedelta(days=4)
+    repository.save(existing)
+    if not present:
+        monkeypatch.setattr(scraper, "discover_listing_urls", lambda *args: [])
+    before = datetime.now(UTC)
+    result = ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository).execute("search")
+    assert existing.status == ListingStatus.ACTIVE
+    assert existing.last_seen_at >= before
+    assert result.failed == 0
+
+
+def test_old_missing_ad_expires_on_failed_check(monkeypatch):
+    from datetime import UTC, datetime, timedelta
+
+    scraper = FakeScraper()
+    repository = InMemoryListingRepository()
+    existing = scraper.scrape_listing("https://fake.test/listing/old")
+    last_seen = datetime.now(UTC) - timedelta(days=4)
+    existing.last_seen_at = last_seen
+    repository.save(existing)
+
+    def fail(url):
+        raise TimeoutError("unreachable")
+
+    monkeypatch.setattr(scraper, "scrape_listing", fail)
+    monkeypatch.setattr(scraper, "discover_listing_urls", lambda *args: [])
+    result = ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository).execute("search")
+    assert existing.status == ListingStatus.EXPIRED
+    assert existing.last_seen_at == last_seen
+    assert result.failed == 1

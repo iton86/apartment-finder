@@ -1,15 +1,4 @@
-"""
-Infrastructure layer — this is the ONLY file that should mention
-Playwright, CSS selectors, or imot.bg's URL structure by name.
-
-If imot.bg redesigns their site, or you switch from Playwright to a
-different tool, only this file (and maybe its sibling adapters) needs
-to change. The use case and domain layers stay untouched.
-
-NOTE: selectors marked # VERIFY are placeholders — imot.bg's bot detection
-blocked automated inspection. Confirm by opening a real listing in your
-browser, right-click -> Inspect on each field, and update accordingly.
-"""
+"""Playwright adapter for imot.bg discovery, extraction, and field parsing."""
 
 import logging
 import os
@@ -18,11 +7,11 @@ import re
 import threading
 import time
 from collections.abc import Iterator, Sequence
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 from playwright.sync_api import BrowserContext, Page, sync_playwright
 
-from apartment_finder.application.ports import ScrapeOutcome, SiteScraper
+from apartment_finder.application.ports import ListingUnavailableError, ScrapeOutcome, SiteScraper
 from apartment_finder.domain.entities import (
     Currency,
     Listing,
@@ -40,59 +29,30 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 )
 
-# Labels inside the .adParams block. Which rows an ad has varies — a plot of
-# land has no "Етаж", a new build no completion year — so these are looked up
-# by label rather than by position.
+# Look up optional property attributes by label; row order varies by listing.
 AREA_LABEL = "Площ"
 FLOOR_LABEL = "Етаж"
 
-# Gallery photos. Owl Carousel clones the trailing slides to the head of the
-# strip so looping looks seamless, which puts the *last* photo first in
-# document order — read the uncloned slides when the wrappers are there, and
-# fall back to every match on pages where owl never initialised.
+# Prefer original carousel slides to preserve photo order; cloned slides repeat photos.
 IMAGE_SELECTOR = "img.carouselimg"
 UNCLONED_IMAGE_SELECTOR = ".owl-item:not(.cloned) img.carouselimg"
 
-# div.location reads as one or two lines:
-#     град София, Манастирски ливади
-#     ул. Луи Айер                    <- only on some ads
-# "град"/"гр." = city, "село"/"с." = village; stripped because the field is
-# already called city. The street keeps its "ул."/"бул." prefix, since that
-# distinguishes a street from a boulevard of the same name.
+# Strip city/village prefixes; retain street prefixes such as "ул." and "бул.".
 CITY_PREFIX_RE = re.compile(r"^(?:град|гр\.|село|с\.)\s+")
 
-# Two container-only Chromium problems, both of which surface as a browser
-# that dies on launch or mid-page:
-#   --no-sandbox: the sandbox needs kernel calls Docker's default seccomp
-#     profile blocks, so Chromium refuses to start.
-#   --disable-dev-shm-usage: Docker caps /dev/shm at 64 MB, well under what
-#     Chromium assumes, and it crashes on image-heavy pages instead.
-# Neither is wanted outside a container (--no-sandbox drops a real security
-# boundary), so the Dockerfile opts in by setting CHROMIUM_IN_CONTAINER=1.
+# Container opt-in: disable the sandbox and avoid Docker's limited /dev/shm.
+# Keep Chromium's default protections outside containers.
 CONTAINER_CHROMIUM_ARGS = ["--no-sandbox", "--disable-dev-shm-usage"]
 
-# One Chromium per worker costs roughly 250-350 MB of RSS, so this is a
-# memory ceiling as much as a politeness one. Four is comfortable on a
-# laptop and inside the 1.39 GB container; past that the request rate is
-# capped by RateLimiter anyway, so extra workers buy nothing but memory.
+# Limit concurrent browser instances to bound memory usage.
 DEFAULT_MAX_WORKERS = 4
 
-# Workers are daemon threads blocked in Playwright, not in Python, so a
-# join() can't be interrupted mid-request. This bounds how long shutdown
-# waits for one in-flight page load before giving up on it.
+# Bound shutdown waits for daemon workers with in-flight browser requests.
 WORKER_JOIN_TIMEOUT_SECONDS = 30.0
 
 
 class RateLimiter:
-    """Spaces out requests across every worker thread.
-
-    This is the piece that makes parallelism safe to turn on. The obvious
-    implementation — each worker sleeping request_delay_seconds on its own —
-    would multiply the request rate imot.bg sees by the worker count, which
-    is exactly how a scraper gets itself blocked. One shared limiter means
-    the configured delay stays the *aggregate* interval no matter how many
-    workers run.
-    """
+    """Reserve request slots at a shared minimum interval across worker threads."""
 
     def __init__(self, min_interval_seconds: float):
         self._min_interval = min_interval_seconds
@@ -103,18 +63,19 @@ class RateLimiter:
         with self._lock:
             now = time.monotonic()
             wait_for = self._next_allowed - now
-            # Book the next slot relative to the later of now and the
-            # current reservation, so a thread that stalls after acquiring
-            # doesn't let the whole queue bunch up behind it.
+            # Reserve request slots under the lock to maintain the shared interval.
             self._next_allowed = max(now, self._next_allowed) + self._min_interval
 
-        # Sleep outside the lock. Holding it while sleeping would serialise
-        # every worker on the mutex and undo the concurrency entirely.
+        # Release the lock before waiting so other workers can reserve slots.
         if wait_for > 0:
             time.sleep(wait_for)
 
 
 class ImotBgScraper(SiteScraper):
+    """Discover and scrape imot.bg listings with a shared request limiter."""
+
+    source = "imot.bg"
+
     def __init__(
         self,
         request_delay_seconds: float = 3.0,
@@ -122,8 +83,7 @@ class ImotBgScraper(SiteScraper):
     ):
         self.request_delay_seconds = request_delay_seconds
         self.max_workers = max_workers
-        # Shared by discovery and listing requests alike, so the delay
-        # describes the total load this scraper puts on the site.
+        # Share the request interval across discovery and listing workers.
         self._rate_limiter = RateLimiter(request_delay_seconds)
 
     def discover_listing_urls(self, search_url: str, max_pages: int) -> list[SearchListingsResult]:
@@ -151,12 +111,7 @@ class ImotBgScraper(SiteScraper):
                 page.goto(paged_url, wait_until="domcontentloaded")
                 page.wait_for_timeout(1500)
 
-                # Every listing is one .item card. The element can carry
-                # additional classes such as TOP or VIP; the .item selector
-                # still matches all of them. Scoping title and price lookups
-                # to the card keeps values from adjacent listings together.
-                # hrefs are protocol-relative ("//www.imot.bg/obiava-..."),
-                # which urljoin resolves against BASE_URL's scheme.
+                # Scope fields to each card; urljoin resolves protocol-relative links.
                 found_on_page = 0
                 for item in page.locator("div.item").all():
                     link = item.locator("a.title.saveSlink").first
@@ -183,9 +138,7 @@ class ImotBgScraper(SiteScraper):
                         )
                         found_on_page += 1
 
-                # Zero on page 1 is the signature of a broken selector or a
-                # bot-detection page, and it's silent otherwise — the run
-                # just reports "0 listings found" and exits successfully.
+                # Empty results can indicate stale selectors or a blocked page.
                 if found_on_page == 0:
                     logger.warning(
                         "No listing cards matched 'div.item' with 'a.title.saveSlink' on %s — "
@@ -206,8 +159,7 @@ class ImotBgScraper(SiteScraper):
         return deduped
 
     def scrape_listing(self, url: str) -> Listing:
-        """Single listing, start to finish. Still raises on failure — the
-        batch path is where errors turn into data."""
+        """Scrape one listing and raise any reported extraction or navigation error."""
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True, args=self._chromium_args())
             try:
@@ -218,34 +170,19 @@ class ImotBgScraper(SiteScraper):
 
         if outcome.error is not None:
             raise outcome.error
-        # Narrowing for the type checker: _scrape_one always sets exactly
-        # one of listing/error.
+        # _scrape_one returns either a listing or an error.
         assert outcome.listing is not None
         return outcome.listing
 
     def scrape_listings(self, urls: Sequence[str]) -> Iterator[ScrapeOutcome]:
-        """Scrape a batch across several browsers at once.
+        """Yield batch outcomes in completion order using a bounded worker pool.
 
-        Two separate costs are being removed here. The obvious one is
-        latency: page load and render used to be serialised behind the
-        delay, so each listing cost delay + latency. The bigger one is that
-        the old code launched a whole Playwright instance and Chromium per
-        listing — around 1.5 s of pure startup, 500 times over. Each worker
-        now launches once and reuses one context for every page it handles.
-
-        Throughput stays bounded by RateLimiter, so this is faster without
-        being ruder: with the default 3 s delay the aggregate request rate
-        is the same 1-per-3-s it was, the run just stops idling between
-        requests. Lowering request_delay_seconds is what actually increases
-        load on imot.bg, and that's a deliberate decision, not a side
-        effect of adding workers.
-
-        Yields in completion order, not input order.
+        Each worker reuses one browser context. A shared rate limiter spaces
+        requests across workers independently of browser and page-load latency.
         """
         worker_count = min(self.max_workers, len(urls))
         if worker_count <= 1:
-            # One worker is just the sequential path, and the port's default
-            # implementation already is that — no threads, no queues.
+            # Use the port's sequential implementation for at most one worker.
             yield from super().scrape_listings(urls)
             return
 
@@ -274,16 +211,11 @@ class ImotBgScraper(SiteScraper):
             worker.start()
 
         try:
-            # Exactly one outcome per URL is guaranteed: every URL is taken
-            # from `pending` exactly once, and both _scrape_one and the
-            # worker's failure path always put something back. That's what
-            # makes this fixed-count loop safe rather than a potential hang.
+            # Collect one outcome per input URL, in completion order.
             for _ in range(len(urls)):
                 yield results.get()
         finally:
-            # Reached on early generator close too (a `break` in the
-            # consumer), where draining `pending` is what lets the workers
-            # notice there's no work left and exit instead of leaking.
+            # Discard pending work when the generator exits, including on explicit close.
             while True:
                 try:
                     pending.get_nowait()
@@ -293,15 +225,12 @@ class ImotBgScraper(SiteScraper):
                 worker.join(timeout=WORKER_JOIN_TIMEOUT_SECONDS)
 
     def _run_worker(self, pending: queue.Queue, results: queue.Queue) -> None:
-        """One browser, many listings, until the queue runs dry."""
+        """Process queued listings with one browser and report pending work on failure."""
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True, args=self._chromium_args())
                 try:
-                    # One context per worker rather than per page: a context
-                    # is a browser profile, so reusing it keeps cookies and
-                    # session state coherent, which is also what a real
-                    # browsing session looks like to bot detection.
+                    # Reuse cookies and session state across each worker's listings.
                     context = browser.new_context(user_agent=USER_AGENT, locale="bg-BG")
                     while True:
                         try:
@@ -312,11 +241,7 @@ class ImotBgScraper(SiteScraper):
                 finally:
                     browser.close()
         except BaseException as exc:
-            # Launching the browser failed (out of memory, missing
-            # dependency, killed). Without this, the URLs still queued would
-            # never produce an outcome and the consumer's fixed-count loop
-            # would block forever, so this thread reports the remainder as
-            # failures on its way out.
+            # Report failures for queued URLs so the consumer can collect their outcomes.
             logger.error("Scraper worker died: %s", exc, exc_info=True)
             while True:
                 try:
@@ -326,28 +251,69 @@ class ImotBgScraper(SiteScraper):
                 results.put(ScrapeOutcome(url=url, error=exc))
 
     def _scrape_one(self, context: BrowserContext, url: str) -> ScrapeOutcome:
-        """Load one listing in its own page. Never raises — the contract the
-        worker loop depends on to keep outcome counts matching URL counts."""
+        """Load and extract a listing, returning navigation and extraction errors as outcomes."""
         self._rate_limiter.acquire()
 
         page = None
         try:
             page = context.new_page()
             logger.debug("Loading listing page %s", url)
-            page.goto(url, wait_until="domcontentloaded")
+            response = page.goto(url, wait_until="domcontentloaded")
+            if response is None:
+                raise RuntimeError("Listing navigation returned no response")
+            if response.status in (404, 410):
+                raise ListingUnavailableError(f"Listing unavailable (HTTP {response.status})")
+            if response.status >= 400:
+                raise RuntimeError(f"Listing request failed (HTTP {response.status})")
             page.wait_for_timeout(1500)
+            self._check_removal_redirect(url, page.url)
+            self._check_removal_notice(page)
             return ScrapeOutcome(url=url, listing=self._extract(page, url))
         except Exception as exc:
             logger.warning("Failed to scrape %s", url, exc_info=True)
             return ScrapeOutcome(url=url, error=exc)
         finally:
-            # Pages are per-listing and must be closed or a long run
-            # accumulates hundreds of them in one browser.
+            # Close each page to prevent accumulation during long batches.
             if page is not None:
                 try:
                     page.close()
                 except Exception:
                     logger.debug("Could not close page for %s", url, exc_info=True)
+
+    @staticmethod
+    def _check_removal_redirect(requested_url: str, final_url: str) -> None:
+        requested = urlsplit(requested_url)
+        destination = urlsplit(final_url)
+        site_hosts = {"imot.bg", "www.imot.bg"}
+        if (
+            requested.hostname in site_hosts
+            and requested.path.startswith("/obiava-")
+            and destination.scheme in {"http", "https"}
+            and destination.hostname in site_hosts
+            and (
+                destination.path == "/obiavi/prodazhbi"
+                or destination.path.startswith("/obiavi/prodazhbi/")
+            )
+        ):
+            raise ListingUnavailableError("Listing redirected to the sales search page")
+
+    @staticmethod
+    def _check_removal_notice(page: Page) -> None:
+        # Only standalone notices without listing markup count as removal.
+        notices = {
+            "обявата е изтрита",
+            "обявата е неактивна",
+            "обявата е свалена",
+            "обявата не съществува",
+        }
+        if page.locator("div.title").count():
+            return
+        lines = {
+            " ".join(line.lower().split()).rstrip(".! ")
+            for line in page.locator("body").inner_text().splitlines()
+        }
+        if lines & notices:
+            raise ListingUnavailableError("Listing page displays a removal notice")
 
     def _extract(self, page: Page, url: str) -> Listing:
         external_id = self._extract_external_id(url)
@@ -364,10 +330,7 @@ class ImotBgScraper(SiteScraper):
         rooms = self._parse_rooms(title)
         city, area, street = self._parse_location(location_raw)
 
-        # "Площ:<br><strong>55 m<sup>2</sup></strong>" reads as "Площ:\n55 m2",
-        # so _parse_number's leading-number match gives 55.0 and ignores the
-        # unit. The first integer in the floor text is the listing's floor;
-        # "от N" separately gives the total number of building floors.
+        # Parse area and floor values independently from the label/value grid.
         params = self._extract_ad_params(page)
         area_sqm = self._parse_number(params.get(AREA_LABEL, ""))
         floor_text = params.get(FLOOR_LABEL) or None
@@ -376,20 +339,14 @@ class ImotBgScraper(SiteScraper):
 
         image_urls = self._extract_image_urls(page)
 
-        # A stale selector doesn't raise — _safe_text swallows the timeout and
-        # returns "", so the listing saves with a blank field and nobody
-        # notices. Naming the empty fields at WARNING is the cheapest early
-        # signal that imot.bg changed their markup again.
+        # Warn about missing core fields that may indicate changed markup.
         missing = [
             name
             for name, value in (
                 ("title", title),
                 ("price", price),
                 ("area_sqm", area_sqm),
-                # city rather than the raw text: an unparseable location
-                # yields an empty city, which is the failure worth hearing
-                # about. street is absent on plenty of real ads, so it is
-                # deliberately not listed here.
+                # Validate the parsed city; street is optional.
                 ("city", city),
                 ("images", image_urls),
             )
@@ -448,10 +405,7 @@ class ImotBgScraper(SiteScraper):
             )
             images = page.locator(IMAGE_SELECTOR)
 
-        # .owl-lazy means the URL lives in data-src and src is empty or a
-        # placeholder until that slide scrolls into view. Headless we never
-        # scroll, so only the first slides would ever get a real src — reading
-        # data-src first is what makes photos past the third one appear.
+        # Lazy-loaded slides store the photo URL in data-src before entering view.
         raw_srcs = [
             img.get_attribute("data-src") or img.get_attribute("src") for img in images.all()
         ]
@@ -463,25 +417,20 @@ class ImotBgScraper(SiteScraper):
     def _resolve_image_urls(raw_srcs: list[str | None]) -> list[str]:
         urls: list[str] = []
         for src in raw_srcs:
-            # A slide owl hasn't touched yet can carry an inline base64 blank
-            # as its src; that's a placeholder, not a photo.
+            # Skip inline placeholders for slides that have not loaded.
             if not src or src.startswith("data:"):
                 continue
             urls.append(urljoin(BASE_URL, src))
-        # Dedup last: the thumbnail strip repeats the main carousel's photos,
-        # and dict.fromkeys keeps the first-seen order so DownloadedImage.
-        # sequence still matches the order the ad shows them in.
+        # Deduplicate resolved URLs while preserving gallery order.
         return list(dict.fromkeys(urls))
 
     def _extract_ad_params(self, page: Page) -> dict[str, str]:
-        """Read the .adParams label/value grid into a {label: value} dict."""
+        """Read the property attribute grid into a label-to-value mapping."""
         try:
-            # Direct children only — a row's own markup nests <strong>/<sup>,
-            # and a descendant match would also return inner wrappers as rows.
+            # Select direct rows only, excluding nested value markup.
             rows = page.locator("div.adParams > div").all_inner_texts()
         except Exception:
-            # Returning {} here means area and floor silently come back
-            # empty, so the reason has to land somewhere.
+            # Log extraction failures before falling back to empty attributes.
             logger.warning("Could not read the .adParams block", exc_info=True)
             return {}
 
@@ -493,19 +442,14 @@ class ImotBgScraper(SiteScraper):
     def _parse_ad_params(rows: list[str]) -> dict[str, str]:
         params: dict[str, str] = {}
         for row in rows:
-            # Split on the label's colon rather than on the newline the <br>
-            # renders as: the colon is in the markup, the newline is a
-            # rendering artifact that disappears if imot.bg drops the <br>.
+            # Split on the label delimiter, independent of rendered line breaks.
             label, separator, value = row.partition(":")
             if not separator:
                 continue
             label = label.strip()
-            # Rows can hold several text nodes ("Тухла, " + "Въведен в
-            # експлоатация " + "2013 г."), so collapse the whitespace between
-            # them into single spaces.
+            # Normalize whitespace across nested text nodes.
             value = " ".join(value.split())
-            # First occurrence wins, so a repeated label can't overwrite the
-            # value already read from the main block.
+            # Preserve the first value for duplicate labels.
             if label and label not in params:
                 params[label] = value
         return params
@@ -515,34 +459,25 @@ class ImotBgScraper(SiteScraper):
         try:
             return page.locator(selector).first.inner_text(timeout=3000).strip()
         except Exception as exc:
-            # DEBUG rather than WARNING: some fields are legitimately absent
-            # (plenty of ads hide the phone), so this fires on healthy pages
-            # too. _extract aggregates the ones that matter into one warning.
-            # %s not exc_info: a Playwright timeout's traceback is noise, the
-            # selector that missed is the whole story.
+            # Optional fields may be absent; _extract warns about missing core fields.
             logger.debug("No text for selector %r (%s)", selector, type(exc).__name__)
             return ""
 
     @staticmethod
     def _parse_location(raw: str) -> tuple[str, str, str | None]:
-        """'град София, Манастирски ливади\\nул. Луи Айер'
-        -> ('София', 'Манастирски ливади', 'ул. Луи Айер')
+        """Parse city, neighbourhood, and optional street from location lines.
 
-        The source uses Bulgarian city/village prefixes, which are removed
-        because the destination field is already named ``city``.
+        Remove Bulgarian city/village prefixes and retain street prefixes.
         """
         lines = [line.strip() for line in raw.splitlines() if line.strip()]
         if not lines:
             return "", "", None
 
-        # partition on the first comma, not split: a neighbourhood
-        # containing a comma keeps it instead of being truncated.
+        # Preserve commas within the neighbourhood name.
         head, _, area = lines[0].partition(",")
         city = CITY_PREFIX_RE.sub("", head.strip()).strip()
 
-        # Anything past the second line is ignored rather than concatenated
-        # — no observed ad has one, and guessing at a third field's meaning
-        # would be worse than dropping it.
+        # Only the second line is interpreted as a street.
         street = lines[1] if len(lines) > 1 else None
 
         return city, area.strip(), street
@@ -582,10 +517,7 @@ class ImotBgScraper(SiteScraper):
 
     @staticmethod
     def _extract_external_id(url: str) -> str:
-        # Listing URLs look like /obiava-1b178411519043054-prodava-dvustaen-...
-        # The id is alphanumeric, not purely numeric: matching only digits
-        # silently drops the leading "1b" and stores a truncated id, which
-        # matters because this is the dedup key.
+        # Listing IDs are alphanumeric, for example /obiava-1b178411519043054-...
         match = re.search(r"/obiava-([a-z0-9]+)", url)
         return match.group(1) if match else url.rstrip("/").split("/")[-1]
 
@@ -601,10 +533,8 @@ class ImotBgScraper(SiteScraper):
     def _parse_number(raw: str) -> float | None:
         if not raw:
             return None
-        # Match the number rather than stripping unwanted characters: the unit
-        # itself contains a dot ("75,5 кв.м"), so stripping non-[\d.] leaves
-        # "75.5." and float() rejects it. Bulgarian pages use "," as the
-        # decimal separator.
+        # Match the numeric value without punctuation from units such as "кв.м".
+        # Accept both Bulgarian decimal commas and decimal points.
         match = re.search(r"\d+(?:[.,]\d+)?", raw)
         if not match:
             return None

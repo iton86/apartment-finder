@@ -145,25 +145,23 @@ def test_filter_unseen_handles_optional_and_changed_prices(
     assert repository.filter_unseen([result]) == ([result] if unseen else [])
 
 
-def test_mark_inactive_returns_updated_records_and_preserves_timestamp(repository):
-    present, missing = make_test_listing("present"), make_test_listing("missing")
-    repository.save(present)
-    repository.save(missing)
-    before = datetime.now(UTC)
-    updated = repository.mark_inactive([present])
-    assert len(updated) == 1
-    assert updated[0].id == missing.id
-    assert not updated[0].is_active
-    first_date = updated[0].deactivated_at
-    assert first_date.tzinfo is not None
-    assert before <= first_date <= datetime.now(UTC)
-    assert repository.mark_inactive([present]) == []
-    stored = {ad.id: ad for ad in repository.all()}
-    assert stored[missing.id].deactivated_at == first_date
-    assert stored[present.id].is_active
-    assert stored[present.id].deactivated_at is None
-    assert [ad.id for ad in repository.mark_inactive([])] == [present.id]
-    assert repository.mark_inactive([]) == []
+def test_listing_status_lifecycle(repository):
+    from datetime import timedelta
+
+    from apartment_finder.domain.entities import ListingStatus
+
+    listing = make_test_listing("lifecycle")
+    now = datetime.now(UTC)
+    listing.last_seen_at = now - timedelta(days=4)
+    repository.save(listing)
+    repository.record_unreachable(listing.id, now)
+    stored = repository.all()[0]
+    assert stored.status == ListingStatus.EXPIRED
+    assert stored.last_seen_at == listing.last_seen_at
+    repository.record_seen({listing.id}, now)
+    stored = repository.all()[0]
+    assert stored.status == ListingStatus.ACTIVE
+    assert stored.last_seen_at == now
 
 
 def test_filter_unseen_returns_only_results_absent_from_database(repository):

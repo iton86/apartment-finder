@@ -198,3 +198,91 @@ class TestParseNumber:
     @pytest.mark.parametrize("raw", ["", "n/a"])
     def test_returns_none_when_unparseable(self, raw):
         assert ImotBgScraper._parse_number(raw) is None
+
+
+@pytest.mark.parametrize("status", [404, 410, 403, 429, 500, 200])
+def test_scrape_classifies_http_failures_and_closes_page(status):
+    from unittest.mock import Mock
+
+    from apartment_finder.application.ports import ListingUnavailableError
+
+    scraper = ImotBgScraper(request_delay_seconds=0)
+    context = Mock()
+    page = context.new_page.return_value
+    page.url = REAL_URL
+    page.goto.return_value.status = status
+    scraper._check_removal_notice = Mock()
+    scraper._extract = Mock()
+    outcome = scraper._scrape_one(context, REAL_URL)
+    assert isinstance(outcome.error, ListingUnavailableError) is (status in (404, 410))
+    assert (outcome.error is None) is (status == 200)
+    page.close.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    ("text", "has_title", "inactive"),
+    [
+        ("Обявата е изтрита.", False, True),
+        ("Обявата е неактивна", False, True),
+        ("Access denied", False, False),
+        ("Описание: обявата е изтрита", False, False),
+        ("Обявата е изтрита", True, False),
+    ],
+)
+def test_removal_notices_require_explicit_standalone_text(text, has_title, inactive):
+    from unittest.mock import Mock
+
+    from apartment_finder.application.ports import ListingUnavailableError
+
+    page = Mock()
+    page.locator.return_value.count.return_value = int(has_title)
+    page.locator.return_value.inner_text.return_value = text
+    if inactive:
+        with pytest.raises(ListingUnavailableError):
+            ImotBgScraper._check_removal_notice(page)
+    else:
+        ImotBgScraper._check_removal_notice(page)
+
+
+@pytest.mark.parametrize(
+    ("final_url", "inactive"),
+    [
+        ("https://www.imot.bg/obiavi/prodazhbi/", True),
+        ("https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/dvustaen", True),
+        ("https://imot.bg/obiavi/prodazhbi?region=sofiya", True),
+        (REAL_URL, False),
+        ("https://www.imot.bg/obiava-1b178411519043054-new-title", False),
+        ("https://www.imot.bg/", False),
+        ("https://www.imot.bg/login", False),
+        ("https://www.imot.bg/obiavi/prodazhbi-other/", False),
+        ("https://other.test/obiavi/prodazhbi/", False),
+        ("https://www.imot.bg.other.test/obiavi/prodazhbi/", False),
+        ("https://www.imot.bg/challenge?next=/obiavi/prodazhbi/", False),
+    ],
+)
+def test_redirect_detection_in_scrape_flow(final_url, inactive):
+    from unittest.mock import Mock
+
+    from apartment_finder.application.ports import ListingUnavailableError
+
+    scraper = ImotBgScraper(request_delay_seconds=0)
+    context = Mock()
+    page = context.new_page.return_value
+    page.goto.return_value.status = 200
+    page.url = final_url
+    scraper._check_removal_notice = Mock()
+    scraper._extract = Mock()
+    outcome = scraper._scrape_one(context, REAL_URL)
+    assert isinstance(outcome.error, ListingUnavailableError) is inactive
+    if inactive:
+        scraper._extract.assert_not_called()
+    else:
+        scraper._extract.assert_called_once()
+    page.close.assert_called_once()
+
+
+def test_search_navigation_is_not_classified_as_a_removed_ad():
+    ImotBgScraper._check_removal_redirect(
+        "https://www.imot.bg/obiavi/prodazhbi/",
+        "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya",
+    )

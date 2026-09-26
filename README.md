@@ -169,11 +169,17 @@ CLI. To use an existing Temporal service, set `TEMPORAL_ADDRESS`,
 `TEMPORAL_API_KEY` (enables TLS); `TEMPORAL_TLS=true` also enables TLS explicitly.
 No database credentials are stored in the workflow input.
 
-**Search coverage:** scraping never deactivates stored ads based on their absence
-from search results. Searches can be partial, empty, or cover different areas.
-Automatic deactivation is disabled until search membership and discovery completion
-are tracked. The repository's explicit `mark_inactive` operation requires a complete
-inventory across the database; an empty inventory deactivates all active ads.
+**Listing status:** ads start as `active` with a UTC `last_seen_at` timestamp.
+Search results refresh that timestamp and restore active status. Stored imot.bg
+ads missing from the search are opened using the shared workers and rate limiter,
+including unreachable and expired ads. Successful parsing restores active status
+and refreshes the timestamp. Failed parsing, removal notices, and removal redirects
+preserve the timestamp and set `unreachable`; if the last sighting was more than
+three days ago, status becomes `expired`. Expiration is evaluated during scraping
+runs. Failed discovery leaves stored statuses unchanged. Partial searches can
+therefore cause additional URL checks, but absence alone does not expire an ad.
+
+Apply the schema with `alembic upgrade head` before running the scraper.
 
 The Docker image can also host the worker by overriding its default entry point:
 

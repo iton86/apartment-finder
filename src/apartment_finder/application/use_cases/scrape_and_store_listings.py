@@ -6,6 +6,7 @@ or Telegram. It only talks to the abstract ports.
 
 import logging
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from apartment_finder.application.ports import (
     ImageDownloader,
@@ -25,7 +26,6 @@ class ScrapeResult:
     total_found: int
     new_listings: list[Listing]
     skipped_duplicates: int
-    inactive_ads: int = 0
     # Listings whose page couldn't be scraped at all. Defaulted so existing
     # callers and tests constructing this by hand keep working.
     failed: int = 0
@@ -54,6 +54,8 @@ class ScrapeAndStoreListings:
     def execute(self, search_url: str, max_pages: int = 1) -> ScrapeResult:
         logger.info("Discovering listing URLs from %s (max_pages=%d)", search_url, max_pages)
         search_results = self._scraper.discover_listing_urls(search_url, max_pages)
+        seen_at = datetime.now(UTC)
+        self._repository.record_seen({result.id for result in search_results}, seen_at)
         unseen_results = self._repository.filter_unseen(search_results)
         # Search results may be partial or scoped to one neighbourhood. Absence
         # here is not evidence that a stored ad has been removed from the site.
@@ -69,7 +71,15 @@ class ScrapeAndStoreListings:
         skipped = len(search_results) - len(unseen_results)
         failed = 0
         total = len(search_results)
-        urls_to_scrape = [result.url for result in unseen_results]
+        present_ids = {result.id for result in search_results}
+        to_check = {
+            listing.url: listing
+            for listing in self._repository.all()
+            if listing.id.source == self._scraper.source and listing.id not in present_ids
+        }
+        urls_to_scrape = list(
+            dict.fromkeys([result.url for result in unseen_results] + list(to_check))
+        )
 
         # scrape_listings decides for itself whether to overlap requests;
         # this loop only knows results arrive one at a time, in whatever
@@ -77,7 +87,9 @@ class ScrapeAndStoreListings:
         for index, outcome in enumerate(self._scraper.scrape_listings(urls_to_scrape), start=1):
             logger.debug("Scrape result %d/%d: %s", index, len(urls_to_scrape), outcome.url)
 
-            if outcome.error is not None:
+            if outcome.error is not None or outcome.listing is None:
+                if outcome.url in to_check:
+                    self._repository.record_unreachable(to_check[outcome.url].id, datetime.now(UTC))
                 # One unreadable ad shouldn't cost the rest of the run.
                 logger.warning(
                     "Skipping %s — scrape failed: %s",
@@ -88,7 +100,16 @@ class ScrapeAndStoreListings:
                 failed += 1
                 continue
 
+            if outcome.url in to_check:
+                if outcome.listing.id != to_check[outcome.url].id:
+                    self._repository.record_unreachable(to_check[outcome.url].id, datetime.now(UTC))
+                    failed += 1
+                else:
+                    self._repository.record_seen({outcome.listing.id}, datetime.now(UTC))
+                continue
+
             listing = outcome.listing
+            listing.last_seen_at = datetime.now(UTC)
             if self._repository.exists(listing.id):
                 # DEBUG, not INFO: on a re-run of the same search almost
                 # every listing lands here, and at INFO that buries the

@@ -8,8 +8,18 @@ implements these interfaces; application never imports infrastructure.
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
+from datetime import datetime
 
-from apartment_finder.domain.entities import DownloadedImage, Listing, SearchListingsResult
+from apartment_finder.domain.entities import (
+    DownloadedImage,
+    Listing,
+    ListingId,
+    SearchListingsResult,
+)
+
+
+class ListingUnavailableError(Exception):
+    """The page explicitly reports that the ad is unavailable."""
 
 
 @dataclass
@@ -30,6 +40,8 @@ class SiteScraper(ABC):
     """Anything that can turn a search page into listing URLs, and a
     listing URL into a Listing, qualifies — regardless of whether it's
     built with Playwright, requests, or something else entirely."""
+
+    source: str | None = None
 
     @abstractmethod
     def discover_listing_urls(
@@ -79,11 +91,13 @@ class ListingRepository(ABC):
     def all(self) -> list[Listing]: ...
 
     @abstractmethod
-    def mark_inactive(self, listings: list[Listing] | list[SearchListingsResult]) -> list[Listing]:
-        """Reconcile against a complete inventory; never pass scoped search results.
+    def record_seen(self, listing_ids: set[ListingId], seen_at: datetime) -> None:
+        """Refresh successful sightings and restore active status."""
+        ...
 
-        Return newly deactivated listings. An empty inventory deactivates all.
-        """
+    @abstractmethod
+    def record_unreachable(self, listing_id: ListingId, checked_at: datetime) -> None:
+        """Preserve last_seen_at; expire after more than three days unseen."""
         ...
 
 

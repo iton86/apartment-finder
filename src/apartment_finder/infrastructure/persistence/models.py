@@ -12,7 +12,6 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import (
     BigInteger,
-    Boolean,
     DateTime,
     Enum,
     ForeignKey,
@@ -27,7 +26,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from apartment_finder.domain.entities import TransactionType
+from apartment_finder.domain.entities import ListingStatus, TransactionType
 
 
 class Base(DeclarativeBase):
@@ -83,8 +82,21 @@ class ListingModel(Base):
     scraped_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    deactivated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[ListingStatus] = mapped_column(
+        Enum(
+            ListingStatus,
+            name="listing_status",
+            native_enum=False,
+            create_constraint=True,
+            values_callable=lambda values: [value.value for value in values],
+        ),
+        nullable=False,
+        default=ListingStatus.ACTIVE,
+        server_default="active",
+    )
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     apartment_id: Mapped[UUID | None] = mapped_column(
         Uuid, ForeignKey("apartments.id"), nullable=True
     )
