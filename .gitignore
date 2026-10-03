@@ -10,3 +10,7 @@ wheels/
 .venv
 .env
 .env.local
+
+# Training data — scraped ad text, labels, checkpoints. Never committed.
+data/
+checkpoints/

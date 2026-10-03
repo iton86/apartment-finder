@@ -1,7 +1,7 @@
 # Run `make help` to see this list. Every command here is safe to run
 # repeatedly — none of them touch the real Azure database.
 
-.PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check
+.PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check training-export
 
 help:
 	@echo "install          - install locked deps + the Chromium binary Playwright drives"
@@ -16,6 +16,7 @@ help:
 	@echo "lint             - check code style with ruff"
 	@echo "format           - auto-fix code style with ruff"
 	@echo "check            - lint + full test suite (run before pushing)"
+	@echo "training-export  - dump cleaned, de-duplicated descriptions to data/raw.jsonl"
 
 # The playwright package and the browser it drives install separately: uv sync
 # gets the Python client, `playwright install` downloads the pinned Chromium
@@ -72,3 +73,8 @@ format:
 	uv run ruff check --fix .
 
 check: lint test
+
+# Read-only (the export runs in a READ ONLY transaction), but it follows
+# APP_ENV like everything else — set APP_ENV=cloud to export production ads.
+training-export:
+	uv run python -m training.export_descriptions

@@ -43,3 +43,14 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.5",
 ]
+
+training = ["torch", "transformers", "peft", "trl", "datasets",
+            "bitsandbytes", "accelerate", "anthropic"]
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
