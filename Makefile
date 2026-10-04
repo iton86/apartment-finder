@@ -1,7 +1,7 @@
 # Run `make help` to see this list. Every command here is safe to run
 # repeatedly — none of them touch the real Azure database.
 
-.PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check training-export
+.PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check training-export label-studio label-try label-run label-submit label-collect label-tasks
 
 help:
 	@echo "install          - install locked deps + the Chromium binary Playwright drives"
@@ -17,6 +17,12 @@ help:
 	@echo "format           - auto-fix code style with ruff"
 	@echo "check            - lint + full test suite (run before pushing)"
 	@echo "training-export  - dump cleaned, de-duplicated descriptions to data/raw.jsonl"
+	@echo "label-studio     - start Label Studio on http://localhost:8080"
+	@echo "label-try        - teacher-label 3 ads and print them (costs a few cents)"
+	@echo "label-run        - teacher-label every new ad, one request at a time"
+	@echo "label-submit     - teacher-label every new ad as one batch (half price)"
+	@echo "label-collect    - wait for submitted batches and save their labels"
+	@echo "label-tasks      - build data/ls_tasks.json + config for Label Studio import"
 
 # The playwright package and the browser it drives install separately: uv sync
 # gets the Python client, `playwright install` downloads the pinned Chromium
@@ -78,3 +84,25 @@ check: lint test
 # APP_ENV like everything else — set APP_ENV=cloud to export production ads.
 training-export:
 	uv run python -m training.export_descriptions
+
+label-studio:
+	docker compose --profile labeling up -d label-studio
+	@echo "Label Studio: http://localhost:8080  (admin@localhost.dev / local_dev_only)"
+
+# The label-* targets below call the teacher model's API (TEACHER_PROVIDER in
+# .env) and spend money; label-try first, read the output, then run or submit.
+label-try:
+	uv run python -m training.label_with_teacher try --limit 10
+
+label-run:
+	uv run python -m training.label_with_teacher run
+
+label-submit:
+	uv run python -m training.label_with_teacher submit
+
+label-collect:
+	uv run python -m training.label_with_teacher collect --wait
+
+label-tasks:
+	uv run python -m training.label_studio config > data/label_studio_config.xml
+	uv run python -m training.label_studio to-tasks

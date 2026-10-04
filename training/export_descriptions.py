@@ -27,6 +27,7 @@ from apartment_finder.infrastructure.persistence.models import ListingModel
 from apartment_finder.infrastructure.persistence.settings import build_postgres_connection_url
 from apartment_finder.interface.logging_config import configure_logging
 from training.dedup import cluster_near_duplicates, content_hash
+from training.jsonl import write_jsonl
 from training.text_cleaning import clean_description
 
 logger = logging.getLogger(__name__)
@@ -153,10 +154,7 @@ def main() -> None:
     logger.info("Read %d listings with a description", len(listings))
     rows, report = build_rows(listings, args.min_chars, args.near_duplicate_threshold)
 
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8") as f:
-        for row in rows:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    write_jsonl(args.out, rows)
     report_path = args.out.with_name(args.out.stem + "_report.json")
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 

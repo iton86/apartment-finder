@@ -15,6 +15,23 @@ services:
     volumes:
       - temporal_data:/data
 
+  # Human review of POI labels (training/label_studio.py). Local only, so
+  # the throwaway login below is fine — never expose this port publicly.
+  label-studio:
+    image: heartexlabs/label-studio:latest
+    # Same reason as temporal: the image's default user can't write the
+    # root-owned named volume.
+    user: "0:0"
+    profiles: [labeling]
+    environment:
+      LABEL_STUDIO_USERNAME: admin@localhost.dev
+      LABEL_STUDIO_PASSWORD: local_dev_only
+      LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK: "true"
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - label_studio_data:/label-studio/data
+
   postgres:
     image: postgres:16
     environment:
@@ -34,3 +51,4 @@ services:
 volumes:
   postgres_data:
   temporal_data:
+  label_studio_data:

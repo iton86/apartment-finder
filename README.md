@@ -176,7 +176,10 @@ including unreachable and expired ads. Successful parsing restores active status
 and refreshes the timestamp. Failed parsing, removal notices, and removal redirects
 preserve the timestamp and set `unreachable`; if the last sighting was more than
 three days ago, status becomes `expired`. Expiration is evaluated during scraping
-runs. Failed discovery leaves stored statuses unchanged. Partial searches can
+runs. Failed discovery leaves stored statuses unchanged. A search URL that no
+longer exists (HTTP 404/410) logs an error and ends the run successfully
+without scraping, so the schedule keeps running; fix the URL with `schedule`.
+Partial searches can
 therefore cause additional URL checks, but absence alone does not expire an ad.
 
 Apply the schema with `alembic upgrade head` before running the scraper.
@@ -192,6 +195,54 @@ docker run --rm --env-file .env --ipc=host \
 
 See [Temporal schedules](https://docs.temporal.io/develop/python/workflows/schedules)
 and [the local Temporal server](https://docs.temporal.io/cli/command-reference/server).
+
+## POI extraction model (training pipeline)
+
+Work in progress: fine-tuning a small local model to pull points of interest
+and their stated distances out of listing descriptions ("10 мин от МОЛ
+България" → `{"category": "shopping_mall", "distance": {"value": 10, "unit":
+"min_unspecified"}, ...}`). It lives in [training/](training/), outside `src/`,
+and never ships in the scraper image. The full step-by-step guide is in
+[training/README.md](training/README.md).
+
+The training dependencies (PyTorch, Transformers, provider SDKs) are a
+separate group, so `make install` stays lean:
+
+```bash
+uv sync --group training   # PyTorch from the CUDA 12.6 index — the last that supports Pascal GPUs
+```
+
+The pipeline so far:
+
+```bash
+make training-export   # cleaned, de-duplicated descriptions -> data/raw.jsonl (read-only DB access)
+make label-try         # teacher model labels 3 ads and prints them
+make label-run         # ...or every ad, one request at a time
+make label-submit      # ...or every ad as one half-price batch (openai, anthropic)
+make label-collect     # fetch the batch results
+make label-studio      # Label Studio at http://localhost:8080 for human review
+make label-tasks       # build the Label Studio import file
+```
+
+The teacher model is pluggable. Pick one with `TEACHER_PROVIDER` in `.env` or
+`--provider`:
+
+| Provider | Cost | Key |
+|---|---|---|
+| `openai` | paid | `OPENAI_API_KEY`, an API key from platform.openai.com (a ChatGPT subscription doesn't include API access) |
+| `anthropic` | paid | `ANTHROPIC_API_KEY` or `ant auth login` |
+| `gemini` | free tier | `GEMINI_API_KEY` from aistudio.google.com |
+| `groq` | free plan | `GROQ_API_KEY` from console.groq.com |
+| `ollama` | free, local | none |
+
+The free providers are rate-limited and less accurate. Use them to test the
+pipeline and as reference labels, not for the final training set. Teacher
+labels are only drafts: ads are reviewed in Label Studio before training,
+and a held-out "gold" set is labeled by hand only.
+
+Everything generated (`data/`, `checkpoints/`) is gitignored, since it holds
+scraped ad text. `make up` doesn't start Label Studio; it runs under its own
+`labeling` Compose profile, with throwaway local credentials.
 
 ## Adding a schema change
 
@@ -210,6 +261,8 @@ make migrate
 - `src/apartment_finder/application/` — use cases and abstract ports
 - `src/apartment_finder/infrastructure/` — Playwright, Postgres, Azure Blob implementations
 - `src/apartment_finder/interface/` — CLI entry point (composition root)
+- `training/` — offline POI-extraction pipeline: export, teacher labeling
+  (`training/teacher/` holds one adapter per provider), Label Studio round-trip
 - `db_migrations/` — Alembic migration history
 - `tests/unit/` — fast tests against fakes, no DB needed
 - `tests/integration/` — real tests against local Postgres

@@ -98,6 +98,9 @@ def main() -> None:
     # These stay prints, not logs: they're the command's output, not a
     # record of what it did. Keeping them on stdout means the report
     # survives redirection while logs go to stderr.
+    if result.search_not_found:
+        print(f"Search page not found: {args.search_url}")
+        return
     print(f"Found {result.total_found} listings.")
     print(f"Saved {len(result.new_listings)} new listings.")
     print(f"Skipped {result.skipped_duplicates} duplicates already seen.")

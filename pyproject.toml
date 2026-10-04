@@ -44,8 +44,17 @@ dev = [
     "ruff>=0.16.5",
 ]
 
-training = ["torch", "transformers", "peft", "trl", "datasets",
-            "bitsandbytes", "accelerate", "anthropic"]
+training = [
+    "torch",
+    "transformers",
+    "peft",
+    "trl",
+    "datasets",
+    "bitsandbytes",
+    "accelerate",
+    "openai>=3.24.0",
+    "anthropic>=1.11.0",
+]
 
 [[tool.uv.index]]
 name = "pytorch-cu126"

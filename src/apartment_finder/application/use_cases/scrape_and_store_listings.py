@@ -11,6 +11,7 @@ from datetime import UTC, datetime
 from apartment_finder.application.ports import (
     ImageDownloader,
     ListingRepository,
+    SearchPageNotFoundError,
     SiteScraper,
 )
 from apartment_finder.domain.entities import Listing
@@ -29,6 +30,8 @@ class ScrapeResult:
     # Listings whose page couldn't be scraped at all. Defaulted so existing
     # callers and tests constructing this by hand keep working.
     failed: int = 0
+    # The search URL itself doesn't exist; nothing was scraped or changed.
+    search_not_found: bool = False
 
 
 class ScrapeAndStoreListings:
@@ -53,7 +56,21 @@ class ScrapeAndStoreListings:
 
     def execute(self, search_url: str, max_pages: int = 1) -> ScrapeResult:
         logger.info("Discovering listing URLs from %s (max_pages=%d)", search_url, max_pages)
-        search_results = self._scraper.discover_listing_urls(search_url, max_pages)
+        try:
+            search_results = self._scraper.discover_listing_urls(search_url, max_pages)
+        except SearchPageNotFoundError as exc:
+            # Not a crash: the run ends cleanly so a schedule keeps running.
+            # Returning before anything else matters — treating this as an
+            # empty search would mark every stored listing as "missing from
+            # the results" and re-check them all.
+            logger.error(
+                "Search page not found, nothing scraped: %s (%s) — check the search URL",
+                search_url,
+                exc,
+            )
+            return ScrapeResult(
+                total_found=0, new_listings=[], skipped_duplicates=0, search_not_found=True
+            )
         seen_at = datetime.now(UTC)
         self._repository.record_seen({result.id for result in search_results}, seen_at)
         unseen_results = self._repository.filter_unseen(search_results)

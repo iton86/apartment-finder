@@ -22,6 +22,14 @@ class ListingUnavailableError(Exception):
     """The page explicitly reports that the ad is unavailable."""
 
 
+class SearchPageNotFoundError(Exception):
+    """The search URL itself doesn't exist on the site (e.g. HTTP 404).
+
+    A configuration problem rather than a transient one: retrying the same
+    URL won't help, but it also says nothing about stored listings.
+    """
+
+
 @dataclass
 class ScrapeOutcome:
     """One listing's result, success or failure.

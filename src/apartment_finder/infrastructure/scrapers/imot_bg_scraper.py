@@ -7,11 +7,16 @@ import re
 import threading
 import time
 from collections.abc import Iterator, Sequence
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urljoin, urlsplit, urlunsplit
 
-from playwright.sync_api import BrowserContext, Page, sync_playwright
+from playwright.sync_api import BrowserContext, Page, Response, sync_playwright
 
-from apartment_finder.application.ports import ListingUnavailableError, ScrapeOutcome, SiteScraper
+from apartment_finder.application.ports import (
+    ListingUnavailableError,
+    ScrapeOutcome,
+    SearchPageNotFoundError,
+    SiteScraper,
+)
 from apartment_finder.domain.entities import (
     Currency,
     Listing,
@@ -28,6 +33,9 @@ USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 )
+
+# The pager's last-page number. Absent when all results fit on one page.
+PAGER_SELECTOR = "div.a.saveSlink.gray"
 
 # Look up optional property attributes by label; row order varies by listing.
 AREA_LABEL = "Площ"
@@ -87,68 +95,63 @@ class ImotBgScraper(SiteScraper):
         self._rate_limiter = RateLimiter(request_delay_seconds)
 
     def discover_listing_urls(self, search_url: str, max_pages: int) -> list[SearchListingsResult]:
+        """Collect listing cards from up to max_pages results pages.
+
+        Raises SearchPageNotFoundError when the search URL itself doesn't
+        exist. A later page that is missing or empty ends pagination early
+        and keeps the results gathered so far.
+        """
         results: list[SearchListingsResult] = []
 
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True, args=self._chromium_args())
-            context = browser.new_context(user_agent=USER_AGENT, locale="bg-BG")
-            page = context.new_page()
-            url_main_part, url_search_params = search_url.split("?")
-            page.goto(search_url, wait_until="domcontentloaded")
-            page.wait_for_timeout(1500)
-            last_page = int(self._safe_text(page, "div.a.saveSlink.gray"))
-            max_pages = min(max_pages, last_page)
-
-            for page_num in range(1, max_pages + 1):
-                paged_url = (
-                    f"{url_main_part}/p-{page_num}?{url_search_params}"
-                    if page_num > 1
-                    else search_url
-                )
-                logger.debug("Fetching results page %d/%d: %s", page_num, max_pages, paged_url)
+            try:
+                context = browser.new_context(user_agent=USER_AGENT, locale="bg-BG")
+                page = context.new_page()
 
                 self._rate_limiter.acquire()
-                page.goto(paged_url, wait_until="domcontentloaded")
+                response = page.goto(search_url, wait_until="domcontentloaded")
+                self._check_search_response(search_url, response)
                 page.wait_for_timeout(1500)
+                last_page = self._parse_last_page(self._safe_text(page, PAGER_SELECTOR))
+                max_pages = min(max_pages, last_page)
+                logger.debug("Search has %d page(s); fetching %d", last_page, max_pages)
 
-                # Scope fields to each card; urljoin resolves protocol-relative links.
-                found_on_page = 0
-                for item in page.locator("div.item").all():
-                    link = item.locator("a.title.saveSlink").first
-                    if not link.count():
-                        continue
-
-                    href = link.get_attribute("href")
-                    if href:
-                        url = urljoin(BASE_URL, href)
-                        title = " ".join(link.inner_text().split())
-                        price = item.locator("div.price").first
-                        price_raw = " ".join(price.inner_text().split()) if price.count() else ""
-                        results.append(
-                            SearchListingsResult(
-                                id=ListingId(
-                                    source="imot.bg",
-                                    external_id=self._extract_external_id(url),
-                                ),
-                                title=title,
-                                url=url,
-                                price=self._parse_price(price_raw),
-                                transaction_type=self._parse_transaction_type(title),
-                            )
+                for page_num in range(1, max_pages + 1):
+                    paged_url = self._results_page_url(search_url, page_num)
+                    # Page 1 is already loaded from the pager check above.
+                    if page_num > 1:
+                        logger.debug(
+                            "Fetching results page %d/%d: %s", page_num, max_pages, paged_url
                         )
-                        found_on_page += 1
+                        self._rate_limiter.acquire()
+                        response = page.goto(paged_url, wait_until="domcontentloaded")
+                        if response is None or response.status >= 400:
+                            status = response.status if response else "no response"
+                            logger.warning(
+                                "Results page %d unavailable (HTTP %s) — stopping at page %d: %s",
+                                page_num,
+                                status,
+                                page_num - 1,
+                                paged_url,
+                            )
+                            break
+                        page.wait_for_timeout(1500)
 
-                # Empty results can indicate stale selectors or a blocked page.
-                if found_on_page == 0:
-                    logger.warning(
-                        "No listing cards matched 'div.item' with 'a.title.saveSlink' on %s — "
-                        "selector may be stale, or the page was blocked",
-                        paged_url,
-                    )
-                else:
+                    found_on_page = self._collect_cards(page, results)
+                    # Empty results can indicate stale selectors, a blocked
+                    # page, or the search shrinking since the pager was read.
+                    # Later pages would be empty too.
+                    if found_on_page == 0:
+                        logger.warning(
+                            "No listing cards matched 'div.item' with 'a.title.saveSlink' on %s — "
+                            "selector may be stale, or the page was blocked; stopping pagination",
+                            paged_url,
+                        )
+                        break
                     logger.debug("Results page %d yielded %d link(s)", page_num, found_on_page)
-
-            browser.close()
+            finally:
+                browser.close()
 
         deduped = list({result.id: result for result in results}.values())
         if len(deduped) != len(results):
@@ -157,6 +160,61 @@ class ImotBgScraper(SiteScraper):
                 len(results) - len(deduped),
             )
         return deduped
+
+    def _collect_cards(self, page: Page, results: list[SearchListingsResult]) -> int:
+        """Append the listing cards on the loaded results page; return how many."""
+        found = 0
+        # Scope fields to each card; urljoin resolves protocol-relative links.
+        for item in page.locator("div.item").all():
+            link = item.locator("a.title.saveSlink").first
+            if not link.count():
+                continue
+
+            href = link.get_attribute("href")
+            if href:
+                url = urljoin(BASE_URL, href)
+                title = " ".join(link.inner_text().split())
+                price = item.locator("div.price").first
+                price_raw = " ".join(price.inner_text().split()) if price.count() else ""
+                results.append(
+                    SearchListingsResult(
+                        id=ListingId(
+                            source="imot.bg",
+                            external_id=self._extract_external_id(url),
+                        ),
+                        title=title,
+                        url=url,
+                        price=self._parse_price(price_raw),
+                        transaction_type=self._parse_transaction_type(title),
+                    )
+                )
+                found += 1
+        return found
+
+    @staticmethod
+    def _check_search_response(search_url: str, response: Response | None) -> None:
+        if response is None:
+            raise RuntimeError(f"Search navigation returned no response: {search_url}")
+        if response.status in (404, 410):
+            raise SearchPageNotFoundError(f"Search page not found (HTTP {response.status})")
+        # Other errors (5xx, 429) are likely transient: fail this run loudly
+        # and let the next scheduled one try again.
+        if response.status >= 400:
+            raise RuntimeError(f"Search request failed (HTTP {response.status}): {search_url}")
+
+    @staticmethod
+    def _parse_last_page(pager_text: str) -> int:
+        """The pager shows the last page number; no pager means one page."""
+        match = re.search(r"\d+", pager_text)
+        return max(int(match.group()), 1) if match else 1
+
+    @staticmethod
+    def _results_page_url(search_url: str, page_num: int) -> str:
+        """imot.bg pages results as <path>/p-N, keeping the query string."""
+        if page_num == 1:
+            return search_url
+        parts = urlsplit(search_url)
+        return urlunsplit(parts._replace(path=f"{parts.path.rstrip('/')}/p-{page_num}"))
 
     def scrape_listing(self, url: str) -> Listing:
         """Scrape one listing and raise any reported extraction or navigation error."""

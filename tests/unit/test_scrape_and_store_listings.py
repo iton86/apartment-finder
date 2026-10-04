@@ -9,7 +9,7 @@ import logging
 
 import pytest
 
-from apartment_finder.application.ports import ImageDownloader, SiteScraper
+from apartment_finder.application.ports import ImageDownloader, SearchPageNotFoundError, SiteScraper
 from apartment_finder.application.use_cases.scrape_and_store_listings import (
     ScrapeAndStoreListings,
 )
@@ -114,6 +114,30 @@ def test_failed_discovery_does_not_deactivate_stored_ads(monkeypatch):
     with pytest.raises(RuntimeError, match="discovery failed"):
         ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository).execute("search")
     assert existing.status == ListingStatus.ACTIVE
+
+
+def test_missing_search_page_ends_the_run_cleanly(monkeypatch):
+    repository = InMemoryListingRepository()
+    scraper = FakeScraper()
+    existing = scraper.scrape_listing("https://fake.test/listing/1")
+    existing_seen_at = existing.last_seen_at
+    repository.save(existing)
+
+    def not_found(*args):
+        raise SearchPageNotFoundError("Search page not found (HTTP 404)")
+
+    monkeypatch.setattr(scraper, "discover_listing_urls", not_found)
+    checked = []
+    monkeypatch.setattr(scraper, "scrape_listings", lambda urls: checked.extend(urls) or iter(()))
+
+    result = ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository).execute("search")
+
+    assert result.search_not_found is True
+    assert (result.total_found, result.new_listings, result.failed) == (0, [], 0)
+    # Unlike an empty search, stored ads aren't re-checked or touched.
+    assert checked == []
+    assert existing.status == ListingStatus.ACTIVE
+    assert existing.last_seen_at == existing_seen_at
 
 
 def test_scrapes_and_saves_new_listings():

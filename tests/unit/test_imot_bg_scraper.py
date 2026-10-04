@@ -10,6 +10,7 @@ collide and get silently skipped.
 
 import pytest
 
+from apartment_finder.application.ports import SearchPageNotFoundError
 from apartment_finder.domain.entities import Currency, TransactionType
 from apartment_finder.infrastructure.scrapers.imot_bg_scraper import ImotBgScraper
 
@@ -286,3 +287,65 @@ def test_search_navigation_is_not_classified_as_a_removed_ad():
         "https://www.imot.bg/obiavi/prodazhbi/",
         "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya",
     )
+
+
+class TestParseLastPage:
+    @pytest.mark.parametrize(("text", "expected"), [("23", 23), (" 12 ", 12), ("1", 1)])
+    def test_reads_the_last_page_number(self, text, expected):
+        assert ImotBgScraper._parse_last_page(text) == expected
+
+    @pytest.mark.parametrize("text", ["", "   ", "Следваща", "0"])
+    def test_missing_or_odd_pager_means_one_page(self, text):
+        # No pager is what a single page of results (or a 404) looks like;
+        # this used to be int("") and crashed the whole run.
+        assert ImotBgScraper._parse_last_page(text) == 1
+
+
+class TestResultsPageUrl:
+    SEARCH = "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/tsentar/tristaen?raioni=6101~"
+
+    def test_first_page_is_the_search_url(self):
+        assert ImotBgScraper._results_page_url(self.SEARCH, 1) == self.SEARCH
+
+    def test_later_pages_insert_p_n_before_the_query(self):
+        assert ImotBgScraper._results_page_url(self.SEARCH, 3) == (
+            "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/tsentar/tristaen/p-3?raioni=6101~"
+        )
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya",
+            "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/",
+        ],
+    )
+    def test_works_without_a_query_string(self, url):
+        # Used to crash: search_url.split("?") needs exactly one "?".
+        assert ImotBgScraper._results_page_url(url, 2) == (
+            "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/p-2"
+        )
+
+
+class FakeResponse:
+    def __init__(self, status: int):
+        self.status = status
+
+
+class TestCheckSearchResponse:
+    @pytest.mark.parametrize("status", [404, 410])
+    def test_not_found(self, status):
+        with pytest.raises(SearchPageNotFoundError, match=str(status)):
+            ImotBgScraper._check_search_response("u", FakeResponse(status))
+
+    @pytest.mark.parametrize("status", [429, 500, 503])
+    def test_other_errors_still_fail_the_run(self, status):
+        with pytest.raises(RuntimeError, match=str(status)):
+            ImotBgScraper._check_search_response("u", FakeResponse(status))
+
+    def test_no_response(self):
+        with pytest.raises(RuntimeError, match="no response"):
+            ImotBgScraper._check_search_response("u", None)
+
+    @pytest.mark.parametrize("status", [200, 301, 304])
+    def test_ok(self, status):
+        ImotBgScraper._check_search_response("u", FakeResponse(status))
