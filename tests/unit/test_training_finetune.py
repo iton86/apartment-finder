@@ -202,3 +202,24 @@ def test_entity_metrics_do_not_reward_outside_tokens():
     logits[0, 1, LABEL2ID["B-park"]] = 1
     logits[0, 2, LABEL2ID["I-park"]] = 1
     assert compute_metrics(SimpleNamespace(predictions=logits, label_ids=labels))["f1"] == 1
+
+
+@pytest.mark.parametrize("suffix", [".", ",", "!", "”", " "])
+def test_alignment_accepts_token_edge_punctuation(suffix):
+    text = "трамвай 7" + suffix
+    example = row(text, pois=[poi("трамвай 7", "трамвай 7")])
+
+    def tokenizer(text, **kwargs):
+        return {"input_ids": [4, 5], "offset_mapping": [(0, 7), (8, len(text))]}
+
+    assert encode_row(example, tokenizer, 512)["labels"] == [LABEL2ID["B-park"], LABEL2ID["I-park"]]
+
+
+def test_alignment_rejects_extra_word_characters():
+    example = row("трамвай 74", pois=[poi("трамвай 7", "трамвай 7")])
+
+    def tokenizer(text, **kwargs):
+        return {"input_ids": [4, 5], "offset_mapping": [(0, 7), (8, 10)]}
+
+    with pytest.raises(ValueError, match="conflicts with token '74'"):
+        encode_row(example, tokenizer, 512)

@@ -1,6 +1,7 @@
 """Convert reviewed POI names to BIO tags without leaking gold descriptions."""
 
 import hashlib
+import unicodedata
 
 from training.dedup import cluster_near_duplicates, content_hash
 from training.schema import PoiCategory, PoiExtraction, find_evidence, find_problems
@@ -90,10 +91,17 @@ def encode_row(row: dict, tokenizer, max_length: int) -> dict:
             raise ValueError("Tokenizer produced no tokens for an annotated name")
         for position, index in enumerate(indices):
             a, b = offsets[index]
-            # Byte-level tokenizers may include leading whitespace in an offset.
+            # Tokens can include edge whitespace or punctuation (e.g. "7.").
+            # Permit those edges, but never absorb neighbouring word characters.
             outside = row["description"][a:start] + row["description"][end:b]
-            if outside.strip() or labels[index] not in (0, -100):
-                raise ValueError("POI boundary conflicts with tokenizer boundaries")
+            if any(
+                not char.isspace() and not unicodedata.category(char).startswith("P")
+                for char in outside
+            ) or labels[index] not in (0, -100):
+                raise ValueError(
+                    f"Row {row.get('id')}: POI {row['description'][start:end]!r} "
+                    f"conflicts with token {row['description'][a:b]!r} at offsets {a}:{b}"
+                )
             labels[index] = LABEL2ID[f"{'B' if position == 0 else 'I'}-{category}"]
     encoded["labels"] = labels
     return dict(encoded)
