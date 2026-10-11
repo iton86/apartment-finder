@@ -1,8 +1,13 @@
 # POI extraction — training pipeline
 
-Fine-tunes a small local model to pull points of interest and their stated
-distances out of listing descriptions, as JSON matching
-[schema.py](schema.py).
+Offline tools for annotating listing descriptions and fine-tuning encoders for
+point-of-interest names and categories. The annotation format in
+[schema.py](schema.py) also supports distances; distance prediction is not yet
+implemented by the encoder.
+
+See the [project documentation](../docs/README.md) and
+[machine-learning overview](../docs/machine-learning.md) for architecture, scope,
+and artifact handling.
 
 Everything here is offline tooling: it reads the app's database but ships
 nowhere. Generated files live in `data/` (gitignored — it holds scraped ad
@@ -223,3 +228,88 @@ uv run python -m training.label_studio to-tasks --exclude data/ls_export.json
 Import that `ls_tasks.json` into the same project. Label Studio doesn't
 de-duplicate imports, so always pass `--exclude`. If an ad does end up
 imported twice, `from-export` keeps one row for it.
+
+## Step 4 — Fine-tune a POI encoder (RoBERTa / XLM-RoBERTa)
+
+This runnable baseline learns **POI names and categories** with BIO token
+classification. It reads `data/labels.jsonl` from Step 3b. It does **not**
+learn distance values, units, or name-to-distance relations, and its output
+is not the full `PoiExtraction` JSON schema. Overlapping evidence is fine;
+overlapping names are rejected because one BIO tag cannot represent two
+entities. Only the occurrence selected by the evidence is annotated; review
+repeated mentions carefully because other occurrences become negative tokens.
+
+Install the existing optional training group (the scraper does not import it):
+
+```bash
+uv sync --group training
+uv run --group training python -m training.finetune \
+  --model FacebookAI/xlm-roberta-base \
+  --labels data/labels.jsonl \
+  --output checkpoints/poi-xlm-roberta-v1 \
+  --batch-size 1 --gradient-accumulation-steps 8 \
+  --gradient-checkpointing
+```
+
+XLM-RoBERTa is the multilingual default for Bulgarian descriptions. Other
+Transformers encoder checkpoints with fast tokenizers and token-classification
+support can be supplied with `--model`, including `FacebookAI/roberta-base`
+(for English). A local checkpoint directory also works. The first use of a
+Hub model downloads its tokenizer and weights; training data is not uploaded,
+Hub publishing is disabled, and external experiment reporting is disabled.
+See the [XLM-RoBERTa model card](https://huggingface.co/FacebookAI/xlm-roberta-base)
+and [token classification guide](https://huggingface.co/docs/transformers/tasks/token_classification).
+
+This is full-parameter fine-tuning, not LoRA/quantization. Full precision is
+used by default. XLM-RoBERTa can exceed a 6 GB GPU's memory even at batch size
+one; gradient checkpointing helps but does not guarantee it fits. Use `--cpu`
+(with sufficient system RAM), a smaller language-appropriate checkpoint, or
+more GPU memory. `--epochs`, `--learning-rate`, `--max-length`, and `--seed`
+are configurable. Training defaults to three epochs and learning rate 2e-5.
+
+Data safeguards:
+
+- Input rows are validated using the existing POI schema and evidence checks.
+- Near-duplicate descriptions are clustered before splitting. Non-gold rows
+  in a gold cluster are excluded entirely; remaining clusters stay together.
+- Validation is selected deterministically from human-reviewed non-gold
+  clusters. Gold never selects checkpoints. At least two independent
+  non-gold clusters are required, including a human-reviewed validation group.
+- Teacher rows require `--allow-teacher`; they cannot enter gold or validation.
+- Text exceeding `--max-length` fails explicitly, rather than silently losing
+  annotations. Split/review long descriptions upstream, or use a checkpoint
+  with a larger context and adjust the limit. Automatic chunking is not implemented.
+- Existing nonempty output directories are refused. Use a new versioned path.
+
+The run directory contains `model/` (best validation checkpoint and tokenizer),
+epoch checkpoints, `run_config.json` (including the input-file checksum),
+`split_manifest.json`, and `validation_results.json`. Precision, recall, and F1
+measure exact category/span matches at token boundaries, not distance quality.
+Scores of zero are reported when neither predictions nor references contain
+entities. These are baseline metrics, not evidence of deployment readiness.
+
+Evaluate the untouched human gold set after choosing your training settings:
+
+```bash
+uv run --group training python -m training.evaluate_encoder checkpoints/poi-xlm-roberta-v1
+# Add --cpu to evaluate without CUDA.
+```
+
+This writes `gold_metrics.json` without updating weights. Keep the original
+labels file at its original path; evaluation verifies its checksum and split
+manifest. Avoid repeatedly tuning against gold scores.
+
+Run inference on a UTF-8 description file:
+
+```bash
+uv run --group training python -m training.predict_encoder \
+  checkpoints/poi-xlm-roberta-v1 --text-file data/example-description.txt
+```
+
+Inference runs on CPU and prints `entities` with `name`, `category`, `start`,
+and `end` character offsets. It refuses overlength inputs. The scraper is not
+wired to this experimental model; integrating predictions is a separate step.
+
+Convenience commands: `make training-fit`, `make training-evaluate`, and
+`make training-predict TEXT_FILE=data/example-description.txt`. Override
+`TRAINING_RUN` and `TRAINING_MODEL` to select a different output/checkpoint.

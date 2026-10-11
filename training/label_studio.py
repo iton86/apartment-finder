@@ -229,6 +229,21 @@ def annotation_to_extraction(annotation: dict, text: str) -> PoiExtraction:
 def convert_export(
     tasks: list[dict], teacher_rows: list[dict], include_teacher: bool
 ) -> tuple[list[dict], list[str]]:
+    if not isinstance(tasks, list):
+        raise ValueError("Expected a Label Studio JSON export containing a list of tasks")
+    required = ("id", "content_hash", TEXT, "split")
+    for index, task in enumerate(tasks, 1):
+        data = task.get("data") if isinstance(task, dict) else None
+        if not isinstance(data, dict):
+            raise ValueError(f"Export task {index}: missing data object")
+        missing = [key for key in required if key not in data]
+        if missing:
+            raise ValueError(
+                f"Export task {index}: missing data fields: {', '.join(missing)}. "
+                "Import the generated ls_tasks JSON into Label Studio, review the tasks, "
+                "then export that project using Export > JSON. "
+                "The labeling-interface preview is not a training task."
+            )
     teacher = {r["content_hash"]: r for r in teacher_rows}
     rows, rejected = [], []
     for task in tasks:
@@ -345,7 +360,10 @@ def main() -> None:
         return
 
     tasks = json.loads(args.export.read_text(encoding="utf-8"))
-    rows, rejected = convert_export(tasks, read_jsonl(args.teacher), args.include_teacher)
+    try:
+        rows, rejected = convert_export(tasks, read_jsonl(args.teacher), args.include_teacher)
+    except ValueError as exc:
+        parser.error(str(exc))
     write_jsonl(args.out, rows)
     by_source: dict[str, int] = {}
     for row in rows:

@@ -7,6 +7,8 @@ actually changed.
 
 import copy
 
+import pytest
+
 from training.label_studio import build_tasks, convert_export, is_gold, labeling_config
 from training.schema import DistanceUnit, PoiCategory
 
@@ -217,3 +219,17 @@ class TestSharedAndDistantEvidence:
         [task] = build_tasks([row], [teacher_row(pois)], gold_percent=0)
         rows, rejected = convert_export([accept_prediction(task)], [], include_teacher=False)
         assert rejected == [] and rows[0]["pois"] == pois
+
+
+@pytest.mark.parametrize("tasks", [{}, [None], [{"data": {"meta": "preview"}}]])
+def test_incomplete_export_reports_actionable_error(tasks):
+    with pytest.raises(ValueError, match="export|Export"):
+        convert_export(tasks, [], include_teacher=False)
+
+
+def test_missing_metadata_is_not_replaced_with_label_studio_task_id():
+    task = build_tasks([raw_row()], [], gold_percent=0)[0]
+    del task["data"]["id"]
+    task["id"] = 123
+    with pytest.raises(ValueError, match="missing data fields: id"):
+        convert_export([task], [], include_teacher=True)

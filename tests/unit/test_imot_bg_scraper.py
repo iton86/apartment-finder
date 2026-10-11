@@ -326,6 +326,33 @@ class TestResultsPageUrl:
         )
 
 
+class TestSearchScope:
+    def test_extracts_neighbourhood_and_rooms(self):
+        scope = ImotBgScraper().search_scope(
+            "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/"
+            "manastirski-livadi/dvustaen?type_home=2~"
+        )
+
+        assert scope.area_slugs == frozenset({"manastirski-livadi"})
+        assert scope.rooms == frozenset({2})
+
+    def test_ignores_pagination_segment(self):
+        scope = ImotBgScraper().search_scope(
+            "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/tsentar/tristaen/p-3?raioni=6101~"
+        )
+
+        assert scope.area_slugs == frozenset({"tsentar"})
+        assert scope.rooms == frozenset({3})
+
+    def test_city_wide_search_has_no_neighbourhood_scope(self):
+        scope = ImotBgScraper().search_scope(
+            "https://www.imot.bg/obiavi/prodazhbi/grad-sofiya/dvustaen"
+        )
+
+        assert scope.area_slugs == frozenset()
+        assert scope.rooms == frozenset({2})
+
+
 class FakeResponse:
     def __init__(self, status: int):
         self.status = status

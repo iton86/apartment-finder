@@ -20,6 +20,7 @@ from apartment_finder.domain.entities import (
     ListingStatus,
     Money,
     SearchListingsResult,
+    SearchScope,
     TransactionType,
 )
 from apartment_finder.infrastructure.persistence.in_memory_listing_repository import (
@@ -34,6 +35,11 @@ class FakeScraper(SiteScraper):
 
     def discover_listing_urls(self, search_url: str, max_pages: int) -> list[SearchListingsResult]:
         return [self._search_result("1"), self._search_result("2")]
+
+    def search_scope(self, search_url: str) -> SearchScope:
+        if search_url == "https://fake.test/search/manastirski-livadi/dvustaen":
+            return SearchScope(area_slugs=frozenset({"manastirski-livadi"}), rooms=frozenset({2}))
+        return SearchScope()
 
     @staticmethod
     def _search_result(external_id: str) -> SearchListingsResult:
@@ -59,6 +65,7 @@ class FakeScraper(SiteScraper):
             area="Манастирски ливади",
             street="ул. Луи Айер",
             description="A nice test apartment",
+            rooms=2,
             image_urls=["https://fake.test/img1.jpg"],
         )
 
@@ -260,6 +267,38 @@ def test_successful_status_check_does_not_save_or_count_a_duplicate():
     assert existing.status == ListingStatus.ACTIVE
     assert result.skipped_duplicates == 0
     assert len(repository.all()) == 3
+
+
+def test_status_checks_are_limited_to_current_search_scope():
+    scraper = FakeScraper()
+    repository = InMemoryListingRepository()
+    same_scope = scraper.scrape_listing("https://fake.test/listing/same-scope")
+    same_scope.area = "Манастирски ливади"
+    same_scope.rooms = 2
+    other_area = scraper.scrape_listing("https://fake.test/listing/other-area")
+    other_area.area = "Лозенец"
+    other_area.rooms = 2
+    other_rooms = scraper.scrape_listing("https://fake.test/listing/other-rooms")
+    other_rooms.area = "Манастирски ливади"
+    other_rooms.rooms = 3
+    for listing in (same_scope, other_area, other_rooms):
+        repository.save(listing)
+
+    checked_urls = []
+    original_scrape_listings = scraper.scrape_listings
+
+    def scrape_listings(urls):
+        checked_urls.extend(urls)
+        return original_scrape_listings(urls)
+
+    scraper.scrape_listings = scrape_listings
+    ScrapeAndStoreListings(scraper, FakeImageDownloader(), repository).execute(
+        "https://fake.test/search/manastirski-livadi/dvustaen"
+    )
+
+    assert "https://fake.test/listing/same-scope" in checked_urls
+    assert "https://fake.test/listing/other-area" not in checked_urls
+    assert "https://fake.test/listing/other-rooms" not in checked_urls
 
 
 @pytest.mark.parametrize("present", [True, False])

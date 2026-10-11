@@ -4,6 +4,9 @@
 .PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check training-export label-studio label-try label-run label-submit label-collect label-tasks
 
 help:
+	@echo "training-fit     - fine-tune a POI name/category encoder on reviewed labels"
+	@echo "training-evaluate - evaluate the saved encoder on held-out gold labels"
+	@echo "training-predict - extract POI names/categories from TEXT_FILE"
 	@echo "install          - install locked deps + the Chromium binary Playwright drives"
 	@echo "install-deps     - system libs Chromium needs (sudo; once per machine)"
 	@echo "up               - start local Postgres (docker compose)"
@@ -106,3 +109,17 @@ label-collect:
 label-tasks:
 	uv run python -m training.label_studio config > data/label_studio_config.xml
 	uv run python -m training.label_studio to-tasks
+
+TRAINING_MODEL ?= FacebookAI/xlm-roberta-base
+TRAINING_RUN ?= checkpoints/poi-encoder
+TEXT_FILE ?= data/example-description.txt
+
+.PHONY: training-fit training-evaluate training-predict
+training-fit:
+	uv run --group training python -m training.finetune --model "$(TRAINING_MODEL)" --output "$(TRAINING_RUN)" --gradient-checkpointing
+
+training-evaluate:
+	uv run --group training python -m training.evaluate_encoder "$(TRAINING_RUN)"
+
+training-predict:
+	uv run --group training python -m training.predict_encoder "$(TRAINING_RUN)" --text-file "$(TEXT_FILE)"

@@ -15,6 +15,7 @@ from apartment_finder.domain.entities import (
     Listing,
     ListingId,
     SearchListingsResult,
+    SearchScope,
 )
 
 
@@ -55,6 +56,9 @@ class SiteScraper(ABC):
     def discover_listing_urls(
         self, search_url: str, max_pages: int
     ) -> list[SearchListingsResult]: ...
+
+    def search_scope(self, search_url: str) -> SearchScope:
+        return SearchScope()
 
     @abstractmethod
     def scrape_listing(self, url: str) -> Listing: ...

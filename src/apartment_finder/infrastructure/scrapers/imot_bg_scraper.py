@@ -7,7 +7,7 @@ import re
 import threading
 import time
 from collections.abc import Iterator, Sequence
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
 
 from playwright.sync_api import BrowserContext, Page, Response, sync_playwright
 
@@ -23,6 +23,7 @@ from apartment_finder.domain.entities import (
     ListingId,
     Money,
     SearchListingsResult,
+    SearchScope,
     TransactionType,
 )
 
@@ -57,6 +58,16 @@ DEFAULT_MAX_WORKERS = 4
 
 # Bound shutdown waits for daemon workers with in-flight browser requests.
 WORKER_JOIN_TIMEOUT_SECONDS = 30.0
+
+ROOM_SLUGS = {
+    "ednostaen": 1,
+    "dvustaen": 2,
+    "tristaen": 3,
+    "chetiristaen": 4,
+    "mnogostaen": 5,
+    "mezonet": 6,
+    "atelie-tavan": 7,
+}
 
 
 class RateLimiter:
@@ -160,6 +171,17 @@ class ImotBgScraper(SiteScraper):
                 len(results) - len(deduped),
             )
         return deduped
+
+    def search_scope(self, search_url: str) -> SearchScope:
+        parts = [
+            unquote(part)
+            for part in urlsplit(search_url).path.strip("/").split("/")
+            if part and not re.fullmatch(r"p-\d+", part)
+        ]
+        rooms = frozenset(ROOM_SLUGS[part] for part in parts if part in ROOM_SLUGS)
+        room_index = next((i for i, part in enumerate(parts) if part in ROOM_SLUGS), None)
+        area_slugs = frozenset({parts[room_index - 1]} if room_index and room_index >= 4 else ())
+        return SearchScope(area_slugs=area_slugs, rooms=rooms)
 
     def _collect_cards(self, page: Page, results: list[SearchListingsResult]) -> int:
         """Append the listing cards on the loaded results page; return how many."""

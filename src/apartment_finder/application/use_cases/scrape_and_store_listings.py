@@ -89,10 +89,13 @@ class ScrapeAndStoreListings:
         failed = 0
         total = len(search_results)
         present_ids = {result.id for result in search_results}
+        search_scope = self._scraper.search_scope(search_url)
         to_check = {
             listing.url: listing
             for listing in self._repository.all()
-            if listing.id.source == self._scraper.source and listing.id not in present_ids
+            if listing.id.source == self._scraper.source
+            and listing.id not in present_ids
+            and search_scope.matches(listing)
         }
         urls_to_scrape = list(
             dict.fromkeys([result.url for result in unseen_results] + list(to_check))

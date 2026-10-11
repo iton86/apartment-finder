@@ -65,6 +65,19 @@ class SearchListingsResult:
     transaction_type: TransactionType
 
 
+@dataclass(frozen=True)
+class SearchScope:
+    """The search filters that make absence from a result page meaningful."""
+
+    area_slugs: frozenset[str] = frozenset()
+    rooms: frozenset[int] = frozenset()
+
+    def matches(self, listing: "Listing") -> bool:
+        if self.area_slugs and slugify_bg(listing.area) not in self.area_slugs:
+            return False
+        return not (self.rooms and listing.rooms not in self.rooms)
+
+
 @dataclass
 class Listing:
     """The core business entity — a real estate ad, independent of where
@@ -95,6 +108,46 @@ class Listing:
         if self.price and self.area_sqm and self.area_sqm > 0:
             return self.price.amount / self.area_sqm
         return None
+
+
+_CYRILLIC_TO_LATIN = str.maketrans(
+    {
+        "а": "a",
+        "б": "b",
+        "в": "v",
+        "г": "g",
+        "д": "d",
+        "е": "e",
+        "ж": "zh",
+        "з": "z",
+        "и": "i",
+        "й": "y",
+        "к": "k",
+        "л": "l",
+        "м": "m",
+        "н": "n",
+        "о": "o",
+        "п": "p",
+        "р": "r",
+        "с": "s",
+        "т": "t",
+        "у": "u",
+        "ф": "f",
+        "х": "h",
+        "ц": "ts",
+        "ч": "ch",
+        "ш": "sh",
+        "щ": "sht",
+        "ъ": "a",
+        "ь": "",
+        "ю": "yu",
+        "я": "ya",
+    }
+)
+
+
+def slugify_bg(value: str) -> str:
+    return "-".join(value.lower().translate(_CYRILLIC_TO_LATIN).split())
 
 
 @dataclass
