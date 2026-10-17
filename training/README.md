@@ -256,7 +256,7 @@ Transformers encoder checkpoints with fast tokenizers and token-classification
 support can be supplied with `--model`, including `FacebookAI/roberta-base`
 (for English). A local checkpoint directory also works. The first use of a
 Hub model downloads its tokenizer and weights; training data is not uploaded,
-Hub publishing is disabled, and external experiment reporting is disabled.
+Hub publishing is disabled, and experiment reporting is disabled by default.
 See the [XLM-RoBERTa model card](https://huggingface.co/FacebookAI/xlm-roberta-base)
 and [token classification guide](https://huggingface.co/docs/transformers/tasks/token_classification).
 
@@ -267,6 +267,50 @@ one; gradient checkpointing helps but does not guarantee it fits. Use `--cpu`
 more GPU memory. `--epochs`, `--learning-rate`, `--max-length`, and `--seed`
 are configurable. Training defaults to three epochs and learning rate 2e-5.
 
+### Optional MLflow experiment tracking
+
+Install the separate tracking group and start the local dashboard from the project root:
+
+```bash
+uv sync --group training --group tracking
+make mlflow-ui
+```
+
+Open http://localhost:5000. In another terminal, start a tracked run:
+
+```bash
+uv run --group training --group tracking python -m training.finetune \
+  --model checkpoints/poi-smoke-v3/checkpoint-5000 \
+  --labels data/labels-v2.jsonl \
+  --output checkpoints/poi-v4 \
+  --epochs 3 --learning-rate 1e-5 \
+  --gradient-checkpointing \
+  --mlflow --run-name v4-expanded-labels
+```
+
+Use your actual dataset and starting checkpoint paths. Add `--allow-teacher` when
+the dataset contains teacher labels. This starts a new optimizer/schedule from
+checkpoint weights. Without `--mlflow`, training does not import or use MLflow.
+
+The default experiment is `poi-encoder`; change it with `--mlflow-experiment`.
+Training and the dashboard share `sqlite:///mlflow.db` and local `mlruns/` artifacts,
+so run both commands from the project root. Training can log without the dashboard
+running. Both locations are gitignored and excluded from Docker builds. The UI
+binds to localhost. `--mlflow-tracking-uri` can select another backend explicitly;
+the CLI default does not read `MLFLOW_TRACKING_URI`.
+
+Each run logs hyperparameters, the dataset checksum, split manifest, training loss,
+learning rate, and validation precision/recall/F1. `best_model_eval_*` metrics describe
+the final evaluation of the selected best model. Small JSON artifacts are logged;
+raw descriptions and model weights are not. The `model_directory` tag points to the
+local saved model, and `mlflow_run.json` in the run directory records the tracking ID.
+Errors during training mark the tracking run failed.
+
+Select runs in the UI and choose **Compare** to inspect parameters and metric curves.
+An expanded dataset can change the validation split, so compare split manifests
+before interpreting changes in scores. Gold evaluation remains a separate command
+and is not logged into training runs.
+
 Data safeguards:
 
 - Input rows are validated using the existing POI schema and evidence checks.
@@ -276,9 +320,12 @@ Data safeguards:
   clusters. Gold never selects checkpoints. At least two independent
   non-gold clusters are required, including a human-reviewed validation group.
 - Teacher rows require `--allow-teacher`; they cannot enter gold or validation.
-- Text exceeding `--max-length` fails explicitly, rather than silently losing
-  annotations. Split/review long descriptions upstream, or use a checkpoint
-  with a larger context and adjust the limit. Automatic chunking is not implemented.
+- Long training, validation, and gold descriptions are partitioned into token
+  chunks within `--max-length`, preserving special tokens and complete POI names.
+  Dataset splitting happens first, so chunks cannot leak across splits. Each
+  content token appears once; metrics are computed over chunks. A single POI
+  name longer than the available chunk capacity is rejected. Prediction still
+  requires an input within the trained length limit.
 - Existing nonempty output directories are refused. Use a new versioned path.
 
 The run directory contains `model/` (best validation checkpoint and tokenizer),

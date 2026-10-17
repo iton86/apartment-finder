@@ -75,10 +75,10 @@ def name_spans(row: dict) -> list[tuple[int, int, str]]:
     return ordered
 
 
-def encode_row(row: dict, tokenizer, max_length: int) -> dict:
+def encode_row(row: dict, tokenizer, max_length: int | None) -> dict:
     """Label every name subtoken; refuse truncation rather than lose annotations."""
     encoded = tokenizer(row["description"], return_offsets_mapping=True, truncation=False)
-    if len(encoded["input_ids"]) > max_length:
+    if max_length is not None and len(encoded["input_ids"]) > max_length:
         raise ValueError(
             f"Row {row.get('id')}: {len(encoded['input_ids'])} tokens exceeds max_length="
             f"{max_length}; shorten/split and review the description before training"
@@ -105,6 +105,44 @@ def encode_row(row: dict, tokenizer, max_length: int) -> dict:
             labels[index] = LABEL2ID[f"{'B' if position == 0 else 'I'}-{category}"]
     encoded["labels"] = labels
     return dict(encoded)
+
+
+def encode_chunks(row: dict, tokenizer, max_length: int) -> list[dict]:
+    """Partition a labeled sequence without losing tokens or splitting POI names.
+
+    Call after dataset splitting, so every chunk stays with its source row.
+    Preserve the tokenizer's original boundary special tokens in each chunk.
+    """
+    encoded = encode_row(row, tokenizer, max_length=None)
+    if len(encoded["input_ids"]) <= max_length:
+        return [encoded]
+    labels = encoded["labels"]
+    content = [i for i, label in enumerate(labels) if label != -100]
+    if not content:
+        raise ValueError(f"Row {row.get('id')}: no content tokens")
+    first, stop = content[0], content[-1] + 1
+    capacity = max_length - first - (len(labels) - stop)
+    if capacity < 1:
+        raise ValueError("max_length must leave room for content and special tokens")
+    chunks = []
+    start = first
+    while start < stop:
+        end = min(start + capacity, stop)
+        # Move the cut to the entity's beginning if it falls inside a name.
+        while end < stop and end > start and LABELS[labels[end]].startswith("I-"):
+            end -= 1
+        if end == start:
+            raise ValueError(
+                f"Row {row.get('id')}: one POI name exceeds the chunk capacity {capacity}"
+            )
+        chunks.append(
+            {
+                key: values[:first] + values[start:end] + values[stop:]
+                for key, values in encoded.items()
+            }
+        )
+        start = end
+    return chunks
 
 
 def entities(tags: list[str]) -> set[tuple[int, int, str]]:

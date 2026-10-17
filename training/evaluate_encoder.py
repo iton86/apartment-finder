@@ -7,7 +7,7 @@ from pathlib import Path
 
 from training.finetune import write_json
 from training.jsonl import read_jsonl
-from training.token_data import LABELS, compute_metrics, encode_row, split_rows
+from training.token_data import LABELS, compute_metrics, encode_chunks, split_rows
 
 
 def main() -> None:
@@ -44,7 +44,11 @@ def main() -> None:
     model = AutoModelForTokenClassification.from_pretrained(args.run / "model")
     if [model.config.id2label[i] for i in range(len(LABELS))] != LABELS:
         parser.error("Checkpoint label mapping does not match this POI schema")
-    dataset = [encode_row(row, tokenizer, config["max_length"]) for row in splits["gold"]]
+    dataset = [
+        chunk
+        for row in splits["gold"]
+        for chunk in encode_chunks(row, tokenizer, config["max_length"])
+    ]
     trainer = Trainer(
         model=model,
         processing_class=tokenizer,

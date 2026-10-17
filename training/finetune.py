@@ -6,7 +6,8 @@ import json
 from pathlib import Path
 
 from training.jsonl import read_jsonl
-from training.token_data import LABEL2ID, LABELS, compute_metrics, encode_row, split_rows
+from training.token_data import LABEL2ID, LABELS, compute_metrics, encode_chunks, split_rows
+from training.tracking import track_training
 
 
 def write_json(path: Path, value: dict) -> None:
@@ -49,7 +50,11 @@ def run(args: argparse.Namespace) -> None:
         label2id=LABEL2ID,
     )
     datasets = {
-        split: [encode_row(row, tokenizer, args.max_length) for row in splits[split]]
+        split: [
+            chunk
+            for row in splits[split]
+            for chunk in encode_chunks(row, tokenizer, args.max_length)
+        ]
         for split in ("train", "validation")
     }
     args.output.mkdir(parents=True, exist_ok=True)
@@ -105,10 +110,11 @@ def run(args: argparse.Namespace) -> None:
         data_collator=DataCollatorForTokenClassification(tokenizer),
         compute_metrics=compute_metrics,
     )
-    trainer.train()
-    trainer.save_model(str(args.output / "model"))
-    tokenizer.save_pretrained(args.output / "model")
-    trainer.save_metrics("validation", trainer.evaluate())
+    with track_training(args, trainer):
+        trainer.train()
+        trainer.save_model(str(args.output / "model"))
+        tokenizer.save_pretrained(args.output / "model")
+        trainer.save_metrics("validation", trainer.evaluate())
     print(f"Saved best validation checkpoint to {args.output / 'model'}")
     print("Gold data was not used for training or checkpoint selection.")
 
@@ -128,6 +134,10 @@ def main() -> None:
     parser.add_argument("--gradient-checkpointing", action="store_true")
     parser.add_argument("--cpu", action="store_true")
     parser.add_argument("--allow-teacher", action="store_true")
+    parser.add_argument("--mlflow", action="store_true", help="Enable experiment tracking")
+    parser.add_argument("--mlflow-tracking-uri", default="sqlite:///mlflow.db")
+    parser.add_argument("--mlflow-experiment", default="poi-encoder")
+    parser.add_argument("--run-name", help="MLflow run name (defaults to output directory name)")
     args = parser.parse_args()
     try:
         run(args)

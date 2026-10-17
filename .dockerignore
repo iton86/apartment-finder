@@ -26,3 +26,5 @@ tests
 docker-compose.yml
 Dockerfile
 Makefile
+mlflow.db*
+mlruns/

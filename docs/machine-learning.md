@@ -61,8 +61,10 @@ guarantee a particular GPU will have sufficient memory.
   splits; gold records and their near duplicates are excluded from those splits.
 - At least two eligible non-gold groups are required to create a split.
 - Fast-tokenizer offsets map character annotations to BIO token labels.
-- Overlapping entity spans and overlength examples are rejected rather than
-  silently dropping annotations through truncation.
+- Overlapping entity spans are rejected. Long descriptions are chunked after
+  dataset splitting, preserving every content token and keeping POI names whole.
+  A single name too long for one chunk is rejected. Evaluation uses the same
+  chunking; prediction still requires an input within the trained length limit.
 - Evaluation checks dataset provenance against the recorded checksum.
 
 ## Artifacts and interpretation

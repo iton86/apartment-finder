@@ -114,7 +114,10 @@ TRAINING_MODEL ?= FacebookAI/xlm-roberta-base
 TRAINING_RUN ?= checkpoints/poi-encoder
 TEXT_FILE ?= data/example-description.txt
 
-.PHONY: training-fit training-evaluate training-predict
+.PHONY: training-fit training-evaluate training-predict mlflow-ui
+mlflow-ui:
+	uv run --group tracking mlflow server --host 127.0.0.1 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --no-serve-artifacts
+
 training-fit:
 	uv run --group training python -m training.finetune --model "$(TRAINING_MODEL)" --output "$(TRAINING_RUN)" --gradient-checkpointing
 

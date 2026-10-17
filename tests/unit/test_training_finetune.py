@@ -79,7 +79,11 @@ def test_alignment_and_overlength():
         encode_row(example, tokenizer, 4)
 
 
-def test_real_roberta_training_and_reload(tmp_path, monkeypatch, capsys):
+@pytest.mark.parametrize("tracking", [False, True])
+def test_real_roberta_training_and_reload(tmp_path, monkeypatch, capsys, tracking):
+    if tracking:
+        mlflow = pytest.importorskip("mlflow")
+    monkeypatch.chdir(tmp_path)
     torch = pytest.importorskip("torch")
     transformers = pytest.importorskip("transformers")
     pytest.importorskip("accelerate")
@@ -147,6 +151,10 @@ def test_real_roberta_training_and_reload(tmp_path, monkeypatch, capsys):
             gradient_checkpointing=False,
             cpu=True,
             allow_teacher=False,
+            mlflow=tracking,
+            mlflow_tracking_uri=f"sqlite:///{tmp_path / 'mlflow.db'}",
+            mlflow_experiment="smoke-test",
+            run_name="tiny-roberta",
         )
     )
     trained = transformers.AutoModelForTokenClassification.from_pretrained(output / "model")
@@ -155,6 +163,26 @@ def test_real_roberta_training_and_reload(tmp_path, monkeypatch, capsys):
     assert (output / "validation_results.json").exists()
     assert not (output / "gold_metrics.json").exists()
     assert json.loads((output / "split_manifest.json").read_text())["gold"]
+    if tracking:
+        info = json.loads((output / "mlflow_run.json").read_text())
+        client = mlflow.tracking.MlflowClient()
+        tracked = client.get_run(info["run_id"])
+        assert tracked.info.status == "FINISHED"
+        assert (
+            tracked.data.params["dataset_sha256"]
+            == json.loads((output / "run_config.json").read_text())["dataset_sha256"]
+        )
+        assert "eval_f1" in tracked.data.metrics
+        assert "best_model_eval_f1" in tracked.data.metrics
+        assert not any("gold" in key for key in tracked.data.metrics)
+        assert "mlflow_tracking_uri" not in tracked.data.params
+        assert {a.path for a in client.list_artifacts(info["run_id"])} == {
+            "run_config.json",
+            "split_manifest.json",
+            "validation_results.json",
+            "mlflow_run.json",
+        }
+        assert mlflow.active_run() is None
     from training import evaluate_encoder, predict_encoder
 
     monkeypatch.setattr("sys.argv", ["evaluate", str(output), "--cpu"])
@@ -223,3 +251,29 @@ def test_alignment_rejects_extra_word_characters():
 
     with pytest.raises(ValueError, match="conflicts with token '74'"):
         encode_row(example, tokenizer, 512)
+
+
+def test_long_row_chunks_preserve_tokens_and_complete_entities():
+    from training.token_data import encode_chunks
+
+    text = "а б в г Южен парк д е"
+    example = row(text, pois=[poi("Южен парк", "Южен парк")])
+
+    def tokenizer(text, **kwargs):
+        import re
+
+        offsets = [(m.start(), m.end()) for m in re.finditer(r"\S+", text)]
+        return {
+            "input_ids": [0, *range(3, 3 + len(offsets)), 2],
+            "attention_mask": [1] * (len(offsets) + 2),
+            "offset_mapping": [(0, 0), *offsets, (0, 0)],
+        }
+
+    chunks = encode_chunks(example, tokenizer, 7)
+    assert [len(c["input_ids"]) for c in chunks] == [6, 6]
+    assert [i for c in chunks for i in c["input_ids"][1:-1]] == list(range(3, 11))
+    assert all(c["labels"][0] == c["labels"][-1] == -100 for c in chunks)
+    assert chunks[1]["labels"][1:3] == [LABEL2ID["B-park"], LABEL2ID["I-park"]]
+    assert encode_chunks(example, tokenizer, 20) == [encode_row(example, tokenizer, 20)]
+    with pytest.raises(ValueError, match="one POI name exceeds"):
+        encode_chunks(example, tokenizer, 3)
