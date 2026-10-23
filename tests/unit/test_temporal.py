@@ -3,7 +3,7 @@ import asyncio
 import sys
 from datetime import timedelta
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from temporalio.client import ScheduleAlreadyRunningError, ScheduleOverlapPolicy
@@ -66,6 +66,35 @@ def test_schedule_update_preserves_paused_state(monkeypatch):
         result = callback(SimpleNamespace(description=SimpleNamespace(schedule=existing)))
         assert result.schedule.state.paused
         assert result.schedule.action.args[0].max_pages == 2
+
+    asyncio.run(check())
+
+
+def test_worker_connects_and_runs(monkeypatch):
+    async def check():
+        client = object()
+        worker = SimpleNamespace(run=AsyncMock())
+        worker_factory = Mock(return_value=worker)
+        monkeypatch.setattr(temporal_cli.Client, "connect", AsyncMock(return_value=client))
+        monkeypatch.setattr(temporal_cli, "Worker", worker_factory)
+        args = argparse.Namespace(
+            command="worker",
+            address="localhost:7233",
+            namespace="default",
+            task_queue="queue",
+        )
+
+        await temporal_cli.run(args)
+
+        temporal_cli.Client.connect.assert_awaited_once_with(
+            "localhost:7233",
+            namespace="default",
+            api_key=None,
+            tls=False,
+        )
+        worker_factory.assert_called_once()
+        assert worker_factory.call_args.kwargs["task_queue"] == "queue"
+        worker.run.assert_awaited_once()
 
     asyncio.run(check())
 

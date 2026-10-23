@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -)",
+      "Bash(uv run *)",
+      "Bash(APP_ENV=local uv run alembic upgrade head)",
+      "Bash(APP_ENV=local uv run pytest tests/integration -q)",
+      "Bash(docker compose *)",
+      "Read(//tmp/**)",
+      "Bash(APP_ENV=local uv run pytest tests/integration/test_location_backfill.py -q)"
+    ]
+  }
+}

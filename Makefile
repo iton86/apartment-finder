@@ -1,7 +1,7 @@
 # Run `make help` to see this list. Every command here is safe to run
 # repeatedly — none of them touch the real Azure database.
 
-.PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check training-export label-studio label-try label-run label-submit label-collect label-tasks
+.PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check training-export training-select-ads label-studio label-try label-run label-submit label-collect label-tasks
 
 help:
 	@echo "training-fit     - fine-tune a POI name/category encoder on reviewed labels"
@@ -20,6 +20,7 @@ help:
 	@echo "format           - auto-fix code style with ruff"
 	@echo "check            - lint + full test suite (run before pushing)"
 	@echo "training-export  - dump cleaned, de-duplicated descriptions to data/raw.jsonl"
+	@echo "training-select-ads - select new listing ads for continuous re-training"
 	@echo "label-studio     - start Label Studio on http://localhost:8080"
 	@echo "label-try        - teacher-label 3 ads and print them (costs a few cents)"
 	@echo "label-run        - teacher-label every new ad, one request at a time"
@@ -87,6 +88,9 @@ check: lint test
 # APP_ENV like everything else — set APP_ENV=cloud to export production ads.
 training-export:
 	uv run python -m training.export_descriptions
+
+training-select-ads:
+	uv run python -m training.ad_selection
 
 label-studio:
 	docker compose --profile labeling up -d label-studio

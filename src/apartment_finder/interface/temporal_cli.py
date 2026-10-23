@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import logging
 import os
 from datetime import timedelta
 
@@ -23,6 +24,8 @@ from apartment_finder.infrastructure.temporal.activities import scrape_listings
 from apartment_finder.infrastructure.temporal.contracts import TASK_QUEUE, ScrapeRequest
 from apartment_finder.infrastructure.temporal.workflows import ScrapeListingsWorkflow
 from apartment_finder.interface.logging_config import configure_logging
+
+logger = logging.getLogger(__name__)
 
 
 def build_schedule(request: ScrapeRequest, schedule_id: str, task_queue: str) -> Schedule:
@@ -54,6 +57,7 @@ async def run(args: argparse.Namespace) -> None:
         )
         request.validate()
     api_key = os.environ.get("TEMPORAL_API_KEY")
+    logger.info("Connecting to Temporal at %s in namespace %s", args.address, args.namespace)
     client = await Client.connect(
         args.address,
         namespace=args.namespace,
@@ -61,6 +65,7 @@ async def run(args: argparse.Namespace) -> None:
         tls=bool(api_key) or os.environ.get("TEMPORAL_TLS") == "true",
     )
     if args.command == "worker":
+        logger.info("Starting Temporal worker on task queue %s", args.task_queue)
         worker = Worker(
             client,
             task_queue=args.task_queue,
@@ -69,6 +74,7 @@ async def run(args: argparse.Namespace) -> None:
             max_concurrent_activities=1,
             graceful_shutdown_timeout=timedelta(seconds=10),
         )
+        logger.info("Temporal worker is polling for work")
         await worker.run()
         return
 

@@ -119,3 +119,20 @@ class ListingImageModel(Base):
     storage_path: Mapped[str] = mapped_column(Text, nullable=False)
 
     listing: Mapped["ListingModel"] = relationship(back_populates="images")
+
+
+class TrainingAdSelectionModel(Base):
+    __tablename__ = "training_ad_selections"
+    __table_args__ = (
+        UniqueConstraint("dataset", "listing_id"),
+        Index("idx_training_ad_selections_run", "selection_run"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dataset: Mapped[str] = mapped_column(String, nullable=False)
+    listing_id: Mapped[UUID] = mapped_column(
+        Uuid, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False
+    )
+    selection_run: Mapped[str] = mapped_column(String, nullable=False)
+    selected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)

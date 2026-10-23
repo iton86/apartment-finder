@@ -25,6 +25,23 @@ the encoder does not yet predict distances or the complete extraction JSON.
 The [annotation and training guide](../training/README.md) documents the exact
 file formats, labeling commands, category schema, and export/import workflow.
 
+## Scheduled ad selection
+
+Continuous model re-training starts with a durable ad selection manifest.
+Apply migrations, then schedule this command with cron, systemd, Temporal, or
+another scheduler:
+
+```bash
+APP_ENV=local uv run python -m training.ad_selection \
+  --dataset listing-ads --sample-rate 0.2 --limit 500
+```
+
+Each run samples from `listings` rows that have not already been selected for
+that dataset, records the decision in `training_ad_selections`, and writes a
+JSONL manifest under `data/`. Re-running with the same or later schedule will
+not select the same ad again for the same dataset. Use a different `--dataset`
+for a separate training target.
+
 ## Running the encoder
 
 After preparing the labeled dataset described in that guide:

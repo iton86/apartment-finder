@@ -92,15 +92,14 @@
             ]
         },
         {
-            "name": "Python Debugger: Current File with Arguments",
+            "name": "Image-Selection",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "module": "training.image_selection",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "python": "${workspaceFolder}/.venv/bin/python",
             "envFile": "${workspaceFolder}/.env",
-            "args": "${command:pickArgs}"
         }
     ],
     "inputs": [
