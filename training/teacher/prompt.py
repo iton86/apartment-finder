@@ -20,7 +20,7 @@ What counts as a POI
 public transport (metro, bus, tram stops), schools, kindergartens, \
 universities, parks, malls, supermarkets, hospitals and medical centers, \
 pharmacies, gyms and sports facilities, restaurants, banks, the city \
-center, the airport.
+center, the airport, named streets and named markets.
 - Only places the ad identifies explicitly, by a proper name or a number. \
 "спирка на автобус 204", "33 СУ", "метростанция Джеймс Баучер", "Южен \
 парк", "супермаркет Лидл", "бул. България" count. "спирка", "училище", \
@@ -28,9 +28,25 @@ center, the airport.
 even with a distance ("на 300 м от метростанция" is skipped). A number \
 counts only when it identifies the place (a school number, a bus or tram \
 line); distances, floors and prices never do.
-- Major roads only when presented as access or proximity ("близо до бул. \
-България", "бърз достъп до Околовръстен път") — use boulevard or \
-ring_road. The street the building itself is on is its address, not a POI.
+- Named roads count when presented as access or proximity. Use street for \
+"ул", "ул.", or "улица" followed by a street name, boulevard for "бул.", \
+and ring_road for "Околовръстен път". Recognize optional dots, spaces, \
+quotes and uppercase spelling: 'до ул."Шишман"', "до ул Шишман", and \
+"до улица Шишман" are street POIs. Keep the name as written in the ad \
+(apart from capitalization); never expand "ул." to "улица".
+- A road used only as the property's own address ("намира се на ул. \
+Луи Айер 12", "адрес: ул. Луи Айер") is not a POI. A separately stated \
+nearby road or access route still counts. "тиха улица" without a name \
+does not count. Do not classify a street as boulevard or other.
+- Use market for a named physical market: "Женски пазар", "пазар \
+Красно село", 'пазар "Иван Вазов"', "пазара Димитър Петков". Recognize \
+"пазар", "пазара", "пазарът" as market wording; they still need an \
+explicit identifying name. Copy the whole identifying market phrase \
+from the evidence, preserving its spelling and quotes. Do not classify \
+markets as supermarket or shopping_mall.
+- Skip unnamed markets ("до пазара", "на 200 м от пазар") and references \
+to the real-estate or financial market ("пазар на имоти", "пазарна цена", \
+"излиза на пазара"). Do not infer a market name from the neighborhood.
 - Skip vague phrases with no specific place: "добра инфраструктура", \
 "всички удобства", "транспортни връзки", "комуникативна локация".
 - Skip amenities of the building or apartment itself (parking, elevator, \
@@ -97,9 +113,39 @@ Example
 "evidence": "В района има училище, детска градина и 33 СУ"}
 ]}
 Skipped: ул. Луи Айер is the building's own address; "метростанция", \
-"училище" and "детска градина" have no name or number."""
+"училище" and "детска градина" have no name or number.
+
+Street and market example
+<ad>
+Имотът се намира на ул. Луи Айер 12. На 200 м от ул. "Цар Симеон" \
+и на 5 минути пеша от Женски пазар. Близо до пазара, на пазарна цена.
+</ad>
+{
+ "pois": [
+  {
+   "category": "street",
+   "name": "ул. \\"Цар Симеон\\"",
+   "distance": {
+    "value": 200,
+    "unit": "m"
+   },
+   "evidence": "На 200 м от ул. \\"Цар Симеон\\""
+  },
+  {
+   "category": "market",
+   "name": "Женски пазар",
+   "distance": {
+    "value": 5,
+    "unit": "min_walk"
+   },
+   "evidence": "на 5 минути пеша от Женски пазар"
+  }
+ ]
+}
+Skipped: the own-address street, unnamed "пазара", and "пазарна цена"."""
 
 
 def user_message(row: dict) -> str:
     ad = f"{row['title']}\nРайон: {row['city']}, {row['area']}\n\n{row['description']}"
     return f"<ad>\n{ad}\n</ad>"
+
