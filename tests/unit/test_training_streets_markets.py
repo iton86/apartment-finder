@@ -52,8 +52,12 @@ class StreetMarketContractTest(unittest.TestCase):
     def test_reviewer_guidance_is_valid_xml(self):
         root = ET.fromstring(labeling_config())
         guidance = " ".join(h.get("value", "") for h in root.iter("Header"))
-        self.assertIn("street: named ул / ул. / улица", guidance)
-        self.assertIn("market: named пазар / пазара / пазарът", guidance)
+        self.assertNotIn("street: named", guidance)
+        self.assertNotIn("market: named", guidance)
+        self.assertNotIn("No name/number", guidance)
+        notes = root.findall(".//Text[@name='review_notes']")
+        self.assertEqual(len(notes), 1)
+        self.assertEqual(notes[0].get("value"), "$review_notes")
         labels = {label.get("value") for label in root.iter("Label")}
         self.assertTrue({"street", "market"} <= labels)
 
