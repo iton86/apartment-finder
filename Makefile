@@ -1,7 +1,7 @@
 # Run `make help` to see this list. Every command here is safe to run
 # repeatedly — none of them touch the real Azure database.
 
-.PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check training-export training-select-ads label-studio label-try label-run label-submit label-collect label-tasks
+.PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check select-labeling labeling-export labeling-approve labeling-sync labeling-export-training training-export training-select-ads label-studio label-try label-run label-submit label-collect label-tasks
 
 help:
 	@echo "training-fit     - fine-tune a POI name/category encoder on reviewed labels"
@@ -19,6 +19,11 @@ help:
 	@echo "lint             - check code style with ruff"
 	@echo "format           - auto-fix code style with ruff"
 	@echo "check            - lint + full test suite (run before pushing)"
+	@echo "select-labeling  - reserve scraped listings for future Label Studio annotation"
+	@echo "labeling-export  - export reserved labeling tasks to Label Studio"
+	@echo "labeling-approve - approve a reviewed batch: make labeling-approve BATCH_ID=... ACTOR=..."
+	@echo "labeling-sync    - reconcile a batch from Label Studio: make labeling-sync BATCH_ID=..."
+	@echo "labeling-export-training - export approved labels to data/labels.jsonl"
 	@echo "training-export  - dump cleaned, de-duplicated descriptions to data/raw.jsonl"
 	@echo "training-select-ads - select new listing ads for continuous re-training"
 	@echo "label-studio     - start Label Studio on http://localhost:8080"
@@ -83,6 +88,21 @@ format:
 	uv run ruff check --fix .
 
 check: lint test
+
+select-labeling:
+	uv run apartment-finder-labeling select
+
+labeling-export:
+	uv run apartment-finder-labeling export
+
+labeling-approve:
+	uv run apartment-finder-labeling approve "$(BATCH_ID)" --actor "$(ACTOR)"
+
+labeling-sync:
+	uv run apartment-finder-labeling sync "$(BATCH_ID)"
+
+labeling-export-training:
+	uv run apartment-finder-labeling export-training
 
 # Read-only (the export runs in a READ ONLY transaction), but it follows
 # APP_ENV like everything else — set APP_ENV=cloud to export production ads.

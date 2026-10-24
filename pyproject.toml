@@ -18,7 +18,9 @@ dependencies = [
 ]
 
 [project.scripts]
+apartment-finder-labeling = "apartment_finder.interface.labeling_cli:main"
 apartment-finder-scrape = "apartment_finder.interface.cli:main"
+apartment-finder-select-labeling = "apartment_finder.interface.labeling_cli:main"
 apartment-finder-temporal = "apartment_finder.interface.temporal_cli:main"
 
 [build-system]

@@ -70,6 +70,57 @@ update. Memory requirements depend on the checkpoint, token length, precision,
 and batch settings. The Makefile enables gradient checkpointing; it does not
 guarantee a particular GPU will have sufficient memory.
 
+## Database-backed Label Studio review
+
+The active-learning path now keeps selected listing snapshots, teacher output,
+Label Studio task IDs, saved human annotations, and approval metadata in
+Postgres. This replaces the older file-only handoff for newly selected batches;
+the file tools under `training/` remain useful for experiments and legacy data.
+
+Configuration:
+
+```bash
+LABEL_STUDIO_URL=http://localhost:8080
+LABEL_STUDIO_API_TOKEN=<token from Label Studio account settings>
+LABEL_STUDIO_PROJECT_ID=<project id>
+TEACHER_PROVIDER=openai        # optional for export
+TEACHER_MODEL=<provider model> # optional
+```
+
+Small local run:
+
+```bash
+make migrate
+make label-studio
+uv run apartment-finder-labeling check-label-studio
+uv run apartment-finder-labeling config > data/label_studio_config.xml
+uv run apartment-finder-labeling select --batch-size 25
+uv run apartment-finder-labeling export --batch-size 25
+uv run apartment-finder-labeling sync <batch-id>
+uv run apartment-finder-labeling sync-task <label-studio-task-id>
+uv run apartment-finder-labeling approve <batch-id> --actor you@example.com
+uv run apartment-finder-labeling export-training --out data/labels.jsonl
+```
+
+Important review semantics:
+
+- Teacher output is imported as Label Studio `predictions`, not final labels.
+- A reviewer does not need to press Submit on unchanged teacher predictions.
+  The explicit `approve` command fetches current task state and converts
+  unchanged predictions into saved annotations through the Label Studio API.
+- Existing saved human annotations are preserved during approval; they are not
+  overwritten by teacher predictions.
+- Drafts and unsaved edits are ignored because sync and approval fetch saved
+  task state from Label Studio.
+- Training export includes only approved annotations whose current synced
+  revision still matches the approved revision. A later annotation update or
+  delete invalidates the approval until the batch is approved again.
+- `sync` is retry-safe and task-scoped. Run it periodically to reconcile missed
+  webhook events or uncertain API outcomes.
+- `sync-task` is suitable for webhook handlers for annotation-created,
+  annotation-updated, and annotation-deleted events; it fetches current task
+  state instead of trusting event ordering.
+
 ## Dataset safeguards
 
 - Training requires reviewed human labels by default. Teacher labels require an

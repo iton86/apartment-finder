@@ -42,7 +42,8 @@ class PoiCategory(StrEnum):
     BANK = "bank"
     BOULEVARD = "boulevard"
     RING_ROAD = "ring_road"
-    CITY_CENTER = "city_center"
+    STREET = "street"
+    MARKET = "market"
     AIRPORT = "airport"
     OTHER = "other"
 

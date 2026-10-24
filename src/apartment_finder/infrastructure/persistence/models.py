@@ -11,6 +11,7 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    JSON,
     BigInteger,
     DateTime,
     Enum,
@@ -27,6 +28,12 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from apartment_finder.domain.entities import ListingStatus, TransactionType
+from apartment_finder.domain.labeling import (
+    LabelingExportStatus,
+    LabelingStatus,
+    LabelingSyncStatus,
+    TeacherStatus,
+)
 
 
 class Base(DeclarativeBase):
@@ -136,3 +143,121 @@ class TrainingAdSelectionModel(Base):
     selection_run: Mapped[str] = mapped_column(String, nullable=False)
     selected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     reason: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class LabelingTaskModel(Base):
+    __tablename__ = "labeling_tasks"
+    __table_args__ = (
+        UniqueConstraint("listing_id"),
+        UniqueConstraint("content_hash"),
+        Index("idx_labeling_tasks_status_created", "status", "created_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    selection_batch_id: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("labeling_batches.id"), nullable=True
+    )
+    listing_id: Mapped[UUID] = mapped_column(
+        Uuid, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False
+    )
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    description_snapshot: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[LabelingStatus] = mapped_column(
+        Enum(
+            LabelingStatus,
+            name="labeling_status",
+            native_enum=False,
+            create_constraint=True,
+            values_callable=lambda values: [value.value for value in values],
+        ),
+        nullable=False,
+        default=LabelingStatus.PENDING,
+        server_default=LabelingStatus.PENDING.value,
+    )
+    selection_score: Mapped[Decimal | None] = mapped_column(Numeric(10, 6), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    label_studio_project_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    label_studio_task_id: Mapped[int | None] = mapped_column(Integer, nullable=True, unique=True)
+    export_status: Mapped[LabelingExportStatus] = mapped_column(
+        Enum(
+            LabelingExportStatus,
+            name="labeling_export_status",
+            native_enum=False,
+            create_constraint=True,
+            values_callable=lambda values: [value.value for value in values],
+        ),
+        nullable=False,
+        default=LabelingExportStatus.NOT_EXPORTED,
+        server_default=LabelingExportStatus.NOT_EXPORTED.value,
+    )
+    sync_status: Mapped[LabelingSyncStatus] = mapped_column(
+        Enum(
+            LabelingSyncStatus,
+            name="labeling_sync_status",
+            native_enum=False,
+            create_constraint=True,
+            values_callable=lambda values: [value.value for value in values],
+        ),
+        nullable=False,
+        default=LabelingSyncStatus.NOT_SYNCED,
+        server_default=LabelingSyncStatus.NOT_SYNCED.value,
+    )
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    teacher_provider: Mapped[str | None] = mapped_column(String, nullable=True)
+    teacher_model: Mapped[str | None] = mapped_column(String, nullable=True)
+    teacher_prompt_version: Mapped[str | None] = mapped_column(String, nullable=True)
+    teacher_status: Mapped[TeacherStatus] = mapped_column(
+        Enum(
+            TeacherStatus,
+            name="teacher_status",
+            native_enum=False,
+            create_constraint=True,
+            values_callable=lambda values: [value.value for value in values],
+        ),
+        nullable=False,
+        default=TeacherStatus.MISSING,
+        server_default=TeacherStatus.MISSING.value,
+    )
+    teacher_result: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    teacher_problems: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    teacher_labeled_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    human_annotation_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    human_result: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    human_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    human_updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    approved_result: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    approved_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    approval_actor: Mapped[str | None] = mapped_column(String, nullable=True)
+    approval_invalidated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    listing: Mapped[ListingModel] = relationship()
+    batch: Mapped["LabelingBatchModel | None"] = relationship(back_populates="tasks")
+
+
+class LabelingBatchModel(Base):
+    __tablename__ = "labeling_batches"
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    label_studio_project_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    approval_actor: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    tasks: Mapped[list[LabelingTaskModel]] = relationship(back_populates="batch")

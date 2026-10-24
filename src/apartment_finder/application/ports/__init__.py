@@ -10,6 +10,13 @@ from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 
+from apartment_finder.application.ports.label_studio import LabelStudioGateway as LabelStudioGateway
+from apartment_finder.application.ports.labeling_repository import (
+    LabelingRepository as LabelingRepository,
+)
+from apartment_finder.application.ports.teacher_annotation import (
+    TeacherAnnotationProvider as TeacherAnnotationProvider,
+)
 from apartment_finder.domain.entities import (
     DownloadedImage,
     Listing,
