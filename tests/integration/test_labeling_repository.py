@@ -313,6 +313,7 @@ def test_approved_training_rows_require_current_synced_revision(repository):
     assert len(rows) == 1
     assert rows[0]["id"] == str(task.id)
     assert rows[0]["pois"] == []
+    assert rows[0]["approved_revision"] == 1
 
     repository.sync_annotation(
         task.id,
