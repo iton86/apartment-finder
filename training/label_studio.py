@@ -84,6 +84,12 @@ def labeling_config() -> str:
         <Number name="{VALUE}" toName="{TEXT}" perRegion="true" min="0" step="0.1"/>
       </View>
       <Header size="6"
+              value="street: named ул / ул. / улица nearby or used for access;
+                     skip the property's own address."/>
+      <Header size="6"
+              value="market: named пазар / пазара / пазарът, e.g. Женски пазар;
+                     skip unnamed markets and пазар на имоти."/>
+      <Header size="6"
               value="Highlight place + distance wording. No name/number = not a POI."/>
     </View>
   </View>
@@ -376,3 +382,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
