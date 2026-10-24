@@ -15,6 +15,7 @@ from apartment_finder.infrastructure.label_studio.mapper import (
 class SyncAnnotationsResult:
     synced: int
     failed: int
+    skipped: int = 0
 
 
 class SyncAnnotations:
@@ -22,24 +23,21 @@ class SyncAnnotations:
         self._repository = repository
         self._label_studio = label_studio
 
-    def execute(self, *, batch_id: UUID | None = None) -> SyncAnnotationsResult:
+    def execute(self, *, batch_id: UUID) -> SyncAnnotationsResult:
         synced = 0
         failed = 0
-        tasks = (
-            self._repository.get_batch_tasks(batch_id)
-            if batch_id is not None
-            else self._repository.get_exported_tasks()
-        )
-        for task in tasks:
+        skipped = 0
+        for task in self._repository.get_batch_tasks(batch_id):
             try:
                 self._sync_task(task)
                 synced += 1
             except SkippedTask:
+                skipped += 1
                 continue
             except Exception as exc:  # noqa: BLE001 - sync must continue task-by-task
                 self._repository.record_sync_error(task.id, f"{type(exc).__name__}: {exc}")
                 failed += 1
-        return SyncAnnotationsResult(synced=synced, failed=failed)
+        return SyncAnnotationsResult(synced=synced, failed=failed, skipped=skipped)
 
     def execute_label_studio_task(self, *, label_studio_task_id: int) -> SyncAnnotationsResult:
         task = self._repository.get_by_label_studio_task_id(label_studio_task_id)
@@ -48,7 +46,7 @@ class SyncAnnotations:
         try:
             self._sync_task(task)
         except SkippedTask:
-            return SyncAnnotationsResult(synced=0, failed=0)
+            return SyncAnnotationsResult(synced=0, failed=0, skipped=1)
         except Exception as exc:  # noqa: BLE001 - webhook/event sync should record and return
             self._repository.record_sync_error(task.id, f"{type(exc).__name__}: {exc}")
             return SyncAnnotationsResult(synced=0, failed=1)
@@ -62,6 +60,8 @@ class SyncAnnotations:
             raise ValueError("Label Studio task text/hash does not match selected snapshot")
         annotation = saved_annotation_state(state)
         if annotation is None:
+            if task.human_annotation_id is None and task.human_revision is None:
+                raise SkippedTask
             self._repository.sync_annotation(
                 task.id,
                 annotation_id=None,
@@ -71,8 +71,11 @@ class SyncAnnotations:
                 deleted=True,
             )
             return
+        result = annotation.get("result")
+        if not isinstance(result, list):
+            raise ValueError("Saved Label Studio annotation must contain a result list")
         pois, problems = validate_annotation_result(
-            annotation.get("result") or [],
+            result,
             task.description_snapshot,
         )
         if problems:
@@ -88,4 +91,3 @@ class SyncAnnotations:
 
 class SkippedTask(Exception):
     pass
-
