@@ -55,6 +55,11 @@ def task_payload(task: LabelingTask) -> LabelStudioTaskPayload:
         task_id=task.id,
         data={
             TEXT: task.description_snapshot,
+            "title": f"Listing {task.listing_id}",
+            "meta": (
+                f"Listing: {task.listing_id} | Task: {task.id} | "
+                f"Batch: {task.selection_batch_id or 'unassigned'}"
+            ),
             "review_notes": "\n".join(notes),
             "labeling_task_id": str(task.id),
             "listing_id": str(task.listing_id),
