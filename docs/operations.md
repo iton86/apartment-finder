@@ -151,3 +151,43 @@ Back up a database before destructive schema or infrastructure changes. Local
 Compose volumes hold persistent state, and removing them deletes that state.
 Export required records and training artifacts before deleting a temporary cloud
 environment. Dataset and model output directories are not backed up by Git.
+
+## Automatic Label Studio annotation sync
+
+After exporting tasks, keep this command running to pull saved reviews into the
+application database every 30 seconds:
+
+```bash
+uv run apartment-finder-labeling sync --watch
+```
+
+It discovers newly exported tasks on each pass and includes previously approved
+tasks so later reviewer edits or annotation removals invalidate stale approval.
+Only saved annotations are pulled; drafts and teacher predictions are not human
+reviews. A saved empty annotation is a valid review with no POIs.
+
+To restrict polling to one export batch or change the interval:
+
+```bash
+uv run apartment-finder-labeling sync <batch-uuid> --watch --interval 15
+```
+
+The interval must be positive and finite. Polling starts immediately, waits after
+each completed pass, and retries temporary service/database failures on the next
+pass. Stop with Ctrl+C. The process must stay running; for unattended operation,
+run it under your existing service supervisor with restart enabled. This command
+does not install a background service.
+
+Use the same database and `LABEL_STUDIO_URL` / `LABEL_STUDIO_API_TOKEN` settings
+as export. No webhook or public inbound endpoint is required. A missing batch ID
+means all database tasks linked to the configured Label Studio instance, so use
+a batch ID when that database contains tasks from multiple Label Studio instances.
+
+For a single pass, omit `--watch`. Existing `sync <batch-uuid>` and `sync-task <id>`
+commands keep working. Sync does not approve annotations for training; run the
+existing `approve <batch-uuid> --actor <name>` command after review. A subsequent
+edit requires approval again before it can be exported for training.
+
+
+Tasks whose latest sync failed are excluded from training export until a successful
+sync confirms the current saved annotation state.
