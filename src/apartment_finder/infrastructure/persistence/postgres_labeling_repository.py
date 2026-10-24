@@ -150,19 +150,6 @@ class PostgresLabelingRepository(LabelingRepository):
             )
             return [self._to_entity(model) for model in models]
 
-    def get_exported_tasks(self) -> list[LabelingTask]:
-        with Session(self._engine) as session:
-            models = (
-                session.execute(
-                    select(LabelingTaskModel)
-                    .where(LabelingTaskModel.label_studio_task_id.is_not(None))
-                    .order_by(LabelingTaskModel.created_at.asc())
-                )
-                .scalars()
-                .all()
-            )
-            return [self._to_entity(model) for model in models]
-
     def get_by_label_studio_task_id(self, label_studio_task_id: int) -> LabelingTask | None:
         with Session(self._engine) as session:
             model = session.scalar(
@@ -430,4 +417,3 @@ def _coerce_datetime(value):
     if isinstance(value, str):
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
     raise TypeError(f"Expected datetime, ISO string, or None, got {type(value).__name__}")
-
