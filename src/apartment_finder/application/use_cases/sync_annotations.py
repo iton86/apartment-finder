@@ -22,10 +22,15 @@ class SyncAnnotations:
         self._repository = repository
         self._label_studio = label_studio
 
-    def execute(self, *, batch_id: UUID) -> SyncAnnotationsResult:
+    def execute(self, *, batch_id: UUID | None = None) -> SyncAnnotationsResult:
         synced = 0
         failed = 0
-        for task in self._repository.get_batch_tasks(batch_id):
+        tasks = (
+            self._repository.get_batch_tasks(batch_id)
+            if batch_id is not None
+            else self._repository.get_exported_tasks()
+        )
+        for task in tasks:
             try:
                 self._sync_task(task)
                 synced += 1
@@ -83,3 +88,4 @@ class SyncAnnotations:
 
 class SkippedTask(Exception):
     pass
+
