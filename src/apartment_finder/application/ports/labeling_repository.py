@@ -32,11 +32,6 @@ class LabelingRepository(ABC):
         ...
 
     @abstractmethod
-    def get_exported_tasks(self) -> list[LabelingTask]:
-        """Return all tasks linked to Label Studio, including approved tasks."""
-        ...
-
-    @abstractmethod
     def get_by_label_studio_task_id(self, label_studio_task_id: int) -> LabelingTask | None:
         """Find the selected snapshot exported as a Label Studio task."""
         ...
@@ -84,4 +79,3 @@ class LabelingRepository(ABC):
     def approved_training_rows(self) -> list[dict]:
         """Return only approved current annotation revisions for model training."""
         ...
-
