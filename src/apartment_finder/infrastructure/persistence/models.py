@@ -233,12 +233,12 @@ class LabelingTaskModel(Base):
     )
     human_annotation_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     human_result: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
-    human_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    human_revision: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     human_updated_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     approved_result: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
-    approved_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    approved_revision: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     approval_actor: Mapped[str | None] = mapped_column(String, nullable=True)
     approval_invalidated_at: Mapped[datetime | None] = mapped_column(
