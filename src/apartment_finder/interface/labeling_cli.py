@@ -19,6 +19,7 @@ from apartment_finder.infrastructure.persistence.postgres_labeling_repository im
     PostgresLabelingRepository,
 )
 from apartment_finder.infrastructure.persistence.settings import build_postgres_connection_url
+from apartment_finder.interface.annotation_sync import positive_interval, watch_annotations
 from apartment_finder.interface.logging_config import configure_logging
 from training.jsonl import write_jsonl
 from training.label_studio import labeling_config
@@ -50,7 +51,9 @@ def main() -> None:
     approve.add_argument("--actor", required=True)
 
     sync = sub.add_parser("sync", help="Reconcile saved Label Studio annotations")
-    sync.add_argument("batch_id", type=UUID)
+    sync.add_argument("batch_id", type=UUID, nargs="?", help="Omit to sync all exported tasks")
+    sync.add_argument("--watch", action="store_true", help="Continuously pull saved annotations")
+    sync.add_argument("--interval", type=positive_interval, default=30.0, metavar="SECONDS")
 
     sync_task = sub.add_parser("sync-task", help="Reconcile one Label Studio task by ID")
     sync_task.add_argument("label_studio_task_id", type=int)
@@ -115,7 +118,14 @@ def main() -> None:
         return
 
     if args.command == "sync":
-        result = SyncAnnotations(repository, client).execute(batch_id=args.batch_id)
+        synchronizer = SyncAnnotations(repository, client)
+        if args.watch:
+            try:
+                watch_annotations(synchronizer, batch_id=args.batch_id, interval=args.interval)
+            except KeyboardInterrupt:
+                print("Annotation sync stopped.")
+            return
+        result = synchronizer.execute(batch_id=args.batch_id)
         print(f"Synced {result.synced} task(s), {result.failed} failed.")
         return
 
@@ -139,3 +149,4 @@ def _label_studio_client() -> LabelStudioClient:
 
 if __name__ == "__main__":
     main()
+
