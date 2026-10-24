@@ -300,6 +300,9 @@ def test_approved_training_rows_require_current_synced_revision(repository):
         ),
     )
     repository.mark_exported(task.id, project_id=7, label_studio_task_id=101)
+    repository.record_sync_error(task.id, "Saved reviewer edit failed validation")
+    assert repository.approved_training_rows() == []
+
     repository.sync_annotation(
         task.id,
         annotation_id=500,
@@ -330,3 +333,23 @@ def test_approved_training_rows_require_current_synced_revision(repository):
     )
 
     assert repository.approved_training_rows() == []
+
+
+def test_get_exported_tasks_includes_approved_and_excludes_unexported(repository):
+    add_listings(
+        repository,
+        make_listing(1, description=valid_description("exported")),
+        make_listing(2, description=valid_description("pending")),
+    )
+    tasks = repository.reserve_candidates(2)
+    batch = repository.create_export_batch(project_id=7, limit=1)
+    [exported] = repository.get_batch_tasks(batch.id)
+    repository.mark_exported(exported.id, project_id=7, label_studio_task_id=101)
+    repository.sync_annotation(
+        exported.id, annotation_id=500, result=[], revision=1,
+        updated_at="2026-10-24T10:00:00Z",
+    )
+    repository.approve_batch(batch.id, actor="reviewer", approved_task_ids=[exported.id])
+
+    assert len(tasks) == 2
+    assert [task.id for task in repository.get_exported_tasks()] == [exported.id]
