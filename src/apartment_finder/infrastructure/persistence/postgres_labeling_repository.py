@@ -287,6 +287,7 @@ class PostgresLabelingRepository(LabelingRepository):
                     LabelingTaskModel.content_hash,
                     LabelingTaskModel.description_snapshot,
                     LabelingTaskModel.approved_result,
+                    LabelingTaskModel.approved_revision,
                     LabelingTaskModel.approved_at,
                     LabelingTaskModel.approval_actor,
                     ListingModel.source,
@@ -311,6 +312,7 @@ class PostgresLabelingRepository(LabelingRepository):
                     "content_hash": row.content_hash,
                     "description": row.description_snapshot,
                     "pois": row.approved_result,
+                    "approved_revision": row.approved_revision,
                     "approved_at": row.approved_at.isoformat() if row.approved_at else None,
                     "approval_actor": row.approval_actor,
                     "source": row.source,
@@ -416,3 +418,4 @@ def _coerce_datetime(value):
     if isinstance(value, str):
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
     raise TypeError(f"Expected datetime, ISO string, or None, got {type(value).__name__}")
+
