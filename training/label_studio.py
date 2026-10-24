@@ -64,7 +64,6 @@ def labeling_config() -> str:
     return f"""<View>
   <Header value="$title"/>
   <Text name="meta" value="$meta"/>
-  <Text name="review_notes" value="$review_notes"/>
   <Labels name="{CATEGORY}" toName="{TEXT}" showInline="true">
 {labels}
   </Labels>
@@ -83,14 +82,7 @@ def labeling_config() -> str:
         </Choices>
         <Number name="{VALUE}" toName="{TEXT}" perRegion="true" min="0" step="0.1"/>
       </View>
-      <Header size="6"
-              value="street: named ул / ул. / улица nearby or used for access;
-                     skip the property's own address."/>
-      <Header size="6"
-              value="market: named пазар / пазара / пазарът, e.g. Женски пазар;
-                     skip unnamed markets and пазар на имоти."/>
-      <Header size="6"
-              value="Highlight place + distance wording. No name/number = not a POI."/>
+      <Text name="review_notes" value="$review_notes"/>
     </View>
   </View>
 </View>
@@ -167,7 +159,7 @@ def build_tasks(raw_rows: list[dict], teacher_rows: list[dict], gold_percent: in
         predictions = []
         if label and label["pois"] is not None:
             results, notes = prediction_results(label["pois"], row["description"])
-            notes += [p for p in label["problems"] if not p.startswith("pois[")]
+            notes.extend(label["problems"])
             predictions.append({"model_version": label["model"], "result": results})
         elif label:
             notes.append(f"Teacher {label['status']}: {'; '.join(label['problems'])}")
