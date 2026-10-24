@@ -229,6 +229,80 @@ Import that `ls_tasks.json` into the same project. Label Studio doesn't
 de-duplicate imports, so always pass `--exclude`. If an ad does end up
 imported twice, `from-export` keeps one row for it.
 
+## Versioned datasets and frozen gold benchmarks
+
+Export approved labels, then prepare a new snapshot in one command. The input
+does not need a split field:
+
+```bash
+uv run apartment-finder-labeling export-training --out data/approved-v1.jsonl
+uv run python -m training.prepare_dataset \
+  --labels data/approved-v1.jsonl \
+  --output data/datasets/v1 \
+  --gold-version gold-v1
+```
+
+Preparation accepts human-reviewed labels only and validates names, evidence,
+and distances before creating output. An existing output directory is refused.
+It groups duplicate/near-duplicate descriptions before selecting approximately
+15% of independent clusters for gold, leaving at least two clusters for training
+and validation. Selection is deterministic for a seed and input contents, and
+prioritizes coverage of rare POI categories, cities/areas, ads with no POIs, and
+descriptions of at least 1,500 characters. This is a coverage-oriented benchmark,
+not a proportional random sample of production traffic. Duplicate clusters vary
+in size, so the gold row percentage can differ from 15%. Review the actual gold
+examples and coverage before declaring a benchmark frozen.
+
+The snapshot contains:
+
+- `labels.jsonl`: canonical input for the existing trainer, with train/gold flags.
+- `train.jsonl`, `validation.jsonl`, `gold.jsonl`, `excluded.jsonl`: exact split contents.
+  Validation rows retain split=train in their records because the existing trainer
+  derives validation itself.
+- `manifest.json`: dataset/gold version names, source and output SHA-256 checksums,
+  schema checksum, seed and split settings, row IDs, content hashes, approval
+  revisions/timestamps when supplied, and feature coverage for each split.
+
+Warnings highlight missing coverage, including streets, markets, negative ads,
+and long descriptions. A small dataset cannot guarantee every category appears
+in gold. Preparation requires at least three independent description clusters.
+
+Train with the same seed and validation fraction used for preparation (the command
+prints these arguments):
+
+```bash
+uv run --group training python -m training.finetune \
+  --labels data/datasets/v1/labels.jsonl \
+  --seed 42 --validation-fraction 0.15 \
+  --output checkpoints/poi-v1 \
+  --gradient-checkpointing
+```
+
+The trainer reconstructs the same splits using the existing duplicate-aware
+splitter. Changing its seed or validation fraction changes validation membership.
+Keep the complete snapshot directory alongside its training run. The preparation
+manifest describes the dataset; the trainer still records its own run configuration
+and split manifest. Files are local/gitignored artifacts, not automatically backed
+up or registered in a remote dataset registry.
+
+For the next dataset version, reuse the original gold benchmark:
+
+```bash
+uv run apartment-finder-labeling export-training --out data/approved-v2.jsonl
+uv run python -m training.prepare_dataset \
+  --labels data/approved-v2.jsonl \
+  --output data/datasets/v2 \
+  --gold-manifest data/datasets/v1/manifest.json
+```
+
+This keeps the gold membership and labels fixed and retains the name gold-v1.
+New near-duplicates of gold are excluded from training/validation rather than added
+to gold. All original gold rows must remain in the input. Changing or removing
+gold labels fails; to intentionally revise the benchmark, prepare a fresh snapshot
+without --gold-manifest and assign a new --gold-version such as gold-v2.
+New rows can still change validation membership, so compare training split
+manifests before comparing validation metrics. Gold evaluation remains separate.
+
 ## Step 4 — Fine-tune a POI encoder (RoBERTa / XLM-RoBERTa)
 
 This runnable baseline learns **POI names and categories** with BIO token
@@ -360,3 +434,4 @@ wired to this experimental model; integrating predictions is a separate step.
 Convenience commands: `make training-fit`, `make training-evaluate`, and
 `make training-predict TEXT_FILE=data/example-description.txt`. Override
 `TRAINING_RUN` and `TRAINING_MODEL` to select a different output/checkpoint.
+
