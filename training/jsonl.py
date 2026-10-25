@@ -14,6 +14,8 @@ def read_jsonl(path: Path) -> list[dict]:
 
 
 def write_jsonl(path: Path, records: Iterable[dict], append: bool = False) -> None:
+    if not isinstance(path, Path):
+        path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a" if append else "w", encoding="utf-8") as f:
         for record in records:
