@@ -247,11 +247,19 @@ and distances before creating output. An existing output directory is refused.
 It groups duplicate/near-duplicate descriptions before selecting approximately
 15% of independent clusters for gold, leaving at least two clusters for training
 and validation. Selection is deterministic for a seed and input contents, and
-prioritizes coverage of rare POI categories, cities/areas, ads with no POIs, and
-descriptions of at least 1,500 characters. This is a coverage-oriented benchmark,
-not a proportional random sample of production traffic. Duplicate clusters vary
+balances POI types by preferring types represented in fewer selected records.
+Each type counts once per record; ads with no POIs form a separate bucket.
+Cities/areas and description length are reported but do not influence selection.
+Balance is best effort: scarce types, multi-type ads, and duplicate isolation can
+prevent equal counts. Duplicate clusters vary
 in size, so the gold row percentage can differ from 15%. Review the actual gold
 examples and coverage before declaring a benchmark frozen.
+
+Use `--gold-count 100` to select exactly 100 gold records instead of a fraction
+of clusters. This is the total size, not the number of records to add. This mode
+can select part of a duplicate cluster; unselected neighbours are excluded from
+training and validation. Counts that cannot leave two independent non-gold
+clusters are rejected rather than silently rounded or reduced.
 
 The snapshot contains:
 
@@ -300,6 +308,22 @@ New near-duplicates of gold are excluded from training/validation rather than ad
 to gold. All original gold rows must remain in the input. Changing or removing
 gold labels fails; to intentionally revise the benchmark, prepare a fresh snapshot
 without --gold-manifest and assign a new --gold-version such as gold-v2.
+To rebalance an existing benchmark to an absolute total, supply both a count and
+a new benchmark version:
+
+```bash
+uv run python -m training.prepare_dataset \
+  --labels data/approved-v2.jsonl \
+  --output data/datasets/v2 \
+  --gold-manifest data/datasets/v1/manifest.json \
+  --gold-count 100 \
+  --gold-version gold-v2
+```
+
+This validates the previous benchmark records, then reselects gold from the
+full input, allowing growth or shrinkage. Previous gold membership is not retained.
+Without `--gold-count`, manifest reuse continues to freeze gold unchanged.
+
 New rows can still change validation membership, so compare training split
 manifests before comparing validation metrics. Gold evaluation remains separate.
 
