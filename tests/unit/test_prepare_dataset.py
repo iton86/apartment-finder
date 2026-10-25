@@ -10,7 +10,7 @@ from pathlib import Path
 
 from training.dedup import cluster_near_duplicates
 from training.jsonl import read_jsonl, write_jsonl
-from training.prepare_dataset import build_snapshot, prepare
+from training.prepare_dataset import build_snapshot, poi_types, prepare
 from training.token_data import split_rows
 
 
@@ -81,12 +81,83 @@ class DatasetPreparationTest(unittest.TestCase):
         self.assertEqual(labels, other_labels)
         self.assertEqual(splits, other_splits)
 
+    def test_absolute_count_balances_types_and_is_order_independent(self):
+        # Many independent street ads must not drown out the other types.
+        rows = copy.deepcopy(self.rows)
+        for i in range(10):
+            row = copy.deepcopy(self.rows[0])
+            row["description"] = f"Unique{i} different{i} apartment{i} ул. Шишман"
+            row["pois"][0]["evidence"] = "ул. Шишман"
+            row["content_hash"] = hashlib.sha256(row["description"].encode()).hexdigest()
+            row["area"] = f"Area{i}"
+            rows.append(row)
+        labels, splits, _ = prepare(rows, gold_count=4)
+        self.assertEqual(len(splits["gold"]), 4)
+        self.assertEqual(
+            set().union(*(poi_types(row) for row in splits["gold"])),
+            {"street", "market", "park", "no_pois"},
+        )
+        other_labels, other_splits, _ = prepare(list(reversed(rows)), gold_count=4)
+        self.assertEqual(labels, other_labels)
+        self.assertEqual(splits, other_splits)
+
+    def test_exact_count_excludes_duplicate_neighbors_and_preserves_training(self):
+        rows = copy.deepcopy(self.rows[:3])
+        for i in range(6):
+            row = {**self.rows[0], "content_hash": f"duplicate-{i}"}
+            rows.append(row)
+        _, splits, _ = prepare(rows, gold_count=7)
+        self.assertEqual(len(splits["gold"]), 7)
+        self.assertTrue(all(row["pois"][0]["category"] == "street" for row in splits["gold"]))
+        self.assertEqual(len(splits["train"]), 1)
+        self.assertEqual(len(splits["validation"]), 1)
+        _, splits, _ = prepare(rows, gold_count=1)
+        self.assertEqual(len(splits["gold"]), 1)
+        clusters = cluster_near_duplicates([
+            row["description"] for row in splits["gold"] + splits["train"] + splits["validation"]
+        ])
+        self.assertNotIn(clusters[0], clusters[1:])
+
+    def test_invalid_or_impossible_absolute_count_is_rejected(self):
+        for count in (0, -1, 1.5, True, len(self.rows) - 1, len(self.rows) + 1):
+            with self.subTest(count=count), self.assertRaisesRegex(ValueError, "gold-count"):
+                prepare(self.rows, gold_count=count)
+
+    def test_update_rebalances_to_total_count_and_requires_new_version(self):
+        self.snapshot()
+        previous = self.root / "v1/manifest.json"
+        for version in (None, "gold-v1"):
+            with self.assertRaisesRegex(ValueError, "new --gold-version"):
+                build_snapshot(
+                    self.source, self.root / "v2", gold_manifest=previous,
+                    gold_count=4, gold_version=version,
+                )
+            self.assertFalse((self.root / "v2").exists())
+        manifest = build_snapshot(
+            self.source, self.root / "v2", gold_manifest=previous,
+            gold_count=4, gold_version="gold-v2",
+        )
+        self.assertEqual(manifest["gold_version"], "gold-v2")
+        self.assertEqual(manifest["gold_count"], 4)
+        self.assertIsNone(manifest["gold_fraction"])
+        self.assertEqual(manifest["gold_selection"], "balanced_by_poi_type")
+        self.assertEqual(len(manifest["gold_rows"]), 4)
+        self.assertEqual(len(read_jsonl(self.root / "v2/gold.jsonl")), 4)
+
+    def test_count_overrides_fraction_and_multilabel_types_count_once(self):
+        _, splits, _ = prepare(self.rows, gold_count=2, gold_fraction=0)
+        self.assertEqual(len(splits["gold"]), 2)
+        row = copy.deepcopy(self.rows[0])
+        row["pois"] *= 2
+        row["pois"].extend(copy.deepcopy(self.rows[1]["pois"]))
+        self.assertEqual(poi_types(row), {"street", "market"})
+
     def test_frozen_gold_is_reused_without_adding_new_neighbors(self):
         manifest = self.snapshot()
         key = manifest["gold_rows"][0]["content_hash"]
         member = next(r for r in self.rows if r["content_hash"] == key)
         neighbor = {**member, "id": "new",
-                    "description": member["description"] + " допълнителна информация"}
+                    "description": member["description"] + " !!!"}
         neighbor["content_hash"] = hashlib.sha256(neighbor["description"].encode()).hexdigest()
         _labels, splits, version = prepare(self.rows + [neighbor], frozen=manifest)
         self.assertEqual(version, "gold-v1")
@@ -148,12 +219,14 @@ class DatasetPreparationTest(unittest.TestCase):
                 sys.executable, "-m", "training.prepare_dataset",
                 "--labels", str(self.source), "--output", str(self.root / "cli-v1"),
                 "--gold-version", "gold-v1",
+                "--gold-count", "4",
             ],
             capture_output=True, text=True, encoding="utf-8", check=False,
             env={**os.environ, "PYTHONIOENCODING": "utf-8"},
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((self.root / "cli-v1/manifest.json").exists())
+        self.assertEqual(len(read_jsonl(self.root / "cli-v1/gold.jsonl")), 4)
         self.assertIn("training.finetune", result.stdout)
 
 
