@@ -93,23 +93,77 @@ class LabelStudioClient(LabelStudioGateway):
 
     def _task_ids_by_labeling_task_id(self, project_id: int) -> dict[str, LabelStudioTaskState]:
         task_ids: dict[str, LabelStudioTaskState] = {}
+        seen: set[int] = set()
         page = 1
         while True:
-            query = urlencode({"project": project_id, "page": page, "page_size": 100})
+            query = urlencode({
+                "project": project_id, "page": page, "page_size": 100, "fields": "all",
+            })
             payload = self._request("GET", f"api/tasks?{query}")
             if isinstance(payload, list):
                 results = payload
                 next_page = None
+                total = None
             else:
-                results = payload.get("tasks") or payload.get("results") or []
+                if not isinstance(payload, dict) or not (
+                    "tasks" in payload or "results" in payload
+                ):
+                    raise LabelStudioError("Unrecognized task listing; refusing to import tasks")
+                results = payload.get("tasks", payload.get("results"))
                 next_page = payload.get("next")
+                total = payload.get("total", payload.get("count"))
+                if total is None and "next" not in payload:
+                    raise LabelStudioError(
+                        "Task listing has no pagination metadata; refusing to import tasks"
+                    )
+            if not isinstance(results, list):
+                raise LabelStudioError("Invalid task listing; refusing to import tasks")
+            page_ids = {int(task["id"]) for task in results}
+            if seen & page_ids:
+                raise LabelStudioError("Task pagination repeated IDs; refusing to import tasks")
+            seen.update(page_ids)
             for task in results:
-                data = task.get("data") or {}
+                if "data" not in task:
+                    raise LabelStudioError("Task listing omitted data; refusing to import tasks")
+                data = task["data"]
+                if not isinstance(data, dict):
+                    raise LabelStudioError("Task data is unavailable; refusing to import tasks")
                 labeling_task_id = data.get("labeling_task_id")
                 if labeling_task_id and task.get("id") is not None:
-                    task_ids[str(labeling_task_id)] = _state_from_payload(task)
-            if not next_page and (isinstance(payload, list) or not payload.get("next")):
+                    if not isinstance(task.get("annotations"), list):
+                        raise LabelStudioError(
+                            "Task annotations are unavailable; refusing to reconcile tasks"
+                        )
+                    key = str(labeling_task_id)
+                    state = _state_from_payload(task)
+                    existing = task_ids.get(key)
+                    if existing is not None:
+                        if not task_data_matches(existing.data, state.data):
+                            raise LabelStudioError(f"Conflicting duplicate tasks for {key}")
+                        if existing.annotations and state.annotations:
+                            raise LabelStudioError(
+                                f"Multiple annotated duplicates for {key}: "
+                                f"{existing.task_id}, {state.task_id}; resolve manually"
+                            )
+                        # Preserve the reviewed copy; otherwise pick the oldest.
+                        if existing.annotations or (
+                            not state.annotations and existing.task_id < state.task_id
+                        ):
+                            continue
+                    task_ids[key] = state
+            if total is not None:
+                if type(total) is not int or total < len(seen):
+                    raise LabelStudioError("Invalid task total; refusing to import tasks")
+                if len(seen) == total:
+                    break
+                if not results:
+                    raise LabelStudioError("Incomplete task listing; refusing to import tasks")
+            elif not next_page:
+                if isinstance(payload, list) and len(results) >= 100:
+                    raise LabelStudioError("Unpaginated full task page; refusing to import tasks")
                 break
+            elif not results:
+                raise LabelStudioError("Empty task page with next link; refusing to import tasks")
             page += 1
         return task_ids
 
