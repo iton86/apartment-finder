@@ -1,0 +1,367 @@
+{
+  "format_version": 1,
+  "dataset_version": "v1",
+  "gold_version": "gold-v1",
+  "source_sha256": "b1bbfb06254cbf2d46abf384cc606e7b098fed45878fc8d6a481ce10df82ae69",
+  "schema_sha256": "58b029ddd9126283e2d8efc90b3fc39243eb1e4ff6036d686735a89950a57b34",
+  "source": "data/approved-v1.jsonl",
+  "seed": 42,
+  "gold_fraction": null,
+  "gold_count": 25,
+  "gold_selection": "balanced_by_poi_type",
+  "validation_fraction": 0.15,
+  "duplicate_threshold": 0.8,
+  "files": {
+    "labels.jsonl": "09fdcc354ac347bf1e96aed5a6a33eb71b0b680517d49d9a48e16be8556c038a",
+    "train.jsonl": "bbf296ac0ad8277fe91f725c8fd762442c29ee3f93109f7a168991e7e43de307",
+    "validation.jsonl": "31ff898119e01179c102bc323963fb554900ada0bcdc1621c6e329abcf83da2a",
+    "gold.jsonl": "202e40c39f1ac0553d5cfb3393f4fb98716e71df5725b149412df3d50d04861c",
+    "excluded.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "coverage": {
+    "train": {
+      "rows": 4,
+      "features": {
+        "area:Докторски паметник": 2,
+        "area:Манастирски ливади": 1,
+        "area:Център": 1,
+        "category:boulevard": 2,
+        "category:park": 2,
+        "city:София": 4,
+        "long_description": 2
+      }
+    },
+    "validation": {
+      "rows": 1,
+      "features": {
+        "area:Център": 1,
+        "category:park": 1,
+        "city:София": 1
+      }
+    },
+    "gold": {
+      "rows": 25,
+      "features": {
+        "area:Докторски паметник": 6,
+        "area:Манастирски ливади": 8,
+        "area:Център": 11,
+        "category:boulevard": 10,
+        "category:bus_stop": 1,
+        "category:gym": 1,
+        "category:hospital": 3,
+        "category:kindergarten": 2,
+        "category:medical_center": 1,
+        "category:metro_station": 2,
+        "category:other": 4,
+        "category:park": 11,
+        "category:ring_road": 4,
+        "category:school": 2,
+        "category:shopping_mall": 7,
+        "category:street": 9,
+        "category:supermarket": 2,
+        "category:tram_stop": 3,
+        "city:София": 25,
+        "long_description": 8,
+        "no_pois": 4
+      }
+    },
+    "excluded": {
+      "rows": 0,
+      "features": {}
+    }
+  },
+  "gold_rows": [
+    {
+      "content_hash": "0c1fa0785ebc6f486c967c8e0b7c4b40126f91f998df452aca5f43f47fe33eb9",
+      "label_fingerprint": "7fde1677e865e419239997235b5441c33d4094017c9ca6c28fe9f761dae088ba"
+    },
+    {
+      "content_hash": "1a2f1a4895cc09b588cac594403224d1d1a5b086d3d8a4153ba98c32f4c44254",
+      "label_fingerprint": "04c0621fc6409345828975092dd97f05b6c5962e0b0aeda7ea45907b69693f7b"
+    },
+    {
+      "content_hash": "1c7dafed636c26eecb52a3b22776f62fd848a7b4038e45b6e1cfe11e81ab3c05",
+      "label_fingerprint": "4a88682eb25b7a89c7b58f9b216fa2428489ee383102fc36e375c664b63e1aab"
+    },
+    {
+      "content_hash": "270f506f45ba1cbeb6c445c542f271554673d07af7b3f313e52b3e2b048b7bb9",
+      "label_fingerprint": "fe1b2adc2807a4a763351fe20ab0c975cd14ebc71cd8b4520a22b8072062299a"
+    },
+    {
+      "content_hash": "2d0dd4999b7210e6bbde7898d121e72d43ee0f1ed0c40fc404ae7611978b12f1",
+      "label_fingerprint": "d35a191bcda41a28da2d0706a11c1f20d57904a0641e2a4111a95c5289b65ed9"
+    },
+    {
+      "content_hash": "4ae41fbd9088717fa7c814d7c467227838b1418bc8c9c8164044668ba7c5dc3e",
+      "label_fingerprint": "fc1c17bef8a8dc8fe7894f7fb1f2fb48b2eb21108aea9089103f33ab9df82833"
+    },
+    {
+      "content_hash": "4d300552b96d1718c7ab76511b71fe4ae5fce22b66214ab63022fc261109e3ea",
+      "label_fingerprint": "a9ed80d364303d89658aa882e6b6a6657af7cb19d3bba9214f04e9834ed53e1b"
+    },
+    {
+      "content_hash": "68d4f5d7141518796db67562de9ce47f22d6fd7ee20c11ee9b0867ed6ca23aa4",
+      "label_fingerprint": "29c961dc6ea2c875be69a86599b587da01c171d19d03dc48a670aac41420c68e"
+    },
+    {
+      "content_hash": "76b94171be446b31aaa4b0a130057348446ddf3eab665272aaa5599c407bcdd5",
+      "label_fingerprint": "e1470a4796d6d72996e2915013ed91216d7c5e1bb96d53cc9d8dea9c24619caf"
+    },
+    {
+      "content_hash": "8032fb7f16d2b0a949600f0f440019abe784b5e20372b8903e66c38be6999fa5",
+      "label_fingerprint": "a936cd83edad9f8c7f5023cd5a138257488d3b582282a4adc1d907edef093e1f"
+    },
+    {
+      "content_hash": "806bcd17995546e1849383e42eaf87f2e1febe929b663735f9dcc7a4622a8950",
+      "label_fingerprint": "cd262ca5f071d309d8945edb5f700522c161ff0e1a4c742e41cac50f53ead2d8"
+    },
+    {
+      "content_hash": "90d675eccafbf09842a30990947e314c7b5b63574f71567bc8671b6a1cd527cc",
+      "label_fingerprint": "61bde7283e92add5e3c90ecab7a79f68da95855776b805ac7faf4f551e0f36a6"
+    },
+    {
+      "content_hash": "926da149b6361abc5051702ebad20d28cf847b665e7bdb2f68b78226f123847f",
+      "label_fingerprint": "e26650a8923eeb91db6000a3d051cfbc6ef96b30929b80c92485ab499e2070e7"
+    },
+    {
+      "content_hash": "94287554687a62ef0347f5a883d0d0cfb374ef75decc4de8e5261208fc855131",
+      "label_fingerprint": "3805ca47f9eef3ead1b84047beb0d001bff3f7592ee7361e2dad21fabcefb729"
+    },
+    {
+      "content_hash": "9cd1550326cb58c0c3447cd7664302ffd70b2ca54e14677190f2f6cdb2be855b",
+      "label_fingerprint": "a22b4be1fa0cedc34fc2d32fb412de8ee37b328e70d09167c051829b4d761103"
+    },
+    {
+      "content_hash": "9d6eb5baac9450bf08cce18c492473c719024f350b1f74bfb64a4e4ad22c1533",
+      "label_fingerprint": "76d2974c58d894868c48228c180628982f54e422de71fb0cf84d4083a88de0ed"
+    },
+    {
+      "content_hash": "a7355a41395617894bcc8c93658cbda70d9616b6219cc3e544035d186cfbb5b1",
+      "label_fingerprint": "3958773b277b969b1ca2daa7592ac3fe7113b5c33f58885a7073a3dfb4c0a662"
+    },
+    {
+      "content_hash": "aff20c379b932e470f0209c58ed04ac86c6e0f5d93f14c4bdfb7f2f0456b1262",
+      "label_fingerprint": "25c41a7295a75a309add31ce2eca5cdcd84839465379801db8a3dcb09f6f8d07"
+    },
+    {
+      "content_hash": "baffc9d34a986ed39e6990739fb7c300583a2f19d7561121b51340aec1eab3e0",
+      "label_fingerprint": "b407bd9c04ff4d6a05828eb0d7c3e6149d3baba1edc008977dfbbcf2cf82d157"
+    },
+    {
+      "content_hash": "bb4e994fffb4229f648addae6e10d6157917f3cccfb2a333f14c90173aab33f9",
+      "label_fingerprint": "9675755af50ae43224c6fb45a3be76b5be0c3bb7946460169804b47628465442"
+    },
+    {
+      "content_hash": "e505575413bdbf1ed9b7541f2b98022c8308dc2ca7224b15b32f82802ebfbaf4",
+      "label_fingerprint": "889df525041782ce93da2fd334ad1fd370e932c962ff486cd929df9b777771db"
+    },
+    {
+      "content_hash": "f5107e93ed79b4f77bc724e68c242ffd827467b228d6fc9a65c8332b3186b812",
+      "label_fingerprint": "f48164dc36b9f3627f367b9acbca81e04d8bf26dbacb01837f9d7106e7029ffa"
+    },
+    {
+      "content_hash": "f54d7ccaf9460f73b7fdb2c7ed8ae235eaafea3e7ebbe2d6a45888bf4eaadc08",
+      "label_fingerprint": "0e0ff4f9846099239ba83ca6e7a066a50081ade5b766a3888fb511d109a2a73c"
+    },
+    {
+      "content_hash": "f54da0db64357882f08e7e6b837b6b3af76c2b9a2491d2b3b8b87ebdb8b54196",
+      "label_fingerprint": "6a3021d919a8f11b9778e3df68aa4139c7562506ef166d9061b99ccdca147f7c"
+    },
+    {
+      "content_hash": "f9ce74ba3ff1698c38ecf5a135f60121f74ba9cb2a5cd7f7c227ab0275267ac1",
+      "label_fingerprint": "0b713a517162f78ba2876d06efa3363c97611cde0ed48b6c42719fc67b8e2b7e"
+    }
+  ],
+  "splits": {
+    "train": [
+      {
+        "id": "653b3b96-9124-4e93-a636-5e1548b65ad8",
+        "content_hash": "c82ab21b359854c4ed597df816e9d0cad1f7382477bbfeec2cb51cc0d35cfb3e",
+        "approved_revision": 211858026599378,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "ba4e9dc1-1a52-40fd-96c9-ef9eb3ecaf02",
+        "content_hash": "f475f003de3a3797900d7aa7aa916236ff9f29ccc387fd4f769f8b9104f05cfe",
+        "approved_revision": 95632484038335,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "9ac6ba83-373e-46c7-9367-ee7d91f9b599",
+        "content_hash": "e93aae0613a7464786efcbdd81e336a141c2110f9404f2506c7d53b82f5f6c9c",
+        "approved_revision": 58837834546678,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "5382986a-6977-48ad-a6e4-5dfa2ff09bf0",
+        "content_hash": "ee2f40c588d81837622a815913b02150297912fe2be2ce4a5c5fc6ab892672a6",
+        "approved_revision": 232057849441207,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      }
+    ],
+    "validation": [
+      {
+        "id": "fe2dc35a-8031-4b77-a924-c67d653620f0",
+        "content_hash": "87ce85ce3520ad333622b131c67d6acc08221a67af6273b91e8c92ab3a741bbd",
+        "approved_revision": 164661563531031,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      }
+    ],
+    "gold": [
+      {
+        "id": "cc6feb63-10a3-4fd4-a8a8-7866032cdf89",
+        "content_hash": "0c1fa0785ebc6f486c967c8e0b7c4b40126f91f998df452aca5f43f47fe33eb9",
+        "approved_revision": 119481661170965,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "aa358eaf-d423-4c98-bd65-c25816481813",
+        "content_hash": "1a2f1a4895cc09b588cac594403224d1d1a5b086d3d8a4153ba98c32f4c44254",
+        "approved_revision": 62112901688891,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "3d912a36-e664-4477-8e30-416373c71d76",
+        "content_hash": "1c7dafed636c26eecb52a3b22776f62fd848a7b4038e45b6e1cfe11e81ab3c05",
+        "approved_revision": 65410655970123,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "eee0a69b-8eb0-47bc-8f80-7e97481e78b3",
+        "content_hash": "270f506f45ba1cbeb6c445c542f271554673d07af7b3f313e52b3e2b048b7bb9",
+        "approved_revision": 8784423983397,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "3a15ac82-32c5-4de3-9854-0e0a377d8ca3",
+        "content_hash": "2d0dd4999b7210e6bbde7898d121e72d43ee0f1ed0c40fc404ae7611978b12f1",
+        "approved_revision": 152283197880422,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "99ec2a7c-fc03-41be-a4d9-5ac3c3c06808",
+        "content_hash": "4ae41fbd9088717fa7c814d7c467227838b1418bc8c9c8164044668ba7c5dc3e",
+        "approved_revision": 199380445186804,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "643ae4b2-9652-469e-b6b9-394010ca9f36",
+        "content_hash": "4d300552b96d1718c7ab76511b71fe4ae5fce22b66214ab63022fc261109e3ea",
+        "approved_revision": 177835215937800,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "60a3fbc0-7fad-4cfb-930b-3f171d94219d",
+        "content_hash": "68d4f5d7141518796db67562de9ce47f22d6fd7ee20c11ee9b0867ed6ca23aa4",
+        "approved_revision": 118849621812796,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "aad0eb33-80f6-4dc3-8833-4e3ecb08c838",
+        "content_hash": "76b94171be446b31aaa4b0a130057348446ddf3eab665272aaa5599c407bcdd5",
+        "approved_revision": 182233532822185,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "998d3bea-f3b5-4748-a96c-436ddb27e598",
+        "content_hash": "8032fb7f16d2b0a949600f0f440019abe784b5e20372b8903e66c38be6999fa5",
+        "approved_revision": 250682366881956,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "b132ac44-56bb-49c0-8fca-15099add287c",
+        "content_hash": "806bcd17995546e1849383e42eaf87f2e1febe929b663735f9dcc7a4622a8950",
+        "approved_revision": 10650789058294,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "f8c4770e-2bcb-4b85-9f21-5e1b06a0386b",
+        "content_hash": "90d675eccafbf09842a30990947e314c7b5b63574f71567bc8671b6a1cd527cc",
+        "approved_revision": 38683767276416,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "ef0fa2f4-76f2-4ce2-a144-ae0b9206012e",
+        "content_hash": "926da149b6361abc5051702ebad20d28cf847b665e7bdb2f68b78226f123847f",
+        "approved_revision": 2637979194632,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "839ec534-6d63-4685-9662-34f9dbe5436a",
+        "content_hash": "94287554687a62ef0347f5a883d0d0cfb374ef75decc4de8e5261208fc855131",
+        "approved_revision": 199174988752800,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "b26647fb-47b0-42a9-ad59-33963087e0ba",
+        "content_hash": "9cd1550326cb58c0c3447cd7664302ffd70b2ca54e14677190f2f6cdb2be855b",
+        "approved_revision": 279530397831169,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "0bf4cd04-0e9c-4d9e-91de-f60318ea33db",
+        "content_hash": "9d6eb5baac9450bf08cce18c492473c719024f350b1f74bfb64a4e4ad22c1533",
+        "approved_revision": 215582244790396,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "c057c2ea-24aa-45b1-aa84-5742f24cc944",
+        "content_hash": "a7355a41395617894bcc8c93658cbda70d9616b6219cc3e544035d186cfbb5b1",
+        "approved_revision": 38544112896986,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "0a3e5a17-e656-4264-a4c6-03ab056a0687",
+        "content_hash": "aff20c379b932e470f0209c58ed04ac86c6e0f5d93f14c4bdfb7f2f0456b1262",
+        "approved_revision": 196746138145956,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "ce0f2da9-063f-47f5-96db-f151072b8a83",
+        "content_hash": "baffc9d34a986ed39e6990739fb7c300583a2f19d7561121b51340aec1eab3e0",
+        "approved_revision": 103790008213199,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "d199cde4-fb8e-455e-87a0-f25ec066b699",
+        "content_hash": "bb4e994fffb4229f648addae6e10d6157917f3cccfb2a333f14c90173aab33f9",
+        "approved_revision": 248910579584034,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "bc095648-b81d-4c2e-9e7f-41223f36eb42",
+        "content_hash": "e505575413bdbf1ed9b7541f2b98022c8308dc2ca7224b15b32f82802ebfbaf4",
+        "approved_revision": 132871466222467,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "33aecfd4-af3c-44e5-84ec-411d6ff9261c",
+        "content_hash": "f5107e93ed79b4f77bc724e68c242ffd827467b228d6fc9a65c8332b3186b812",
+        "approved_revision": 123928168157859,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "70decc08-eab7-45d4-8059-a453af3ff22a",
+        "content_hash": "f54d7ccaf9460f73b7fdb2c7ed8ae235eaafea3e7ebbe2d6a45888bf4eaadc08",
+        "approved_revision": 142684636628227,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "93f242b0-1653-4072-a56b-92fdc94e065d",
+        "content_hash": "f54da0db64357882f08e7e6b837b6b3af76c2b9a2491d2b3b8b87ebdb8b54196",
+        "approved_revision": 271735734023162,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "2746c0fa-bfe2-440d-81df-82a7b8dd4aa7",
+        "content_hash": "f9ce74ba3ff1698c38ecf5a135f60121f74ba9cb2a5cd7f7c227ab0275267ac1",
+        "approved_revision": 219300632058551,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      }
+    ],
+    "excluded": []
+  },
+  "warnings": [
+    "Dataset has no examples of category:market"
+  ]
+}

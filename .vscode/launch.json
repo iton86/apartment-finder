@@ -100,6 +100,21 @@
             "cwd": "${workspaceFolder}",
             "python": "${workspaceFolder}/.venv/bin/python",
             "envFile": "${workspaceFolder}/.env",
+        },
+        {
+            "name": "Labeling: Sync batch",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "apartment_finder.interface.labeling_cli",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "sync",
+                "dc2e85ce-c854-4d58-a830-0fca7535cb01"
+            ]
         }
     ],
     "inputs": [
