@@ -3,7 +3,6 @@ import html
 import os
 from pathlib import Path
 
-import mlflow
 import pandas as pd
 import streamlit as st
 
@@ -14,19 +13,18 @@ from apartment_finder.inspection.infrastructure.mlflow_reader import MlflowInspe
 st.set_page_config(page_title="POI Prediction Inspector", layout="wide")
 st.title("POI Prediction Inspector")
 uri = st.sidebar.text_input("MLflow tracking URI", os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db"))
-mlflow.set_tracking_uri(uri)
-client = mlflow.MlflowClient()
-experiments = client.search_experiments()
+reader = MlflowInspectionReader(uri)
+experiments = reader.experiments()
 if not experiments:
     st.info("No MLflow experiments found. Train with --mlflow first.")
     st.stop()
 experiment = st.sidebar.selectbox("Experiment", experiments, format_func=lambda e: e.name)
-runs = client.search_runs([experiment.experiment_id], max_results=200, order_by=["attributes.start_time DESC"])
+runs = reader.runs(experiment.experiment_id)
 if not runs:
     st.info("No runs in this experiment.")
     st.stop()
 run = st.sidebar.selectbox("Run", runs, format_func=lambda r: f"{r.data.tags.get('mlflow.runName', r.info.run_id)} ({r.info.run_id[:8]})")
-artifacts = client.list_artifacts(run.info.run_id, "inspection")
+artifacts = reader.artifacts(run.info.run_id)
 paths = [a.path for a in artifacts if a.path.endswith(".jsonl")]
 if not paths:
     st.warning("No prediction artifacts. Run apartment_finder.evaluation.interface.cli with --log-mlflow first.")
@@ -103,7 +101,7 @@ with view[2]:
     other = st.selectbox("Compare with", [r for r in runs if r.info.run_id != run.info.run_id],
                          format_func=lambda r: r.data.tags.get("mlflow.runName", r.info.run_id))
     if other:
-        other_paths = [a.path for a in client.list_artifacts(other.info.run_id, "inspection")
+        other_paths = [a.path for a in reader.artifacts(other.info.run_id)
                        if a.path.endswith(".jsonl") and a.path.endswith(Path(path).name)]
         if other_paths:
             comparison = load_predictions(uri, other.info.run_id, other_paths[0])
