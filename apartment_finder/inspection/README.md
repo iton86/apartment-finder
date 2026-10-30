@@ -30,16 +30,11 @@ MLflow uses `sqlite:///mlflow.db` by default. Use the same working directory and
 
 The inspector reports **exact character-span + category** micro metrics. It stores the original listing text in MLflow artifacts, so do not use a remote artifact store without appropriate data controls. Predictions include a minimum token confidence across each entity; thresholding in the UI is exploratory, not a calibrated metric. Long descriptions are processed in token chunks, with the same max-length setting as training. Run comparisons require matching listing ID, text and ground truth.
 
-## Architecture
+## Module boundaries
 
-The evaluation subsystem follows a modular Clean Architecture:
+- `evaluation/` owns prediction generation, scoring and writing MLflow artifacts.
+- `inspection/application/` owns inspection and run-comparison queries.
+- `inspection/infrastructure/` owns the read-only MLflow adapter.
+- `inspection/interface/` owns Streamlit.
 
-- `apartment_finder/evaluation/domain`: framework-free spans, exact matching, and metrics
-- `apartment_finder/evaluation/application`: evaluation, inspection, comparison use cases and ports
-- `apartment_finder/evaluation/infrastructure`: Hugging Face predictor, JSONL persistence, MLflow adapter
-- `training/inspection.py`: CLI composition root; validates original dataset hash and split manifest
-- `apartment_finder/inspection/interface/app.py`: Streamlit presentation
-
-`training/inspection_metrics.py` is a backwards-compatible re-export of the domain metrics.
-
-The dashboard is still a first iteration: experiment/run listing and some filtering live in Streamlit. The next refinement would move those queries to an application query service and use a dedicated experiment catalog port. Model inference is chunked; evaluate token-boundary behavior on real long descriptions before relying on the metrics for promotion.
+Inspection depends on evaluation's public metrics and artifact contract; evaluation never imports inspection.
