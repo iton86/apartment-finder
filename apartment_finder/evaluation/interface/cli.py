@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 
 from training.jsonl import read_jsonl
@@ -33,7 +34,7 @@ def export(run, split, output, log_mlflow=False, cpu=False):
     EvaluateModel(predictor, JsonlPredictionRepository()).execute(rows, str(output))
     if log_mlflow:
         run_info = json.loads((run / "mlflow_run.json").read_text(encoding="utf-8"))
-        MlflowExperimentRepository("sqlite:///mlflow.db").log_predictions(run_info["run_id"], str(output))
+        MlflowExperimentRepository(os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")).log_predictions(run_info["run_id"], str(output))
     return len(rows)
 
 
