@@ -9,6 +9,10 @@ class MlflowInspectionReader:
     def load_predictions(self, run_id: str, artifact_path: str) -> list[dict]:
         return self._repository.load_predictions(run_id, artifact_path)
 
+    def load(self, location: str) -> list[dict]:
+        run_id, artifact_path = location.split(":", 1)
+        return self.load_predictions(run_id, artifact_path)
+
     def experiments(self):
         return self._repository._client().search_experiments()
 
