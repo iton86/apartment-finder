@@ -1,0 +1,1 @@
+"""Inspection presentation adapters."""
