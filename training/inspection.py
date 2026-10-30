@@ -4,7 +4,11 @@ import hashlib
 import json
 from pathlib import Path
 
-from training.jsonl import read_jsonl, write_jsonl
+from training.jsonl import read_jsonl
+from apartment_finder.application.evaluation.evaluate_model import EvaluateModel
+from apartment_finder.infrastructure.evaluation.hf_predictor import HuggingFacePoiPredictor
+from apartment_finder.infrastructure.evaluation.jsonl_repository import JsonlPredictionRepository
+from apartment_finder.infrastructure.evaluation.mlflow_repository import MlflowExperimentRepository
 from training.token_data import LABELS, entities, name_spans, split_rows
 
 
@@ -52,9 +56,6 @@ def predict(text, tokenizer, model, max_length, device):
 
 
 def export(run, split, output, log_mlflow=False, cpu=False):
-    import torch
-    from transformers import AutoModelForTokenClassification, AutoTokenizer
-
     config = json.loads((run / "run_config.json").read_text(encoding="utf-8"))
     labels = Path(config["labels"])
     if hashlib.sha256(labels.read_bytes()).hexdigest() != config["dataset_sha256"]:
@@ -65,27 +66,18 @@ def export(run, split, output, log_mlflow=False, cpu=False):
                for key, rows in splits.items()}
     if current != manifest:
         raise ValueError("Split manifest mismatch")
-    tokenizer = AutoTokenizer.from_pretrained(run / "model", use_fast=True)
-    model = AutoModelForTokenClassification.from_pretrained(run / "model")
-    if [model.config.id2label[i] for i in range(len(LABELS))] != LABELS:
-        raise ValueError("Model label mapping mismatch")
-    device = "cuda" if torch.cuda.is_available() and not cpu else "cpu"
-    model.to(device)
-    records = []
+    predictor = HuggingFacePoiPredictor(run / "model", config["max_length"], cpu=cpu)
+    rows = []
     for row in splits[split]:
         text = row["description"]
-        gold = [{"start": a, "end": b, "name": text[a:b], "category": category}
-                for a, b, category in name_spans(row)]
-        records.append({"id": row.get("id"), "text": text, "split": split,
-                        "ground_truth": gold,
-                        "predictions": predict(text, tokenizer, model, config["max_length"], device)})
-    write_jsonl(output, records)
+        gold = [{"start": start, "end": end, "name": text[start:end], "category": category}
+                for start, end, category in name_spans(row)]
+        rows.append({"id": row.get("id"), "text": text, "split": split, "ground_truth": gold})
+    EvaluateModel(predictor, JsonlPredictionRepository()).execute(rows, str(output))
     if log_mlflow:
-        import mlflow
         run_info = json.loads((run / "mlflow_run.json").read_text(encoding="utf-8"))
-        mlflow.set_tracking_uri(config.get("mlflow_tracking_uri", "sqlite:///mlflow.db"))
-        mlflow.MlflowClient().log_artifact(run_info["run_id"], str(output), artifact_path="inspection")
-    return len(records)
+        MlflowExperimentRepository("sqlite:///mlflow.db").log_predictions(run_info["run_id"], str(output))
+    return len(rows)
 
 
 def main():
