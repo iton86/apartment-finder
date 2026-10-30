@@ -1,6 +1,6 @@
-from apartment_finder.application.evaluation.compare_runs import compare_runs
-from apartment_finder.application.evaluation.evaluate_model import EvaluateModel
-from apartment_finder.domain.evaluation.metrics import compare, summarize
+from apartment_finder.inspection.application.compare_runs import compare_runs
+from apartment_finder.evaluation.application.evaluate_model import EvaluateModel
+from apartment_finder.evaluation.domain.metrics import compare, summarize
 
 
 class FakePredictor:
