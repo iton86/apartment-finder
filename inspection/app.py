@@ -7,7 +7,9 @@ import mlflow
 import pandas as pd
 import streamlit as st
 
-from training.inspection_metrics import compare, summarize
+from apartment_finder.domain.evaluation.metrics import compare, summarize
+from apartment_finder.application.evaluation.compare_runs import compare_runs
+from apartment_finder.infrastructure.evaluation.mlflow_repository import MlflowExperimentRepository
 from training.jsonl import read_jsonl
 
 st.set_page_config(page_title="POI Prediction Inspector", layout="wide")
@@ -34,9 +36,7 @@ if not paths:
 path = st.sidebar.selectbox("Prediction artifact", paths)
 @st.cache_data(show_spinner=False)
 def load_predictions(tracking_uri, run_id, artifact):
-    mlflow.set_tracking_uri(tracking_uri)
-    downloaded = mlflow.MlflowClient().download_artifacts(run_id, artifact)
-    return read_jsonl(Path(downloaded))
+    return MlflowExperimentRepository(tracking_uri).load_predictions(run_id, artifact)
 
 rows = load_predictions(uri, run.info.run_id, path)
 metrics = summarize(rows)
@@ -108,16 +108,7 @@ with view[2]:
                        if a.path.endswith(".jsonl") and a.path.endswith(Path(path).name)]
         if other_paths:
             comparison = load_predictions(uri, other.info.run_id, other_paths[0])
-            base = {str(r["id"]): r for r in rows}
-            diffs = []
-            for item in comparison:
-                old = base.get(str(item["id"]))
-                if old and old["text"] == item["text"] and old["ground_truth"] == item["ground_truth"]:
-                    a = compare(old["ground_truth"], old["predictions"])
-                    b = compare(item["ground_truth"], item["predictions"])
-                    diffs.append({"id": item["id"], "baseline_errors": a["fp"] + a["fn"],
-                                  "other_errors": b["fp"] + b["fn"],
-                                  "delta": b["fp"] + b["fn"] - a["fp"] - a["fn"]})
+            diffs = compare_runs(rows, comparison)
             st.caption("Negative delta = improvement; only identical text and ground truth are compared.")
             st.dataframe(pd.DataFrame(diffs).sort_values("delta") if diffs else pd.DataFrame(),
                          use_container_width=True)
