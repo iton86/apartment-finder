@@ -1,0 +1,16 @@
+"""Ports owned by the application layer."""
+from typing import Protocol
+
+
+class ModelPredictor(Protocol):
+    def predict(self, text: str) -> list[dict]: ...
+
+
+class PredictionRepository(Protocol):
+    def save(self, records: list[dict], destination: str) -> None: ...
+    def load(self, location: str) -> list[dict]: ...
+
+
+class ExperimentRepository(Protocol):
+    def log_predictions(self, run_id: str, file_path: str) -> None: ...
+    def load_predictions(self, run_id: str, artifact_path: str) -> list[dict]: ...
