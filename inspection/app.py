@@ -10,7 +10,6 @@ import streamlit as st
 from apartment_finder.domain.evaluation.metrics import compare, summarize
 from apartment_finder.application.evaluation.compare_runs import compare_runs
 from apartment_finder.infrastructure.evaluation.mlflow_repository import MlflowExperimentRepository
-from training.jsonl import read_jsonl
 
 st.set_page_config(page_title="POI Prediction Inspector", layout="wide")
 st.title("POI Prediction Inspector")

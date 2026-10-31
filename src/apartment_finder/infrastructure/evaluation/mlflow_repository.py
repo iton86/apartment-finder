@@ -1,7 +1,7 @@
 """MLflow artifact adapter; import is lazy to keep the domain independent."""
 from pathlib import Path
 
-from training.jsonl import read_jsonl
+from apartment_finder.infrastructure.evaluation.jsonl import read_jsonl
 
 
 class MlflowExperimentRepository:

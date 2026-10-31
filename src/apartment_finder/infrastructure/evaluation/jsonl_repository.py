@@ -1,7 +1,7 @@
 """JSONL implementation of the prediction persistence port."""
 from pathlib import Path
 
-from training.jsonl import read_jsonl, write_jsonl
+from apartment_finder.infrastructure.evaluation.jsonl import read_jsonl, write_jsonl
 
 
 class JsonlPredictionRepository:
