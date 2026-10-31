@@ -55,10 +55,23 @@ def test_locates_name_inside_evidence_not_an_earlier_mention():
     assert name_spans(example) == [(21, 30, "park")]
 
 
-def test_rejects_conflicting_name_spans():
-    example = row("до Южен парк", pois=[poi(), {**poi(), "category": "other"}])
-    with pytest.raises(ValueError, match="overlapping"):
-        name_spans(example)
+@pytest.mark.parametrize("categories", [("park", "other"), ("other", "park")])
+def test_keeps_first_category_for_conflicting_name_spans(categories):
+    example = row("до Южен парк", pois=[{**poi(), "category": c} for c in categories])
+    assert name_spans(example) == [(3, 12, categories[0])]
+
+
+def test_skips_partial_overlaps_and_keeps_adjacent_names_in_text_order():
+    example = row(
+        "Южен парк София",
+        pois=[
+            poi("София", "София"),
+            poi("парк", "парк"),
+            poi("Южен парк", "Южен парк"),
+            poi("парк", "парк"),
+        ],
+    )
+    assert name_spans(example) == [(5, 9, "park"), (10, 15, "park")]
 
 
 def test_bio_boundaries_and_orphan_inside_tag():

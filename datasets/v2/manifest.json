@@ -1,0 +1,3118 @@
+{
+  "format_version": 1,
+  "dataset_version": "v2",
+  "gold_version": "gold-v1",
+  "source_sha256": "6ca82884b0df22c6278de1c85e95c2f87b890c91e1b62c7f6e655879e45a9eaa",
+  "schema_sha256": "58b029ddd9126283e2d8efc90b3fc39243eb1e4ff6036d686735a89950a57b34",
+  "source": "data/approved-v2.jsonl",
+  "seed": 42,
+  "gold_fraction": 0.15,
+  "gold_count": null,
+  "gold_selection": "frozen",
+  "validation_fraction": 0.15,
+  "duplicate_threshold": 0.8,
+  "files": {
+    "labels.jsonl": "197665a14ceb9f6c0c70fb26327045326d5fd059bc3f5a273130e6e36a71362d",
+    "train.jsonl": "3baac3c00e5fce0b6db9780d5fdbbed9cbce2c03c88d41269f9ce3542a6dbc80",
+    "validation.jsonl": "a38a5abf4fd471143e923e1d0c48b172b76b9bc03e66f858548a223e414c2374",
+    "gold.jsonl": "202e40c39f1ac0553d5cfb3393f4fb98716e71df5725b149412df3d50d04861c",
+    "excluded.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "coverage": {
+    "train": {
+      "rows": 392,
+      "features": {
+        "area:Докторски паметник": 57,
+        "area:Манастирски ливади": 174,
+        "area:Център": 161,
+        "category:bank": 4,
+        "category:boulevard": 105,
+        "category:bus_stop": 7,
+        "category:gym": 3,
+        "category:hospital": 14,
+        "category:kindergarten": 4,
+        "category:market": 18,
+        "category:medical_center": 8,
+        "category:metro_station": 64,
+        "category:other": 44,
+        "category:park": 112,
+        "category:pharmacy": 2,
+        "category:restaurant": 4,
+        "category:ring_road": 30,
+        "category:school": 16,
+        "category:shopping_mall": 60,
+        "category:sports_facility": 4,
+        "category:street": 50,
+        "category:supermarket": 36,
+        "category:tram_stop": 10,
+        "category:university": 20,
+        "city:София": 392,
+        "long_description": 87,
+        "no_pois": 130
+      }
+    },
+    "validation": {
+      "rows": 64,
+      "features": {
+        "area:Докторски паметник": 8,
+        "area:Манастирски ливади": 26,
+        "area:Център": 30,
+        "category:airport": 1,
+        "category:bank": 1,
+        "category:boulevard": 21,
+        "category:bus_stop": 2,
+        "category:kindergarten": 2,
+        "category:metro_station": 10,
+        "category:other": 11,
+        "category:park": 17,
+        "category:pharmacy": 1,
+        "category:ring_road": 4,
+        "category:school": 2,
+        "category:shopping_mall": 10,
+        "category:street": 8,
+        "category:supermarket": 7,
+        "category:tram_stop": 4,
+        "category:university": 2,
+        "city:София": 64,
+        "long_description": 22,
+        "no_pois": 18
+      }
+    },
+    "gold": {
+      "rows": 25,
+      "features": {
+        "area:Докторски паметник": 6,
+        "area:Манастирски ливади": 8,
+        "area:Център": 11,
+        "category:boulevard": 10,
+        "category:bus_stop": 1,
+        "category:gym": 1,
+        "category:hospital": 3,
+        "category:kindergarten": 2,
+        "category:medical_center": 1,
+        "category:metro_station": 2,
+        "category:other": 4,
+        "category:park": 11,
+        "category:ring_road": 4,
+        "category:school": 2,
+        "category:shopping_mall": 7,
+        "category:street": 9,
+        "category:supermarket": 2,
+        "category:tram_stop": 3,
+        "city:София": 25,
+        "long_description": 8,
+        "no_pois": 4
+      }
+    },
+    "excluded": {
+      "rows": 0,
+      "features": {}
+    }
+  },
+  "gold_rows": [
+    {
+      "content_hash": "0c1fa0785ebc6f486c967c8e0b7c4b40126f91f998df452aca5f43f47fe33eb9",
+      "label_fingerprint": "7fde1677e865e419239997235b5441c33d4094017c9ca6c28fe9f761dae088ba"
+    },
+    {
+      "content_hash": "1a2f1a4895cc09b588cac594403224d1d1a5b086d3d8a4153ba98c32f4c44254",
+      "label_fingerprint": "04c0621fc6409345828975092dd97f05b6c5962e0b0aeda7ea45907b69693f7b"
+    },
+    {
+      "content_hash": "1c7dafed636c26eecb52a3b22776f62fd848a7b4038e45b6e1cfe11e81ab3c05",
+      "label_fingerprint": "4a88682eb25b7a89c7b58f9b216fa2428489ee383102fc36e375c664b63e1aab"
+    },
+    {
+      "content_hash": "270f506f45ba1cbeb6c445c542f271554673d07af7b3f313e52b3e2b048b7bb9",
+      "label_fingerprint": "fe1b2adc2807a4a763351fe20ab0c975cd14ebc71cd8b4520a22b8072062299a"
+    },
+    {
+      "content_hash": "2d0dd4999b7210e6bbde7898d121e72d43ee0f1ed0c40fc404ae7611978b12f1",
+      "label_fingerprint": "d35a191bcda41a28da2d0706a11c1f20d57904a0641e2a4111a95c5289b65ed9"
+    },
+    {
+      "content_hash": "4ae41fbd9088717fa7c814d7c467227838b1418bc8c9c8164044668ba7c5dc3e",
+      "label_fingerprint": "fc1c17bef8a8dc8fe7894f7fb1f2fb48b2eb21108aea9089103f33ab9df82833"
+    },
+    {
+      "content_hash": "4d300552b96d1718c7ab76511b71fe4ae5fce22b66214ab63022fc261109e3ea",
+      "label_fingerprint": "a9ed80d364303d89658aa882e6b6a6657af7cb19d3bba9214f04e9834ed53e1b"
+    },
+    {
+      "content_hash": "68d4f5d7141518796db67562de9ce47f22d6fd7ee20c11ee9b0867ed6ca23aa4",
+      "label_fingerprint": "29c961dc6ea2c875be69a86599b587da01c171d19d03dc48a670aac41420c68e"
+    },
+    {
+      "content_hash": "76b94171be446b31aaa4b0a130057348446ddf3eab665272aaa5599c407bcdd5",
+      "label_fingerprint": "e1470a4796d6d72996e2915013ed91216d7c5e1bb96d53cc9d8dea9c24619caf"
+    },
+    {
+      "content_hash": "8032fb7f16d2b0a949600f0f440019abe784b5e20372b8903e66c38be6999fa5",
+      "label_fingerprint": "a936cd83edad9f8c7f5023cd5a138257488d3b582282a4adc1d907edef093e1f"
+    },
+    {
+      "content_hash": "806bcd17995546e1849383e42eaf87f2e1febe929b663735f9dcc7a4622a8950",
+      "label_fingerprint": "cd262ca5f071d309d8945edb5f700522c161ff0e1a4c742e41cac50f53ead2d8"
+    },
+    {
+      "content_hash": "90d675eccafbf09842a30990947e314c7b5b63574f71567bc8671b6a1cd527cc",
+      "label_fingerprint": "61bde7283e92add5e3c90ecab7a79f68da95855776b805ac7faf4f551e0f36a6"
+    },
+    {
+      "content_hash": "926da149b6361abc5051702ebad20d28cf847b665e7bdb2f68b78226f123847f",
+      "label_fingerprint": "e26650a8923eeb91db6000a3d051cfbc6ef96b30929b80c92485ab499e2070e7"
+    },
+    {
+      "content_hash": "94287554687a62ef0347f5a883d0d0cfb374ef75decc4de8e5261208fc855131",
+      "label_fingerprint": "3805ca47f9eef3ead1b84047beb0d001bff3f7592ee7361e2dad21fabcefb729"
+    },
+    {
+      "content_hash": "9cd1550326cb58c0c3447cd7664302ffd70b2ca54e14677190f2f6cdb2be855b",
+      "label_fingerprint": "a22b4be1fa0cedc34fc2d32fb412de8ee37b328e70d09167c051829b4d761103"
+    },
+    {
+      "content_hash": "9d6eb5baac9450bf08cce18c492473c719024f350b1f74bfb64a4e4ad22c1533",
+      "label_fingerprint": "76d2974c58d894868c48228c180628982f54e422de71fb0cf84d4083a88de0ed"
+    },
+    {
+      "content_hash": "a7355a41395617894bcc8c93658cbda70d9616b6219cc3e544035d186cfbb5b1",
+      "label_fingerprint": "3958773b277b969b1ca2daa7592ac3fe7113b5c33f58885a7073a3dfb4c0a662"
+    },
+    {
+      "content_hash": "aff20c379b932e470f0209c58ed04ac86c6e0f5d93f14c4bdfb7f2f0456b1262",
+      "label_fingerprint": "25c41a7295a75a309add31ce2eca5cdcd84839465379801db8a3dcb09f6f8d07"
+    },
+    {
+      "content_hash": "baffc9d34a986ed39e6990739fb7c300583a2f19d7561121b51340aec1eab3e0",
+      "label_fingerprint": "b407bd9c04ff4d6a05828eb0d7c3e6149d3baba1edc008977dfbbcf2cf82d157"
+    },
+    {
+      "content_hash": "bb4e994fffb4229f648addae6e10d6157917f3cccfb2a333f14c90173aab33f9",
+      "label_fingerprint": "9675755af50ae43224c6fb45a3be76b5be0c3bb7946460169804b47628465442"
+    },
+    {
+      "content_hash": "e505575413bdbf1ed9b7541f2b98022c8308dc2ca7224b15b32f82802ebfbaf4",
+      "label_fingerprint": "889df525041782ce93da2fd334ad1fd370e932c962ff486cd929df9b777771db"
+    },
+    {
+      "content_hash": "f5107e93ed79b4f77bc724e68c242ffd827467b228d6fc9a65c8332b3186b812",
+      "label_fingerprint": "f48164dc36b9f3627f367b9acbca81e04d8bf26dbacb01837f9d7106e7029ffa"
+    },
+    {
+      "content_hash": "f54d7ccaf9460f73b7fdb2c7ed8ae235eaafea3e7ebbe2d6a45888bf4eaadc08",
+      "label_fingerprint": "0e0ff4f9846099239ba83ca6e7a066a50081ade5b766a3888fb511d109a2a73c"
+    },
+    {
+      "content_hash": "f54da0db64357882f08e7e6b837b6b3af76c2b9a2491d2b3b8b87ebdb8b54196",
+      "label_fingerprint": "6a3021d919a8f11b9778e3df68aa4139c7562506ef166d9061b99ccdca147f7c"
+    },
+    {
+      "content_hash": "f9ce74ba3ff1698c38ecf5a135f60121f74ba9cb2a5cd7f7c227ab0275267ac1",
+      "label_fingerprint": "0b713a517162f78ba2876d06efa3363c97611cde0ed48b6c42719fc67b8e2b7e"
+    }
+  ],
+  "splits": {
+    "train": [
+      {
+        "id": "03814ce7-434f-4475-93f7-cc31ed98576d",
+        "content_hash": "a890aa01d390722aac3460fb9788b3e6d088a59379e94cfd1799b502436e6c07",
+        "approved_revision": 22650538872979,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "be1aa0d7-f047-403b-89ff-4fa87f28621c",
+        "content_hash": "97b53d63aadc1429013f64a861f7d84d295cce7369ec8f5f3ca7852bfc799060",
+        "approved_revision": 212888058279634,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "41a0eab4-9961-4a60-99b0-81a76ae3b44c",
+        "content_hash": "b77986e25e79bba50fdd8fe4041edfee62c186c39b05581c0a9d3303dc4d6391",
+        "approved_revision": 192658574867737,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "743b6246-9f67-4881-ba6d-14c3873b6597",
+        "content_hash": "8ced96198a4eb5b835ec9d2d916b99f12f196f98c383a6586cec1b6d07844621",
+        "approved_revision": 87888684454357,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7bb8993e-a5f2-48b6-87b0-9c1ac8884bbf",
+        "content_hash": "7d5bd71202ddaf89744232abee6d0670e0bcd3b9531f7b57b63c2482c2c7092a",
+        "approved_revision": 95337188631140,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8bd5ee7f-80eb-4519-add1-7b93f6213328",
+        "content_hash": "91efa9c3e27713e501604442af0a1ee3e20141d1d23a41dcbc18a308fefac779",
+        "approved_revision": 211908165825644,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e66863cc-f26f-49d3-937c-1c42be847b4c",
+        "content_hash": "0e4a3a75dae7c05ce185ff33977c866412b509995880c9cc14b6b970e39e3433",
+        "approved_revision": 94683834689490,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "76c2e9d2-8a9a-48b7-a5f1-c89352627179",
+        "content_hash": "1206d7726f15197c24553308049ab0c9500c7eee6c3daa9fdb2136f5767f7eda",
+        "approved_revision": 46521665820466,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "98ae408d-dad1-4c52-9397-58dddbf32b46",
+        "content_hash": "dfe9768eb915d3033ab795f326b038b51e7bfb35451315636bb5bbb71c368651",
+        "approved_revision": 137500515836952,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0376206c-3811-4720-be82-86495f669984",
+        "content_hash": "ad3522a679cacd40f4205f6c9e11e7981aa7a93d1ed917f8e00c083c50e27939",
+        "approved_revision": 178759920097102,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0741994b-695d-44c7-89bd-03c2b1f3ee76",
+        "content_hash": "cb9c2d92ec191bd2dfc2fa8d1c58cc7abff1d9c79b4e0ada78637157bcaf42b2",
+        "approved_revision": 101034969285966,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "39549ab5-fe6a-44a0-aea3-478c3eef26e6",
+        "content_hash": "dfe1f7d24421ecc8ca37f9c1a0a281830321ce395a1932aafb1cf06a1b607e0d",
+        "approved_revision": 40553139784475,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "bb316cc7-066d-48b3-96d4-6d7cc3ad0bce",
+        "content_hash": "f6988c31547d4ab0ad46feb55b252c1e65158489f6ebc857b28c5ea2e425bc29",
+        "approved_revision": 174556183736497,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b4ab8764-1d7b-48d6-b43a-8a26dcf0e9ef",
+        "content_hash": "34b254e39c597c2a6f1c4c4f30734f8d2b8ec7c215ecde617fc84c939c06427e",
+        "approved_revision": 28088800542725,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "41f5251c-f416-4e5e-a98c-55833c1fabab",
+        "content_hash": "998869fa29b8d70e01a1fcd4c932965588b83c4dfcf2d719046415121be4a858",
+        "approved_revision": 266731814824407,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c3cb4da8-5c6b-4e1a-a24f-8cdfc5ee668a",
+        "content_hash": "5025ce32f252adc6296bddae64eeaadddb9c94122d89e3148c9ba3a79fa2fba7",
+        "approved_revision": 78741047496337,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "90f46429-8911-40ec-a6a6-67f366582ccc",
+        "content_hash": "e405ed1a44719480e8efe5a70bb1cac07d9dfc710776a9067fed30690b0dc8a2",
+        "approved_revision": 66330744215284,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2edb2f6a-7dc5-4b80-bcce-779e49b5ec86",
+        "content_hash": "ee7d6dfc6d53ce0d3f6b94e425b2e5125b4e4c53e481216629a15e7eb312b409",
+        "approved_revision": 158783241941659,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5387003c-6460-449b-8c2e-ae55911153dd",
+        "content_hash": "c21a56ffebc78875d84d34668bed06aebb8aa0a535de5fd0af57ad4a00f07e27",
+        "approved_revision": 4961850076240,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b970349c-1173-4247-9040-6afce39e048e",
+        "content_hash": "906b34fb5128122ec4e2277721f36e93ead8cc2c2ec3048a3e3c351e32dad9d0",
+        "approved_revision": 250872403902839,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "35d75eec-f3b5-4bf3-8aa2-253e36c6e664",
+        "content_hash": "f314adfd8f83d0ed9db0344cd97967a56e2b9c257257bbe6097d6d388d333fd0",
+        "approved_revision": 14868521682942,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "abd46425-af01-46a2-8e45-d27a446e831b",
+        "content_hash": "af2f1d435b081df6a83062ba2255c07c79ceb7ba9e7a91ce4a358dde3b1cd78a",
+        "approved_revision": 214182976284489,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f317e634-bc98-4051-a156-356565a51c73",
+        "content_hash": "6c8a451cd3c2d0098ebc3cf272ddde632d951c141936e47ea6a32eb6f91f9f81",
+        "approved_revision": 63856130041453,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "78a4cf9b-04ec-4b57-9d2a-d94a309a44c5",
+        "content_hash": "d2bbafcc4db48a997c6fa2989671191fde561d624665ccd9dd8ff5beaa5ecabe",
+        "approved_revision": 243091177108375,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "76662fd4-6444-422c-a23d-2c5a6975b0c8",
+        "content_hash": "4a7762a84af88457038594161761558495c042a43b369870bc3ad93ae144894c",
+        "approved_revision": 23855072168066,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cce89848-7a89-4911-a7da-9f8c66913ea5",
+        "content_hash": "ce60f713a3a89ef09910b1b896f782aed6a48cddb7fc995ee89e6aee7d6d0fd5",
+        "approved_revision": 216642174158124,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c05a3376-b975-46bc-b08c-0df7c70bdb89",
+        "content_hash": "3bddbfd0c10245cd4375161629f71d41149a1fed9bf4f98262d67e7fd55d74f5",
+        "approved_revision": 229177758190758,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d29d9c40-9003-4d36-b598-e66f349a9934",
+        "content_hash": "116c44c496d663bd1385be2faf59dac2f2f065de7cb3713d7fa07fd22b42681f",
+        "approved_revision": 261238331572345,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e127b3e0-d2c9-45a4-9ec5-3a59869ee004",
+        "content_hash": "c2092dfff2baad54230a0bd1a6846083fdffd92bade022b3ec533b5a4cfc4dd7",
+        "approved_revision": 221831997475410,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7a2827d3-6e67-4d30-bc58-b20c8cc3db36",
+        "content_hash": "914b59b96d43f64b7be9cc562943fe119d2c2204a7493cdd1dfc45c2473250fc",
+        "approved_revision": 203151567573423,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "845ab342-7d79-4897-910a-b9d52f795a84",
+        "content_hash": "447551073fc79fbaaf748aaaa010e9b566e0ab2f7fd923365531173b1ea6b0e3",
+        "approved_revision": 63642804804862,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "eb20c8d6-b627-4fba-946b-c14059777f14",
+        "content_hash": "4a10e5511a2fd66f8f9ae81ff5eed44a84270b68a2925f0fa150f3edb23bc6b1",
+        "approved_revision": 131660590420518,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "550e2d41-5275-4dfc-832b-fdf6fe214f18",
+        "content_hash": "13517770e6f9e547b2c32bc2fce2a2a155fb7ef2c828183f5df1c9ca948548e0",
+        "approved_revision": 177793953331471,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a3de204a-9422-43cc-bdb3-5df076fb45ad",
+        "content_hash": "ce5fcdb159505d5af4a24311e96f5657d5955841459edb67d34387543d6203dc",
+        "approved_revision": 25658388344376,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a23ce1a7-1b7c-4d9e-a907-c71762444721",
+        "content_hash": "fcc361559d40236faffd0edc49a536398039129d4ba36fd70f62e3c19ea15dec",
+        "approved_revision": 262114172525074,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e5cbcac2-520d-4f0c-8c1d-156e71c93151",
+        "content_hash": "bf29d2798c71c7b771d11a0652b20cff3e3461307d320edfb76dc6f32e40c390",
+        "approved_revision": 215576194008816,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "91ef5f24-1eec-4deb-9c7c-837c755dbc3d",
+        "content_hash": "326e11c35849013259766d23ff83902385ff34e779ea8a76af5bb4254d49df81",
+        "approved_revision": 31402625143194,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2d71dca0-1a9d-4c1c-b1a4-995bcf3601c3",
+        "content_hash": "7834460b52e34b270b7a46599b925283522cb8072a219167f20ed022312c0b3e",
+        "approved_revision": 35843484745479,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "919ae7e6-9cf2-4835-9138-0d5e3566b1ce",
+        "content_hash": "dfcd7c10b393c3f10313b598eacbcafef85972d18a84cf291441ab3bc5596f21",
+        "approved_revision": 77580690261868,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "08efea03-e417-4495-ad94-e2dd9e2fe261",
+        "content_hash": "cc6b1d40fe8f306f644e59c82965a54bc405734e5db62ad79aa15125a8856cac",
+        "approved_revision": 154638352203298,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2bed34a2-0676-41cb-80cc-162736fda76e",
+        "content_hash": "2f07bcba5bb5a84cba7cc0a124d4205038ca7e825ef7694928fdb7d2eb974e9e",
+        "approved_revision": 216412241913298,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3dd544fb-c7da-4773-aa66-1a48ae3bcf0a",
+        "content_hash": "bf4f23dba8268f4524e4ac3709412e697a964824e34442fffef228438af454c5",
+        "approved_revision": 164052793690236,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7a95df66-6b0e-4253-927a-6da11c70df06",
+        "content_hash": "2fecd7f702e08d0c49f70c1a15b6e1ec596dc1ac877d405a75fa16782e3f7bf3",
+        "approved_revision": 170053730471552,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1905b11a-0c85-4a35-a51f-cb948a6500e6",
+        "content_hash": "d31a716f07baf06052562f0e071569ba1af5e9629a20dab4fa76abdb5ac34f40",
+        "approved_revision": 257205729853489,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "159cc6f5-fcdb-4bde-8763-398f5d0f467b",
+        "content_hash": "d69d606aeb99373bac190c60ffcdcfbd45c6a168f5d9e277653eeb0298c22f15",
+        "approved_revision": 16988311785729,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a4490631-2697-4f0b-8e3a-a4f9cd9ced8e",
+        "content_hash": "5285ca666b96c542af9aadf42c9e94bfdcab1357a294a0ebfd8fea2b21b72bcf",
+        "approved_revision": 132152549994801,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "529565f0-1f5c-4c73-aee5-09ff7050e05f",
+        "content_hash": "64053b9801a8b5cdc3081df14eeea3a9346a52c0d0a819ebd41a960f6ef2fe43",
+        "approved_revision": 109406381639794,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b28cba68-5b32-49a0-adcf-9eab4a70d04a",
+        "content_hash": "f8af2c68c690b303206d466b54a1f12290ba150875d36d9076d4bed76438a34f",
+        "approved_revision": 218155070682658,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "01bde45d-baa5-438d-8c15-cccdb6d4ff5e",
+        "content_hash": "b3f9b2c697dd9e09c5ccd895643ba6d27c5a7e5d610146f82bf6acb70019eddf",
+        "approved_revision": 244567137426760,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "90e8b1a8-6d24-478b-a0ef-d9c7696e088a",
+        "content_hash": "fe236e8b956f9f6a4b1b2f062d660f36bad13fa132f06df58270e97e791e1a49",
+        "approved_revision": 99715224061234,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "39dbe6b4-7d0c-488c-a13c-6e27fa897a61",
+        "content_hash": "aba39378e65aeeca5c9ee93db7f747938d67598e1da55e0c5156d20b9435c9e3",
+        "approved_revision": 49095820344995,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0c7bcd64-809c-4e65-9f5f-612eb274fa2f",
+        "content_hash": "434b6e2bb5440fef024ddbc6c079b6d240f9251cf55500b07fb9eeeddb303439",
+        "approved_revision": 127111818185525,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8e242e45-e675-4a81-82b2-f6d1cb84c033",
+        "content_hash": "a7cc48be95a796382eb3ad1bc5f4d181ffbd6eb90fd6420b72abfd7f34a2c200",
+        "approved_revision": 190605426449160,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "acb6e293-54a3-43d6-8b94-1c2f49115416",
+        "content_hash": "3fa2ba92c9de6d5bd80532e59bb72a94072d17abe86f75bb8153a8827be17b78",
+        "approved_revision": 219382319548038,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3f3bc233-3975-40df-b56f-66b3d93c11c1",
+        "content_hash": "d8bbded506e3525736ffc1d5af4bf118ed35fd297656cc53572de65615c8fcd1",
+        "approved_revision": 136082641614881,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1d293195-9e93-4c9a-8f48-f8c85d1b606c",
+        "content_hash": "881153975986139ae6f4c49cfe7d46f2b89d5d340f2c5fd882b5d8fe40bca5f6",
+        "approved_revision": 239251058066375,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4805370c-11db-40a8-b092-34f084f4a576",
+        "content_hash": "5b797696055ee0dba9b9ded0af23bc80cad567f9d2ed52d5006d36ae2e61fc5e",
+        "approved_revision": 56825112014088,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0e1c5467-c326-4fbd-ab6c-9561037d8b3e",
+        "content_hash": "6413a6adf84540ffe563f479b5d7d0d42ad0df24fc3458aa8f54fe1b08129564",
+        "approved_revision": 184261939047977,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e0836fa6-65d5-4cea-938e-7757bfcbd143",
+        "content_hash": "802c85cb240d869acc9ebec60569eb919a7bc938651c6cb65d71b5aba58998f4",
+        "approved_revision": 120712127545449,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "48d0d18b-3564-4dd7-9903-a30f26819cdb",
+        "content_hash": "3871be82eb87b0c140c789d7cc303e7395c4290cd96bdeb862a7d270ecd83cc3",
+        "approved_revision": 259981066987291,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "46b045ea-adbd-4ec6-81e0-f94d94e32e63",
+        "content_hash": "8863d039294c202f7329bd1acff6d62d4861512db714f85e20740effe5681977",
+        "approved_revision": 232191145873541,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "07c614b8-800e-4aa3-ad40-ba9abbcc222e",
+        "content_hash": "12f4615d8c897ba03bb0ffc1a3ebfc7e6fb5861fd589a923935fcfaad9a29c2a",
+        "approved_revision": 175537462354312,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9f043254-1ef4-44df-94d9-3f4cfe6e2db8",
+        "content_hash": "987bf90caacb4a44d8fca9d590a2924dee57ce3631a975acc533c364b37daa65",
+        "approved_revision": 162518277199371,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6a912dcd-027c-4d40-95e5-7a1b1430cd7f",
+        "content_hash": "98ab24776af2a4c52cfaad566bb2f27d3abb32d0e479728910ce306124b86f76",
+        "approved_revision": 253148526293916,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d2217bdd-2848-494f-8cd0-4843d5459752",
+        "content_hash": "32379a0b113c32ba424d5d7166587c16ef0846cf27bfdd32c686a7c91156a18c",
+        "approved_revision": 259612503810795,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0f3fc576-758c-4842-a03a-7a7f9919aee0",
+        "content_hash": "d1a518a3881de908c3c4f337d78e7b159abf63aa0c92a9f3f3b4d0795a8ee473",
+        "approved_revision": 41487053923904,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "70911de4-45d0-4ca0-affd-4cb58ed918e8",
+        "content_hash": "51e152491212affda49aa743838e1abb26ee43f8cb7c2b6272caa68b39448711",
+        "approved_revision": 169345622139822,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "da6d5788-7d96-4ea6-8787-3cc03db25b84",
+        "content_hash": "5534c9910a918fb9acbf4005198802972e587caca74e7db04b5424fabf3fdd24",
+        "approved_revision": 35902607916272,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b8ae20d5-cf4a-450b-a626-7abaf36b9663",
+        "content_hash": "9c24d34a6f3e947da0014ee9fa91b02cb4552e2b45a1f5e47f96c8934cf190e6",
+        "approved_revision": 214667601982846,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "37c57171-ea5e-4439-891a-5a604e26c26f",
+        "content_hash": "d210ea335acca7120748def1d2e00777ce346695240bc21afae9d2e9150d7676",
+        "approved_revision": 247136363570204,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "be210347-e8cc-49a4-bada-f57379552ea3",
+        "content_hash": "a022e642a4cc55115ba5999cbb3f1340c220721ee32bf82a8fe7b697680bcdf8",
+        "approved_revision": 172476205416623,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "73704994-e43e-4bfd-a3da-c7db00028ad2",
+        "content_hash": "7d51e9c4972e974dc4d54b114d323ba55e8f25e68535c6ee60fe3eacd2be33c3",
+        "approved_revision": 30240665513419,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f23ac2a2-0e8e-4277-a5d9-c73346e0ce1d",
+        "content_hash": "33a9e401c7a3abcd6d9a3c40d707561e5ea148b111b5e3001dc1260f548b6db0",
+        "approved_revision": 164134009224741,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ace4212a-b4cd-425f-95ea-8f949d09c6ac",
+        "content_hash": "1ab7542845c593a5fbe0fd581c48ab9d2492eee8bf2b2762ef40571f1c9afb85",
+        "approved_revision": 178999768128196,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "297a458f-6468-49a2-807d-6fa0b034ceb6",
+        "content_hash": "845d2189fbdba6f69d0af9f9e5b98c5ca2a533c58f8b057603ff330c4eb4a7e4",
+        "approved_revision": 234968278679785,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "daa17fdd-ba8e-40f6-bf54-aaab5ab71ec1",
+        "content_hash": "58a0c5a1c7825369344050646f9ea86204cfb91491040c68a25869742f5efb9c",
+        "approved_revision": 105468906071760,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c5055783-f1f5-495f-9f7c-176c233784bc",
+        "content_hash": "79b884e9c1b16e68cd8b59fa9e6b4df6d551c187c8d9278f1f909e89133e6ba3",
+        "approved_revision": 18432107296014,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e75083de-55c7-44ef-b36c-b8d6da6148f8",
+        "content_hash": "d1a7eb55fb738d09efc279ea8913ca4b6a9c165d0686e7c8796526d199043eec",
+        "approved_revision": 241426361540786,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c0939a62-2e00-46b2-ac35-6dd0761d5542",
+        "content_hash": "10d3633120012f951d63300ee9b3b574434d99020e6eee73c6a821084086b411",
+        "approved_revision": 53579789320051,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1b87eca8-8a47-419c-9542-7c7f30a2e133",
+        "content_hash": "0f398cea60d58af37340836ad954bff532d399c21faffeb70e459672b4201f5c",
+        "approved_revision": 171201139221917,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "657eb4e4-f77e-4df1-af4e-a26027ad2a7d",
+        "content_hash": "5fd1c69d8a7420bdb17015fa94c971aea1fa2217ddae2f25cf07e33a14e94b41",
+        "approved_revision": 235570881157721,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4c50f978-a90a-4c54-bbd8-11641f7b4642",
+        "content_hash": "a1bd7947c440e5f81145b16346c0fd7a683050401604c8d1f88442403903f3e7",
+        "approved_revision": 228968472021399,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "db2e0c99-e234-4f8a-89d9-b98bc833dd84",
+        "content_hash": "b492ffd3ce7c98d80be931110fffe4c76a8939a16c5efba3adce03bd14523559",
+        "approved_revision": 58449137213935,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f5c3eed5-78fc-4036-b221-c2cc9d3f5958",
+        "content_hash": "79862e4bfc741fb12ab1a075bd17aa44665d234dfaf46823952b07d51437fc56",
+        "approved_revision": 233700879109604,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "24dc5aa8-815b-45d6-8595-275b3ab8a4a7",
+        "content_hash": "2cc7bfdaf09cae81370a5c7706b6077297e0eddb8c740a8297a90024fb7a76b0",
+        "approved_revision": 37706618738478,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7f6d41ba-6d56-41bd-8561-8577c06b1bb4",
+        "content_hash": "805d3c0d060264dfea58538599f917b53414afe26dc3d5a35fc2b8ab35c25455",
+        "approved_revision": 168026145708879,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "83351adb-b35c-4224-8764-4ec4415bb849",
+        "content_hash": "c4917c2b34a03cd757d5768a8bd8bd89821fb767aabc04d2a4a27e8cc7716444",
+        "approved_revision": 234352142124701,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "102fa39a-ee02-4021-b77c-5d54ed260f81",
+        "content_hash": "2e7fa57d4e46c07e91c39da77feb1c3e143b369b439ee54b4aede865d26ff8f2",
+        "approved_revision": 9786841899305,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1695bc1d-c833-4ca7-b5fe-0d954a9cfbf8",
+        "content_hash": "4b69632cbc7c3f94e3ac237310848f1a10c0098446e5b2d36f28787a621f19bb",
+        "approved_revision": 211065612280744,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5a6195e5-07cf-41b1-a657-757330b8b100",
+        "content_hash": "045d7e58dd81a54f1caaff4a354bf4ec4ef30a6024e8c9291627e29a5e16980a",
+        "approved_revision": 216992110555923,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1e8a23f6-766b-490e-b00a-5cf01d375560",
+        "content_hash": "08276d299e0e071f2a472011254525fee38544c29f87497f5235da8d68734527",
+        "approved_revision": 230076805411469,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4b73128b-b874-48b0-9e86-c655a412e009",
+        "content_hash": "1c9980493ba813b09748ebf30e24cfb6a1ec96b1db9519a8cfaed90068ce4122",
+        "approved_revision": 187350429386032,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "727b4430-cc7c-4286-92ea-cd10a35bb6bf",
+        "content_hash": "3182d7dd779d418a66a4af4406fb3a78c1c5ef3596920d6c0c393872c99c1eee",
+        "approved_revision": 101028461362851,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2f2790f3-87cf-40d2-aa05-60ef54ba59f7",
+        "content_hash": "36f3cd83cc5685fdcbbd535d44bcde6aa9104dbf5c05299557e81c2cce97c56f",
+        "approved_revision": 104194240456521,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8c99dd9a-49ec-4ea5-ba89-f55a60cae2ff",
+        "content_hash": "387ca4bf859726ce8dfcb9247a5c4b2e33b03237b9ddec92747ef3875487c03c",
+        "approved_revision": 67149537306221,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b3656d51-9dad-4241-97d8-8d7ed9b72634",
+        "content_hash": "40a3e731c60dc3d475979dc488bc2cc2097e3e80811fa58fd590396f59034b93",
+        "approved_revision": 242319352377035,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7877ad5d-6799-4484-b246-911be5ec4df7",
+        "content_hash": "43dc34c83b9325396c5d8e71c006b7c269c85fbce0f3b1f945f8310c15bde57b",
+        "approved_revision": 72870186597952,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "18ca855b-23d7-48a2-a429-8916c5957aa3",
+        "content_hash": "5c46638663286cd19e8dfcf8f458e43e41b265bc79eb62bccebc06969e0d2d27",
+        "approved_revision": 252117418874239,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2d45ed7b-331e-4216-8e31-61360b62111b",
+        "content_hash": "7e7fc0277265c2a313e9fedf8dabf754da9e21c68ee43d680520817728767d7b",
+        "approved_revision": 274832505819631,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "bdea3853-6c7e-40b9-b8a6-8e6e5f83cda0",
+        "content_hash": "9335299e78af0ea335a1f6a2bab79c7bf2e01dbd5a39696834a8c81d4e71948e",
+        "approved_revision": 68589888851835,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8e2d995e-9884-427b-8b54-de8659de0fe1",
+        "content_hash": "940f352ad33c483ca0332421d301d2a24eb4e874ab53e3cadeba4084a0aba10f",
+        "approved_revision": 236349462283347,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0a800824-c401-42a6-be10-701c7241b619",
+        "content_hash": "98d43b0d352c0151ce972510f0c2b7ada65610376b197af3b453a8207b92b10d",
+        "approved_revision": 223620777103462,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8afee4b5-e9a4-4e52-934e-97cf04d6cb2c",
+        "content_hash": "b7ab60a7466b4b91d87f2c15370a49808c392b11d7fb9fab6aca95ae9e30ea10",
+        "approved_revision": 114260720501248,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e99bb706-0d08-4a32-878e-c96832454ec6",
+        "content_hash": "c7d94b58fb743a0ad6c5c976ac398e178acf21dcb8c1f31fa78970df288baf83",
+        "approved_revision": 9139944507776,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "20f74415-0c0c-43f7-8d05-7e2221ccaf92",
+        "content_hash": "cd594e4d8fd4dbc74297be56120faac4501421d262813dfd3feb0758ed1c20b3",
+        "approved_revision": 18611079381199,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ec0e1560-5512-48e2-b0f2-af74957aa9f3",
+        "content_hash": "d7791647bb67938d223e2f3c3a68d9104d0e4419d2d2f6bc6b6218563f309ad2",
+        "approved_revision": 210436802839697,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7043aff8-30f8-45ab-81c3-0111755a9bbd",
+        "content_hash": "da369040df600a8d4738dbca3a2dc6972d2ab4fdd0587b894ea751199bb8a22d",
+        "approved_revision": 100659862898708,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "89b41da0-297f-48da-824a-059a221e7bfe",
+        "content_hash": "dc30586d4a01bb1d75de3a6707abd686bcf91b3ab411803881963cf88ec403fe",
+        "approved_revision": 48588925196303,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "77c9f90b-193f-43e3-95d2-092a5f80598b",
+        "content_hash": "e59effa790d4b4bff706b2c08ae91806b4a4fa53670c7c97c5df67dada465e8f",
+        "approved_revision": 100570818735102,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b246dcd1-13e0-4a1d-b037-2b03ca866518",
+        "content_hash": "e6784e8c59d70da44f4f94d226ced92ce21163f28b0cfa6c902f10da7d1fc47d",
+        "approved_revision": 133072956505339,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c4edd364-c023-4ee7-b1a8-9f79d8525488",
+        "content_hash": "345508389cb2d1e2eca7bfe5379e27540f3695122163b475a97badbb033bf905",
+        "approved_revision": 68713041951890,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0464f882-d4cc-4454-bcfe-996f9553fa1b",
+        "content_hash": "1d606909fee9f48d3e3e67573396b51ddd0214c8bebc543e6b56fd99b9693957",
+        "approved_revision": 78783744867585,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3a8e2e04-1396-4009-9d1e-b26152937884",
+        "content_hash": "206912594b45f3454b8d869785e2cc4402f8f4eb8b08ec5cbd764d21bc1c8754",
+        "approved_revision": 100825973547976,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0af7b3f8-3f0a-437d-a618-05d2a7ee731d",
+        "content_hash": "b4d46399ba8910407e8fe3704277749431e7b753550230b0eed1c8c65cbc7a58",
+        "approved_revision": 96624322478629,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ee095943-9415-413a-9cc3-4e17ea9ec91a",
+        "content_hash": "bcfa3f6be1db6ced466014e1c02a9386311925340cee43e527900353b28cd7f8",
+        "approved_revision": 136889426137728,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "905b471b-5f55-45d6-afb4-ef01efcabfae",
+        "content_hash": "d375e379e9514537da5a2891b013a444c3b377e084971b3c440dfeebbc8f10a6",
+        "approved_revision": 222123951485642,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "fcef5812-f2ef-4865-9580-6e1e990e07aa",
+        "content_hash": "0a10eaf4b6cd784835c8b6785adc86b68c307d3fdabf1ced57b9abc7c787a2bd",
+        "approved_revision": 107070656248135,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b6abe2fa-6186-42ba-a1d7-8d2b5038d689",
+        "content_hash": "0e8f0fcd90b274a8228d879d4da809f42e2ae1582fd2383c31f4f20fb75c07df",
+        "approved_revision": 265444140458322,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e0b14420-e8fb-4a7e-9ca4-a40747258ecb",
+        "content_hash": "9587f2a87bcfc4012bdfdf1ae240ead010388b5e12448a70cc0dc3b5c4f4f178",
+        "approved_revision": 10571287443942,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8b7418e2-7abc-4270-91d0-4e0b16477500",
+        "content_hash": "6d0d4cb9570a2451899df4ead212df51ae369eb4b17a173257f063409336c267",
+        "approved_revision": 73808429580676,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "653b3b96-9124-4e93-a636-5e1548b65ad8",
+        "content_hash": "c82ab21b359854c4ed597df816e9d0cad1f7382477bbfeec2cb51cc0d35cfb3e",
+        "approved_revision": 211858026599378,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "7115fc16-1294-4ac8-9f60-a5b865d92d25",
+        "content_hash": "59b81b81083ef88ebcd2242f2285387f2b0d99d31134d00a6e8b5ae0dea3e16f",
+        "approved_revision": 110165406811578,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cc0bcafb-c8db-4fdb-b018-76c85c3f2e15",
+        "content_hash": "0eadefcd8f182470c8a1eae0813e7fcb087a285b612eb36efde079d6ddccd880",
+        "approved_revision": 22861688316105,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "96df0b4c-68d4-4b51-bedf-3e6e23d92c0b",
+        "content_hash": "948f8be3a60e3d8dce75bc8aac0a20bbe8c3fa04efc9795cc39c196f9f2eaa7b",
+        "approved_revision": 43612371582532,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7c3714f0-4528-402e-97f1-8fbc44382288",
+        "content_hash": "fdd849d1ab9ba4794c7e6cf6e9581da22199d35dd2c24ea9e18941d0534c8ffa",
+        "approved_revision": 26934878050588,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3481ad0c-1352-4086-becf-c34a9fae4159",
+        "content_hash": "369bcfdee90f8b926b12fe533123df49eb6f472484d2daca1c4e4cc2f2016b89",
+        "approved_revision": 214012013054587,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ee201673-90cc-4b11-b52b-d59a861ffdaf",
+        "content_hash": "657940176ee60c326a5b4049f1558c489ad9686a412ef676c91d1ea02d7abeb4",
+        "approved_revision": 195098640935905,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "defd3ff5-a0f9-4a20-b004-d41a4c408217",
+        "content_hash": "caf9f944e42860671e9178f1969de755395d2a341d9d4eb95d9d917b6a5b49a5",
+        "approved_revision": 245666313976781,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b84595f3-ec6e-4db7-ade6-dd03e33dcf10",
+        "content_hash": "2c9261722a1f4d2975ec7dc5c5e46b9e910d59fa7cd4f30d8684cb6bbac87c37",
+        "approved_revision": 94982161895945,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4aa15ef4-a3bb-4f7c-b8e3-5bf033fbca53",
+        "content_hash": "d1d7a9cd1ad977472b33143de77cc1ee0157ba1b6e3363328c2a08c24f7c068e",
+        "approved_revision": 275403199042724,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d8e348ca-eb68-4fb6-88d4-f03b5ad5974b",
+        "content_hash": "0ebf975b2a654c6d9c6e5ba44da98cb20987f23a14b114030508b922a2ed4ec2",
+        "approved_revision": 102920121919378,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5112f282-07ea-4ad8-93c2-a4400d0aaa26",
+        "content_hash": "058ccb0f12369824e8ce13b5c6a3791953659d5269bb1b20f901d4f55f404bb9",
+        "approved_revision": 106154788241189,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "aba73d42-c166-4481-9936-24095900925e",
+        "content_hash": "0c4ae65e8200876590f3489ed19a1c843c1e4f9ca756b0b9553edfcfd150a644",
+        "approved_revision": 129527624385577,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "83ff3945-000c-4103-a501-df6d781a7300",
+        "content_hash": "ae3e4f07d4217e1cb740b27b0da150dc746cb3d5e4cb4d9a4aa5427417ec5836",
+        "approved_revision": 165421839342288,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cba2f416-b7e1-493f-8fcb-51c6cf6b048e",
+        "content_hash": "8aeb07bb370a9cbf3f24a956ace1aa29c31a64d7da7fe8a159bf45b0284f8df4",
+        "approved_revision": 18447550589479,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "00707eb9-44ea-42f4-a14a-bd584a4aa4c9",
+        "content_hash": "064f97b47ba37ba0c8a789c466fbccd8937c32bf5a7754d48a439a1dee2d4b82",
+        "approved_revision": 127806662183290,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5ca91f04-a199-4305-b7ed-3e187a6bd2f0",
+        "content_hash": "16e3afca3b2202e40ec6fc5b90eedcaa51bf9f194a841b2418d44bf103bce714",
+        "approved_revision": 249477653852565,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0323882c-b6f8-4077-b84b-ffec413dfb79",
+        "content_hash": "3564fb9eae25f41756b6872701bcd282386aacce67b6baa70b686b475693ea5c",
+        "approved_revision": 156457659543039,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "49626865-0347-4a52-b88f-430db88e69b6",
+        "content_hash": "014487029cb38e72c04197078b756a5e31f6051d5e2520db1e719ecb8c19868e",
+        "approved_revision": 11185683456818,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ba4e9dc1-1a52-40fd-96c9-ef9eb3ecaf02",
+        "content_hash": "f475f003de3a3797900d7aa7aa916236ff9f29ccc387fd4f769f8b9104f05cfe",
+        "approved_revision": 95632484038335,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "d0316689-495c-487d-a63c-c542b47026b8",
+        "content_hash": "2232885cf81f94726a322dc4887e48efd8fef1f2e9f22815a21db88a5666e9e6",
+        "approved_revision": 6786186157475,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2fc2a845-0971-4055-ab6a-c485d6bb6d17",
+        "content_hash": "fa942c3b1d20da09fa6e26a089ee996ed3bfeaded5b36f17fb04424f0d7fc4ce",
+        "approved_revision": 142056307308502,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a058ac9d-5843-4dd5-9dc0-bafa7a3f6ac4",
+        "content_hash": "93d658c364f721aaa8ed5fe04d0df58983b25b3363c5ea02aa9462ff72e82996",
+        "approved_revision": 95699713896503,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1009c071-8171-464c-9577-587d0a78d4f4",
+        "content_hash": "8b36df81acb20b551ddbdaaef437aa2dec1ba00c8e560780f3b54e5261d3f871",
+        "approved_revision": 11969332723850,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ad088ccf-a720-45a3-bf58-401864e4ab75",
+        "content_hash": "9950fc72c967f56b4e38911cfe51231a131514da3cc52a617cfbf159f9845869",
+        "approved_revision": 4984166566765,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8793467d-c059-4dfe-a1d3-88272f636410",
+        "content_hash": "70d353632a3af76f0be6b58d6a58c03bd0b92de746bd54db841b4a548df69509",
+        "approved_revision": 125974250875566,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "422d60ab-d283-4785-9b06-45c4593e3308",
+        "content_hash": "b97ce50cbd8b0425a3803e3b577ecbc6914ff1424317376afce0077cdea905bf",
+        "approved_revision": 201996848132718,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6afbbf81-df55-440d-8ebd-22933d8b9ffb",
+        "content_hash": "e322007a39933237a79d06198448845d9ef40d1c3e45f6a22a1cde439b36c698",
+        "approved_revision": 272814641465735,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5841f637-e7ca-40dc-a0da-49cc9df3c60a",
+        "content_hash": "377669a2fe24ddf6ead0c1db5e643105693315e0d41acf3a4366e1eb445bde5b",
+        "approved_revision": 91189029535410,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "02e2827f-0c32-4e3d-a9dc-abd9bb33b90f",
+        "content_hash": "e34331562bb504bb75ad0d19bd609db54ea313af4c51ab48b3f712c562b7ba99",
+        "approved_revision": 206574953814934,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "757fbe17-0c21-4cb6-954e-748f17114598",
+        "content_hash": "b4dddbd175d898f2ee14491531d02985d4e287fd650e65bdb2f367c0140928f7",
+        "approved_revision": 249331009155726,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "456d3347-edf2-4427-a37b-1c793a5ac2fa",
+        "content_hash": "7842bfbeeae2c58f876264db50b95984a3da3ed9d3a5b4d3bf69f83823c22f5c",
+        "approved_revision": 138398286553887,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7db9698e-a44c-408d-9884-5159ba09ec33",
+        "content_hash": "73c97d4d75481b6493f9fcd9a49075aa4fa6cde568f68a4ae4867de0c65fcbc2",
+        "approved_revision": 73374531005909,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "54e39dbd-78ef-4c4b-8ffd-8f162912c70b",
+        "content_hash": "c5f7620405dbb9dbd5d80f886622bac16244c04ef08c436468d9897d076b4b71",
+        "approved_revision": 142608562396559,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5bb6ac96-0736-483c-b26d-d9ae1e9bedac",
+        "content_hash": "a34004579895e7ff430687a71636d38ada7f9ee595ee2a2c2b3433085c903350",
+        "approved_revision": 37786997519139,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "150c1032-5b95-44b8-9e53-095f9809b842",
+        "content_hash": "778dbe980e36cc2c58cf90109d4f3554621f00ff561a1c0f2d29756ad223c9a4",
+        "approved_revision": 166553922164409,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "609eada7-c4dc-412b-85a1-d471ae52a9d8",
+        "content_hash": "6c41a401c27e5e0d94e39ecf438bc6e6cff43dffe605ec8d2c7a071ff48fc2d3",
+        "approved_revision": 72516441363483,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "48982379-b860-493b-8ae3-322ebed33a06",
+        "content_hash": "0a61a5deaff8979d9cddcc57d04511af03828b3917dc48065423b7675744fd96",
+        "approved_revision": 46384808797709,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "19847e52-c15c-4a26-9458-284ffd80854e",
+        "content_hash": "68cb080cbd98ba632c20365c9d8e45339dece629f8472e917bba376c0046c35e",
+        "approved_revision": 258589478870044,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6190a7ee-664b-4689-90e2-f740840ef950",
+        "content_hash": "4cb86fba88615f5ca9f1245c726cab32c8d74de4ce07e33f07a75179c50a80b6",
+        "approved_revision": 154519583979468,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f0c0848e-e338-4ffd-aa99-519068f2d2af",
+        "content_hash": "304e3948cf5e9135e2b1129751335c2a67c55765b3cc47ee545290325699654d",
+        "approved_revision": 11534297111597,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "aa466f22-2ac9-4220-88d8-ea79c0fbd57f",
+        "content_hash": "55dd3cbb7003408d92bb6c154d9e4937a865b0d572e9e6d7d01d007585a498f4",
+        "approved_revision": 199055667141602,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e6b61980-9e3d-4a8f-8f90-ba5fddc1d401",
+        "content_hash": "5b0d73ad6b75ead28fdf120fb5e50e3ea1f55f9981a1c2c09898d093b6a7601b",
+        "approved_revision": 93796372215856,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b078cfd5-8cfc-4d59-9aa2-a0fa56c91295",
+        "content_hash": "d70119094c289ba1c7f2c8eea239f6e013b7ba862eea7598efffb3ec7e2ce147",
+        "approved_revision": 2487864829235,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "aa891630-290a-4f63-a2a8-37fc1d042ce8",
+        "content_hash": "dc7fb7dc1777105e4b5856dce2801c43322210e1a1a0a6cb0ca9f0cda88532ea",
+        "approved_revision": 143704946473631,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d3744f56-1de0-420a-80d1-19de55da0986",
+        "content_hash": "f21e0590067e93939c5e92049e5dba4125a30dd1cce552d254a97d8668ee8aab",
+        "approved_revision": 246419837444467,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4f674b29-9adc-47d7-802e-d0ef9589b43e",
+        "content_hash": "5dc623fd78b785e4076b43f40c8c71ff4911bc97c39fe51d164dc647417c2b01",
+        "approved_revision": 129593344315407,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "db9dee8c-fc3a-4e30-a36e-7d316101e611",
+        "content_hash": "f8f7351bf73da2b0704ca4e1da6062e7af2c3bbd7a0f8748896f2f1035bb2518",
+        "approved_revision": 3390655394174,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "35f36b89-b9a9-42ca-b007-1a34743617d3",
+        "content_hash": "e616aeed599a70eaf4ff760eb0ec29b063303c349bee93c0d9fb6f041c6e5429",
+        "approved_revision": 63468883562559,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e92fa353-4ff0-49bf-9d9c-f028998f7478",
+        "content_hash": "a010dae49e1722fce5dd2a073354a538fe21353a3ac635e622a84151cd9b8318",
+        "approved_revision": 257236171113557,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "296c6df3-ad7c-4934-bae6-d366e6d55e10",
+        "content_hash": "53429155282a1fc416dde1fe65fc7b511896682ecc661abf61014324c8d09e4e",
+        "approved_revision": 225819867852684,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "31db26b7-7217-4d24-b24c-31b687960054",
+        "content_hash": "1a8de38207041092959359b665386c3aa29ac97705ab268536877552af0da964",
+        "approved_revision": 278479680368387,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "caaeb4bc-50c2-4b95-8ce6-627c1560b6f8",
+        "content_hash": "2188f9a9aa7c5d77e0ce1cca0ee71b35ca157553dd9555bcc38b1ad53dfcc8a8",
+        "approved_revision": 73596142638360,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2dfcabb2-19a9-41ed-9b3b-c85418f54027",
+        "content_hash": "5f1a897e9889cfcf11e971105e81bd743d9447a6fdde5d2a953c209b47150e88",
+        "approved_revision": 64325270237813,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "dfb2070c-8e1c-4d2e-abfe-6abe356fdfad",
+        "content_hash": "630461719c9ffe07fd14ff69045f8d7d77f18b1a4a8ec95ea1ea7a4280b0d87f",
+        "approved_revision": 274781128772510,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2cc1df97-e14f-4cbb-bb5f-dcb9388d4ff1",
+        "content_hash": "c18e4426ced984460eb66a2d53b8dd0a0367fc4248be4352ce4de5d1cd0a9a35",
+        "approved_revision": 204989303854268,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0e3ac35b-0f36-4174-9540-19c73320fed1",
+        "content_hash": "9cbe865b4f3b0234f0640abce7ce3f34bbc0dad5df2c54a240d9571965aa31c1",
+        "approved_revision": 1979352430205,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d0d8d116-5fd9-4eff-baee-1ce13ff92033",
+        "content_hash": "d5c43f611d52f70994616dada25f46c188453ddf4cf73c49e1154ff836b121a6",
+        "approved_revision": 166132712063121,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d4db9905-1d72-4811-8595-603190c2bc4a",
+        "content_hash": "fea48d94c510290942d7e72b756ba86fa4c64a177dcd1ab75e51d065ced9700c",
+        "approved_revision": 38312860964397,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c6cb7f40-682f-49d9-a00b-d08f92124b5a",
+        "content_hash": "380a6799022abeb839820d4fbc2358c1b83c090701380ebf9e77019d618096f4",
+        "approved_revision": 274996938552920,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d23d7eda-80cb-44c4-a75f-3d5c91479940",
+        "content_hash": "9fe69b9c4bde7387a6fee3ca1216fa9d7893e4fad91ba2eed5cc3cab1d813637",
+        "approved_revision": 118360342244123,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "592faf51-c9b1-4341-97ba-1ea24cd6a600",
+        "content_hash": "f81dcb457d512108de4833bf3e920bdfba13aff4535f984e9329abba33af465d",
+        "approved_revision": 229912497952017,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "64ef4f20-22d1-4549-bcd9-6d53235be83e",
+        "content_hash": "44d9823ba1452a42a72de7179ad53f37853012425523d3f31d608a0a64e29799",
+        "approved_revision": 145561445338215,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7f2d5712-1549-41be-a900-ee4a3ecbf289",
+        "content_hash": "bcd703256c131c9309c6a7dfba162b8bc55cf4926f8f0be195b6fb89c4562372",
+        "approved_revision": 268012427493463,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "21eb0a5f-9a85-440b-af53-74941301d821",
+        "content_hash": "a3f05a299abd15179f29d5f51a1492253e49d301ff75bbd9ff99b9c51310c3c5",
+        "approved_revision": 253662927295395,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "92eb183d-b095-4b7a-9158-38d5768afecf",
+        "content_hash": "8e5506fb65158ef00117ebb395ad62efd93c205b3272d64d6eb1f7043f93626c",
+        "approved_revision": 17906510579863,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "11cb35cf-5f72-4abb-9334-389ba31b8bfd",
+        "content_hash": "c3be47f7fec8b74f9550c955702a274110309e3de0b069a1ddc54dfa68e86dfd",
+        "approved_revision": 88688027832262,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9ac6ba83-373e-46c7-9367-ee7d91f9b599",
+        "content_hash": "e93aae0613a7464786efcbdd81e336a141c2110f9404f2506c7d53b82f5f6c9c",
+        "approved_revision": 58837834546678,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "f65d99c2-1948-428a-86b8-4da988456672",
+        "content_hash": "30f4d98911a9f5fb34b13ee1f135f03f3af062f178438decbb597d4b5a391957",
+        "approved_revision": 60033735114824,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cd15cf4a-03b8-4b9e-92b8-cfec4bcd7bc7",
+        "content_hash": "60125aa1e553257290ab3afe807eddf2796577588bba937118b0922549448bff",
+        "approved_revision": 4892523470218,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3910b5a9-fa73-43ee-821c-fd7423556082",
+        "content_hash": "9137729828cba3393e8617402d1948ee6dd1891ba095833f832dd18ed54f70cb",
+        "approved_revision": 257699267907118,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6652f5b4-8623-4ba6-82bd-a0c520c9c658",
+        "content_hash": "5a2d039205dc50b627697a989e07f12d1b9250378f1fa5fc7082a740fa838a84",
+        "approved_revision": 64767735062842,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f4890089-bc2b-4a99-ba6b-9db7dccd6b90",
+        "content_hash": "58ff81b9b3aa3d458a8a36b04d865e608ca598da478af06878c86c39d6793431",
+        "approved_revision": 118564114485220,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cd966aeb-3aac-4daf-9dc7-c841b307630e",
+        "content_hash": "c67e06d920a27f4ec70a7d369555d3b48f1afbd79c5403b55add8fdba349b414",
+        "approved_revision": 234500372143876,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "91c9261b-20e2-4793-b04f-6ef3698c31ee",
+        "content_hash": "1b68f9b730c38d61c5515278f573e4a43464998ff498f07d583602f886eb2b8c",
+        "approved_revision": 230674267161199,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3e831a60-bfd4-42a8-b3d5-5a1b52d39a21",
+        "content_hash": "c42bd0309d02cfa572141ea258b24668e9a7c626c895a80371febfcb97ac29ab",
+        "approved_revision": 141557460955860,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2388eb6d-5086-4872-a2d6-53c0459023db",
+        "content_hash": "100934d519214caf4d0d54ace29588cc4f94ce1c210f678abcf6f641a90b54f6",
+        "approved_revision": 201147757967497,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "24f32b3e-03fd-4444-a8f5-323c4a5dbc36",
+        "content_hash": "b98c60736ded8c5b90bee6a7fcab83ab48315cde0e0a8eb92f6e54ecc7778b0a",
+        "approved_revision": 46137279925788,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b6290be6-b698-4289-b3d8-c3c9ef8e5f11",
+        "content_hash": "36805db3c928e2c382d6527b014961d13386a5c2b42801b897e077991234cfd4",
+        "approved_revision": 206148749171112,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "891eef6a-30a9-4759-94a3-566761154a19",
+        "content_hash": "1de7fbfbfd3ee30c4ad1d274ed0802f18b3c6b1f607f2823c16c0aef2fe2395f",
+        "approved_revision": 272794047007074,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "91b41705-6eea-46d7-b0ed-35e5bab35e79",
+        "content_hash": "6d99514f664beb72d92f268d40d06cb884075da804025af120ee79f22b240435",
+        "approved_revision": 64070141093699,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0cd2fe3a-c1ea-40b4-83cd-4f4cc646b901",
+        "content_hash": "1ae6832257935e65b14db2eb224e2b0271ce46cdde2ab3e88f8f52191c391ab3",
+        "approved_revision": 264419065366606,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "68eaa26a-9507-4ac7-a49a-08fbf23edc2e",
+        "content_hash": "ba675ecfeb449df64c721557458ef977a37202ef42b3deb06c181b99855048a2",
+        "approved_revision": 169073124375895,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c6e2ee35-442e-4e69-8455-7cfe80a7982a",
+        "content_hash": "88ef9944995177ea5ec56956b7d795ba44e0e35fcb56422587585ea6bd22b8fc",
+        "approved_revision": 184010520314365,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6ffe5c92-71ed-4fa5-ae56-a5dc8e9298b6",
+        "content_hash": "bb83916876a6104756a5992f73dad85de39f101e6752ba6a896a0f30e80117f6",
+        "approved_revision": 14810201740819,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f011d300-a8fe-47b5-b23a-4869ebd0e96e",
+        "content_hash": "32383a76ad3b5d50817c32bed69fb16c7b6d976cd2dc3b38a44be5c7f048c8f1",
+        "approved_revision": 152206001250989,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "15848f40-1803-454e-ad42-5e3bb0018b6a",
+        "content_hash": "3b3316a9cfc5f24c470859ba7adda7de9fa644cbb191312d96c9fe5ac0872f83",
+        "approved_revision": 141809149156686,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c1cb6860-de69-42c5-b123-f1e563745542",
+        "content_hash": "a67ebab863d55a7212bbea1a13b0f5b3e7b7bbd4d75edb13dc83331af36380a5",
+        "approved_revision": 19166755420884,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0890c935-7be8-4b15-8b2a-0f0b14378a73",
+        "content_hash": "8682b5a0c0887d9ce594c6e4320cfa1b61d8a8a253085934f38293b3fd8018e0",
+        "approved_revision": 211090142854381,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c093664f-87cb-438c-93b9-5a26eb246650",
+        "content_hash": "61a7f4348c911797065fbaf16b16246cb024dc5e4b8dd629eac03392c88380ae",
+        "approved_revision": 85568522175130,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2567c3c3-76e6-47cd-a6b9-05afb5101dee",
+        "content_hash": "1950d4dedad1acc979821cb21f62088883e3df2a9bd462b0bdc381d102c50827",
+        "approved_revision": 188996815380049,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ebdafa64-280a-48b2-b18e-6364ce097f73",
+        "content_hash": "7d2eb19a59d5dffa0866328a4c125de4864973839c37755483f7f57bf12ab6be",
+        "approved_revision": 150912136180384,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d29448aa-895a-436d-835d-de83674eeeab",
+        "content_hash": "d062c166d9ea6b62152017b83af510d3455e1e7d567fdc2f2c8665ee0db676f9",
+        "approved_revision": 213975088370452,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1ec671d9-64d5-4db6-94a8-bb7077c40544",
+        "content_hash": "f10960ccae98883ee77e7044571eaf3d3c037d50cca8956e0fb71cdfa18f1e05",
+        "approved_revision": 75140145141725,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "bcec45a0-59dc-4dfd-a159-b2ac45d322d0",
+        "content_hash": "daa8c89b06d5371e52b9311b33c0a56b3403c72a390ae1a3bc9e21ff3cfa7aca",
+        "approved_revision": 251559959192931,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "584dba2d-b9e5-4fd7-9e00-f9435a6a13e7",
+        "content_hash": "f38ccf65c1942788320d7a95437975c899c6441abd0690e9a8e6fceb2a2e2efe",
+        "approved_revision": 19983806022066,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ec7c5c6c-ca07-4792-a77a-697d1c3c8ba5",
+        "content_hash": "6e6dbc455f716708bd5cd6b9080796732042027887c195534564c5597eb17106",
+        "approved_revision": 196276125509817,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "59d40d52-13e7-423a-ad95-716ebb2b9830",
+        "content_hash": "f4c67c2bb201ae683f5b2743fc53acf27cb8297dd23a519373b3fdc6c27cb5c6",
+        "approved_revision": 146080943752265,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b5bbe103-ebef-4b78-a805-32e942e1292d",
+        "content_hash": "dafdd20f50e42024a8c22bc46d62b89bcb3d01aaf1faa7604f46c38db14ad0a8",
+        "approved_revision": 73832766308904,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "570f7e72-1200-4de1-b12a-5cc12f5c3262",
+        "content_hash": "a0a1ccecc2281dd59a6bfa25ee95ffbcbf64ab060c16560051b1f9f14de7ce0d",
+        "approved_revision": 271091548371135,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "19b8456e-25e8-49d7-9229-c831f85d68d2",
+        "content_hash": "b7cb5bd4c1e5410a562a209a4771fd9cd927dd0a6d64bc17277438c15003e046",
+        "approved_revision": 94522812255696,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c12e4bdd-bdc9-4fbd-aff7-6f2551a1cb92",
+        "content_hash": "8bbbe04b5245aebec9e18cefc220f6329acae40cea679c9d74d0903911efa794",
+        "approved_revision": 92190339634361,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "16321576-b327-46ef-9ae2-9f5af618aa06",
+        "content_hash": "cbd8b1a9e0fb86993850e1c1143fe6d9c797c855e59a61f7c6ff079bf1f21cbf",
+        "approved_revision": 272712308760377,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2664f369-776f-431b-a0c6-3490afe40f89",
+        "content_hash": "c493cea4e408e7d5a712adbb67161602ddf718ad95ba20d5fe080c285a8e286d",
+        "approved_revision": 200255751442235,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "07e6efa0-4265-490f-9aa2-2b48bf58651f",
+        "content_hash": "26d46b1b823ad675a0e85338b02116b7a71d5f261c837e261415505f342e8c45",
+        "approved_revision": 277646349190907,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b5d0f117-2882-41ac-9002-e9da5f7db212",
+        "content_hash": "4d414bbeb2f6ddb9b05b67115c2c512e040d4a7ebaaaaca0f225cca49b4b9162",
+        "approved_revision": 31700197279817,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "82cdefed-0505-4533-a5f0-c1503b36dc87",
+        "content_hash": "6473b63ab070b3cf82b3c34a8da591b491c37efa53e1bb9b9b8aa4688a7600b5",
+        "approved_revision": 198248498186581,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b9635878-e500-4587-bd53-015b7f8809cd",
+        "content_hash": "5d4248c3ae97fc5f0a0917a373248e93a3a398f7bdc73481213c06da9e1d5c36",
+        "approved_revision": 159719422009412,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0f06571f-3f1a-4355-8bbe-9aa85ae0b6d6",
+        "content_hash": "92b63764d52552d5209db8973d5b0a9898ea17ca2188ac85b50a7a59737617f0",
+        "approved_revision": 23610334107303,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "12a8f1c3-9a16-4826-b9b5-fa6460f67eb8",
+        "content_hash": "b1caa87c7f9f07be4abce7c4c674167460c05d93d21dbfbef33e4a206e9e7fea",
+        "approved_revision": 58795089857722,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1642da61-d7c1-4100-baa3-06d184cd7ba3",
+        "content_hash": "4bff9a73a194967a0360f9deaa5d1643c35e5fa3e799ee155d81f50f31fce804",
+        "approved_revision": 132872094524616,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "229893fd-7c41-4755-8425-d93f8e3cfa40",
+        "content_hash": "89a7bef171a58f33c6609db9e596174055604b8bc7ec889e68f6c8c067e0357c",
+        "approved_revision": 70322401373118,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "218f6ed1-d535-4972-82b5-ba6c768f0bcb",
+        "content_hash": "a0c52d6bdca77ff8be42575e69b4be6e9fdf08fa4c71a624d6a608a89fb507c6",
+        "approved_revision": 196684644269916,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "80ed0b37-2c0c-4544-9fbc-c312642b3eb4",
+        "content_hash": "d0f06b352c5f4b0a003e440d9fd3b7817965a3f65b9531a2e8415cd999d0b3b6",
+        "approved_revision": 78033195403802,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2399b492-8d19-45b7-9619-b12d578aa4f0",
+        "content_hash": "d9d42408eefae4e74527e78c5d2231b8bc5cd01b66c94499cb0aa1188bc15846",
+        "approved_revision": 18339284329380,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8f5b34d7-05d9-4283-a717-de71e9ffa2e1",
+        "content_hash": "6bbe5aac9f4ae0b46ad8b89a90d48625143dc1ea4749aa5275f5128bc057d968",
+        "approved_revision": 60009910355955,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "576ca827-5646-4195-8d0c-9acb64528750",
+        "content_hash": "af1cc862e4a10736a8c58ad52374ad002333f61fc7168f0ab8c5d7a9090e1907",
+        "approved_revision": 25906133410450,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7548f9c2-ed72-4dc4-bf50-6da9d27f95b8",
+        "content_hash": "e7ac24981b80a2e993f46ae658feb76dcd7ac2b809af5ca9985692836ab89e6f",
+        "approved_revision": 271530276374202,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a65d9593-0250-4f64-a89b-8f487650dcce",
+        "content_hash": "650a3043c60fd901252b7488c12735f1b4ba3dddde6d6cc4d354ba2155c45e6d",
+        "approved_revision": 71750196027735,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f17f2c2c-3bec-4e7c-a0ea-9188bc920eb6",
+        "content_hash": "ba1711d3382764440548fcf3de652981e5bf0bbbc76e3320767179bdc852cef3",
+        "approved_revision": 240956030151845,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8b5c91f0-89f0-4a5e-aad8-4d66e4ef091f",
+        "content_hash": "c2997618169b1e6f42965aa2aad76f4d8f20be9ca553b90154f4fe996e3b0c7e",
+        "approved_revision": 26099141456702,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "79828726-ee01-4421-98d4-ca77475468b6",
+        "content_hash": "7c90b19effc64a69ae3e687a6990fc1e3e8c9b4cc029fcc1d589af7f480cef94",
+        "approved_revision": 38030219149094,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "80670054-eb34-442e-aeba-a26f6a09d7a1",
+        "content_hash": "d3f33459f6895f862c8b186928fb5cc6c886d719d9e02005264e0a27f9371ce3",
+        "approved_revision": 205724045545155,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cef0a90d-0359-4173-a053-598b957087d6",
+        "content_hash": "3317863e1c2e17786a953349eb3aaff7c244efe55d0b768c74c4b242788755d3",
+        "approved_revision": 2604774916778,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3ac34969-af3e-4b79-a1cf-4b2efad36a74",
+        "content_hash": "59876cdb2cdc8f4b7bb668e97437bfe7e11b471f52d34b17e297e972b6a4dc36",
+        "approved_revision": 203730575686552,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7bb01ca3-1c89-4bd4-a5d9-b1c28cc20951",
+        "content_hash": "b399a74357b753dc65a6ef76a752bfda2ce6a275bfd6ee9ed888af8c55baf3d7",
+        "approved_revision": 11943491275195,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a1935c44-beb4-440a-8d0f-542a5721cd33",
+        "content_hash": "e40e2a1eab30f37ab4426f3831fcaf1d6efef25517caf302858c7df06455db24",
+        "approved_revision": 277546564513590,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1d888fc9-5262-4466-a558-acc0abfa2ca6",
+        "content_hash": "acba240f82085834ffb954cd2ccf24401dd568b483aa66bd7629ef8cedce9cac",
+        "approved_revision": 269241662814391,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9429da98-230b-40f3-9693-2affc67f0078",
+        "content_hash": "bccc92bacf4ea08e638abe47ed452d9990953e0c74ff8a28e1a927010fd64e7d",
+        "approved_revision": 241735470857263,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a116cb2f-6311-4830-bffb-239b02411017",
+        "content_hash": "e0cdb28e79351b3394015d66fe5dd281906969b657f7031f3c5fe49f845959cd",
+        "approved_revision": 189147484302349,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c374ff6e-17ac-4b89-bb3b-b9c05263250e",
+        "content_hash": "be5246c0feb8fc6795b9bf43d777a80c4713d1f01aa221e0c67b20ef4f161dd2",
+        "approved_revision": 92243127471614,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "eb33e35e-fffd-425b-a49b-45e1f02d82ac",
+        "content_hash": "fee3e08974f5bd83baa5b58d6304b63276b93f735df0b74be0e26b7f8d8d30bc",
+        "approved_revision": 123621772342667,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "02dc7282-97bd-4ad1-a908-a57861981000",
+        "content_hash": "ce067b9efaa269a6c0cf89aa1410ab688f04fceddfe1a562093195f464a6d371",
+        "approved_revision": 279764536539504,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ea6cfd5a-eb73-49a9-b928-49b68c847510",
+        "content_hash": "ec9ac99de74c4cec977ac14c8743b2ce18fb6658e02b8ff3af76ddc34a13fd72",
+        "approved_revision": 172828887165311,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "27494350-e029-4475-8a22-25d86a355cc2",
+        "content_hash": "3825df4fca7bb4c26345192d890d76c9f89f1c1b743565bdc6bbc05811ed1a4a",
+        "approved_revision": 101501936521726,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d99d110c-de84-41dc-bd7e-4f26e1a2af92",
+        "content_hash": "c1b85dde3335301b5428d0f4e932cacab722de8f7c38ebc4d523ae941affba3e",
+        "approved_revision": 141653131735211,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2691a03b-158b-4649-9c97-787fc2c08826",
+        "content_hash": "3fba093a9afdc6494b609f8814c933baf61c9d1eb1b510b27352f2034e5ec942",
+        "approved_revision": 136786096916920,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "aa9c7c07-3224-4454-8b5c-460e6047b39c",
+        "content_hash": "5a66025159383471ce2e6a0ea0b0e1205531ff67596efea4650ba4ac3bfc5375",
+        "approved_revision": 86712758641031,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6691ac5c-c627-4fc1-a55b-9b53d22684d8",
+        "content_hash": "453602bce43d9450b6ba7f78285e03cc125fb99111fb534456139033cd07bec4",
+        "approved_revision": 239865991217746,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8c5deb65-d92a-43d7-85f2-0593e93e2e9c",
+        "content_hash": "60e1a08d15eab50af6b442da9457ce5906d20471dee340b255404dd4b8909c3a",
+        "approved_revision": 253696193259784,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4c40bd55-d74e-4a5d-a683-33ff6d85d422",
+        "content_hash": "4b7e76231325ab9997bed208c6ef9b2b066ee3e049d9ecb1284a02cb7deef0d0",
+        "approved_revision": 10187691898723,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "083265c3-b703-4b55-93b4-3137127f6bcc",
+        "content_hash": "a0d601a0464c4b29ef647897df367a0822f24b3a22fd1354459dbe6a2f13b9de",
+        "approved_revision": 130923336427005,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2034f973-ccc7-4c7a-b0e7-d9ac68c49a1b",
+        "content_hash": "40e46b888f5b490fae3ae9b0517b3e978194f24f1ae5d8d8c6de2a4fc3620ba3",
+        "approved_revision": 95630316848445,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b401836b-ae95-4da6-b102-5462cb223a6d",
+        "content_hash": "69176dae4d894932eb0a474ea60f2c10856da693dadda7d7fbb7f195b4cb02ca",
+        "approved_revision": 213990930763623,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "63475805-d91a-42f6-a3af-f76d09d656fc",
+        "content_hash": "33dbeea8c39807a3aff29f486d8bc172f3f12cdf038ebad19b54e4a816ff8166",
+        "approved_revision": 279136462413315,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0a3c892c-2fdd-4504-aaae-febabff29d32",
+        "content_hash": "01819c6fb4c06745ab7e41758287619bbbccb6e6f3724c93158f9c6151f0b35e",
+        "approved_revision": 138413508637183,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e157bcbb-6ff5-4a1b-ae0b-7560823162ae",
+        "content_hash": "6719555ecc293a32f76f9a6b5790f489ebc500941bc94e8feca9045f909624be",
+        "approved_revision": 135803905492690,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0207c4ab-44c3-41d1-b52e-92a3c7e91ecf",
+        "content_hash": "4710077483a20ec68cea5b25af28e976b6049dd677256e1667cb1b699d1daaee",
+        "approved_revision": 46597367106157,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "efe9c020-8c7e-407f-a0f4-389e4877468c",
+        "content_hash": "86a18704659b45e9da244a5d560bff9dce8ba06eb48ede55261874aec6417c62",
+        "approved_revision": 141392706699285,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ad89aa3e-ccb1-45c7-83ce-6581208d7295",
+        "content_hash": "475399cc7e452bd065c4a621717e431d7afe4246a3261be8f2c115b3538bc18b",
+        "approved_revision": 272939489156446,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5382986a-6977-48ad-a6e4-5dfa2ff09bf0",
+        "content_hash": "ee2f40c588d81837622a815913b02150297912fe2be2ce4a5c5fc6ab892672a6",
+        "approved_revision": 232057849441207,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "debfbe67-e21c-427b-a1f1-59953e135148",
+        "content_hash": "bee605ecc39a950f949ae12b3315902739794faa46f1ddc63cf7a09fdde7910e",
+        "approved_revision": 172870073638881,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "428d1706-851b-483e-9a08-310399acbaf2",
+        "content_hash": "bdd73223025b7cedbbc74c034a82ef327ae0d61b95a0328086053e1d0756b9be",
+        "approved_revision": 213087600364769,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "bc4ba333-7211-4bb3-b6c1-03317da4464e",
+        "content_hash": "88fe0be5b4ff718aeac19f5aca0add2f9f9146c6ed3df9ed4afcbc251a2601ad",
+        "approved_revision": 281060235404292,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6acfc208-c5cd-4a3a-8781-d0d6990a501c",
+        "content_hash": "824fcaec1d2045bdbe999e1a53fd7bb248c739995e14392ee5daa51be4c4ab41",
+        "approved_revision": 34517228827596,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9128d531-b7f0-4599-ad17-881fa75733b5",
+        "content_hash": "861da0b9b4d1786d3bcd6e692e268a3a6dfa0f7d1c58d54fabdf185e65c01410",
+        "approved_revision": 186585650815662,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d12b35ad-501d-4252-a458-3a2b1b5087a8",
+        "content_hash": "561c6c6a9ad4e97ec8fe20c2a8a8d40087edeb90f715171c64ecc82c1e22fcfc",
+        "approved_revision": 205993338860606,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d4ccae79-f39c-479d-976b-8085a939ced8",
+        "content_hash": "8f300808a2fa64415d60135aa0521dae03afa07aba5c7e72ec03f613b5f983f1",
+        "approved_revision": 25460021480472,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d1269bb0-205c-4a99-9512-386d8422e231",
+        "content_hash": "91284d2698c860c9f215088e2f9aa4cdacffee5537faf514ed5517591980d08b",
+        "approved_revision": 95842465000251,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f51914dd-1ac0-4176-a715-d75c7c519eeb",
+        "content_hash": "a371005d4a8dadb07bc28ab4663fe6bd098c72a9b4051108775ea1897cd4428d",
+        "approved_revision": 132108029928576,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ec79ad17-1103-4a4d-a89b-d90c5197fc37",
+        "content_hash": "617d184f3ddcfbdab13f59adbf80ccc663d4f9f341e003dbae62bad0651b7656",
+        "approved_revision": 243870502391351,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f01d1b05-fe03-4bc2-9717-0cfb7182dd44",
+        "content_hash": "c6d5b8bb59fbf770e0910f1c25d573f25bd2903daa1120bb8228c45b0fe590a3",
+        "approved_revision": 163365114106281,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9e79354f-58be-4706-8192-ea8d51cc41d4",
+        "content_hash": "c5f3a5f8af3c63125f7b90ec36c5a4bd426a4dd2330d04d07b8fdc5c9aa3bc15",
+        "approved_revision": 118731673447978,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9d617a70-b216-4c91-8808-cf787225a2b3",
+        "content_hash": "c67dc0113e81071bbaf7a4aca59afa43fb39beb3d1e500f8b274d00fcf73bddb",
+        "approved_revision": 189720456948468,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "39cb33ee-da16-4892-a99b-e41bcceeead1",
+        "content_hash": "1583b4238faf714a13b024fd48aa30488d2b3b15a6aaf3c3b951d446b416307f",
+        "approved_revision": 229598813828390,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ce89210f-afb4-4f79-b0c9-a861335c43b9",
+        "content_hash": "814cf3a532a34be37fe0d3d8c74df4d9fee5a4054c9bdb0a4be10345bc041b39",
+        "approved_revision": 29827250620389,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "bb346b44-da01-401b-ab9e-4a5b1a8064c2",
+        "content_hash": "f8b21c2d2d1cf0b550da832a3787fe513d8a49ff9f7edb2d0d7c8c0a2ae30f8e",
+        "approved_revision": 141638967429865,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b55d1582-95d7-40df-a315-0557d6b163fc",
+        "content_hash": "7ba4e9b1357435d9ed6f1f8c64b19a6cc9c9d2726469e0672f9e33235f866993",
+        "approved_revision": 244077217898805,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "94189232-6029-4ea3-8361-2fc0ca94c0a3",
+        "content_hash": "d8a6638b6feaedcb9afb97510b484d6ca75cd52657a2e687dfd9ae0f957f0eb9",
+        "approved_revision": 59927124426653,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e3c205d5-d788-4943-82fb-a0094501f5dc",
+        "content_hash": "ac81eb8704fbb5e0cb82e907a373305a7658efa783e08fe7801604160991957c",
+        "approved_revision": 234492721092422,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0c10bf6f-b346-4de5-98ac-1e73247a992d",
+        "content_hash": "7802bf86c5925cbb571c753c20c43994e4a3ce56cbc5d465facfb5fe561f42ef",
+        "approved_revision": 180531585433261,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "dcae3836-15d2-4c02-ab60-8bc5faa4dea8",
+        "content_hash": "af1878d65adf4385b0a24cf1fd6a6ccf583cbfc685f906f0d670ebc47a2a5cf3",
+        "approved_revision": 114061771251000,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "605c8410-56b7-4aee-bc06-538d263abce8",
+        "content_hash": "868e923774dcf30b5aa549edcbfe5d8f4663aed6a0e2e6727a95d61cb028a3a2",
+        "approved_revision": 243203563571750,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "875b8be8-7573-4bff-a78d-fd0cf438d997",
+        "content_hash": "f0a839502d30e5be30aedb13bbe738ebff64202317124ac42fec6f54c9ab9128",
+        "approved_revision": 212923709537612,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1fb54c1f-9fae-4185-992a-8a740af969ef",
+        "content_hash": "d775a9cb8ae5ee94fde902e19c4b34be9e631c61f62096ea4572f3898891e070",
+        "approved_revision": 196223361373362,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2fad1c70-8230-4cb9-b61f-1ef0aebed127",
+        "content_hash": "e26dd24f013ea7f3edb1341d505ba6f2ef8319896270a526efa73da1f591c6fe",
+        "approved_revision": 10019627734739,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6853ec28-6806-4507-adda-e4f7dcc6d111",
+        "content_hash": "d61bbbbfd95806630838d5b0992c0c1d5dd23bcd8837fdaafa17c0d19d32c854",
+        "approved_revision": 75694101724074,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "69aa351a-6019-4792-a1e0-a4703b7b0d0a",
+        "content_hash": "003929df37011bcfc0d60ac8565e48fc056b916798c3d94a94d70de4ff44ad12",
+        "approved_revision": 265728438617480,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0c804058-a235-40c5-8dad-969a3c6d1ffa",
+        "content_hash": "dffd20d2c628897b9fe4f7b4cf4fea41f41c513dab17ff5e728261367caa7749",
+        "approved_revision": 141930842960779,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "787d4303-d6f2-4b1c-a3e6-939edd5ed06a",
+        "content_hash": "b185cc495a8934da3c9f3f6ad94ff069e6a4120007b96a10050f07becfa64c64",
+        "approved_revision": 260381096803686,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "22501a67-077c-4259-90fb-d0f4b610c5f1",
+        "content_hash": "183c8253668ab807212f5567b1307a0f688611173fc2c339a72d351e151e33ca",
+        "approved_revision": 231035216247884,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2a7ac721-eb8c-4af8-8dce-d0829739c4fe",
+        "content_hash": "2bb928457cc2df1462504407796e64741200b9e2d91daa69ae8f18c04f73caa1",
+        "approved_revision": 152966916896711,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "72f264b8-360e-4356-9d15-5f75a10d7033",
+        "content_hash": "8d8baffff1958a4873033b73492c5c8bba57e42815562444234c6934e6761a2e",
+        "approved_revision": 83299365094630,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1c41b593-0255-48d4-949b-d1800fb4301a",
+        "content_hash": "232040e4eee0a8ab8ff4fcd6170e9b84a0e06f69bed042d8ea1cc591885af4a6",
+        "approved_revision": 53615901501603,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "adca4d57-82d6-4be5-9678-e9400e5b774f",
+        "content_hash": "417f01560fb3c9729dde784d3b61ab0066fdf461172b2f5257853468c67b4061",
+        "approved_revision": 82609879301007,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b6555c14-70d7-4055-b0c5-490a2e2e31c6",
+        "content_hash": "0dff0adde78cd3ad730167e140c8b8e9983a8b842a1dab305819ef076665d7d0",
+        "approved_revision": 134982492645522,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e3f82b7e-4084-4511-98d9-dc93f86a6807",
+        "content_hash": "b05550d19f18c84c95d52e67858bf2a3a87077fea7688781e68f8c507a43c397",
+        "approved_revision": 235547988545330,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "81e4dc8e-b047-4c1b-86be-9bbd0eb6319f",
+        "content_hash": "44ccefef138e15714ba82b4e9f1567155e1bcdfb5344eff0df4612162c6fe660",
+        "approved_revision": 173383117047208,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "82499953-9a23-4cc1-9171-363232c29de9",
+        "content_hash": "434b6347d46425699314a3f02702afcaa721663bd6eb156a28cb9967daa8d29d",
+        "approved_revision": 231893413148335,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1151c728-a9a3-4e73-91e8-e89eccc64805",
+        "content_hash": "3cdaa8520cf236eb75faab4d826ff96613638733be4307637e2d4196eca5c0ba",
+        "approved_revision": 153033866697759,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cd3f4350-a974-45cf-907b-8e5ef0cbe228",
+        "content_hash": "8d91cb3112e3da2f775ce449b03e19f5ca5032612cf875cbd183b30c0621013e",
+        "approved_revision": 268436923986221,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "28bede38-c2e3-4b2d-9b43-59a7822bddb0",
+        "content_hash": "80976892841af658b651dc6cd05e250d282e6356b518f215cba26160eb9f9c6e",
+        "approved_revision": 60749584902867,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f1379028-4604-4c30-b51c-ee8253f7bf9b",
+        "content_hash": "3a15de36d354cc01e45472201bd70e4bb320ff77447fc5bd39fab9c4eb98d7f9",
+        "approved_revision": 31179258200365,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "283e82f8-dcc2-4179-94b1-1bafcecdca47",
+        "content_hash": "df94cb49c1d12866ad26883e1360280a6ae65402ff02f2bab49ac7753302023c",
+        "approved_revision": 56214849932381,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5573db42-d675-4fe3-9d9d-f21b27f3a6dd",
+        "content_hash": "0caaeed09644bfafda92dc7bdef80ad9f716de5356585a1921137d8d6fb0da01",
+        "approved_revision": 278076205029248,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4084f322-6cb0-417c-a52e-34ecff3339b1",
+        "content_hash": "85e2c9d6f1a4aa26772d9431fbc05c4c6a4efd70bbed236ab2ae4083b330ead4",
+        "approved_revision": 217952351474829,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "56400f58-8558-4783-a2f7-e581edff4ced",
+        "content_hash": "c839d8620149e9c165a55fa7afe9bea9214f6266231d5bce7c3f517ebb4cf015",
+        "approved_revision": 184214227048110,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "12d7957e-3988-4324-adc9-f8162b759142",
+        "content_hash": "f085cd9578dc6a98a06e2eaba13cd8020069e9137ef3d36a2b04b513e3b11aea",
+        "approved_revision": 158025764833816,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2cbfb2d9-10c9-4527-9834-2384949ee7f2",
+        "content_hash": "7fc2994c6aff4581db4a49cc2d21106bcda38c3e8cdfe57fc5d42ca52f120715",
+        "approved_revision": 211088233651316,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5a3a81d4-b519-4c68-9d92-f05acb7b7c25",
+        "content_hash": "f72c0ab6ac55e33655107163f3117a8257817baa754f46243da8812ff6253acf",
+        "approved_revision": 121861571418356,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d11d90ad-a785-4c60-a7ef-3512811cd03e",
+        "content_hash": "2b235df8c544b1b937b1ea256eb1f3544d6f23901616e6dd5a0564dac80f5fac",
+        "approved_revision": 59972121149794,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "68ec8f7a-0d96-4d67-9359-6e016f387a32",
+        "content_hash": "0b25c3b369bd26520d7566bad31321f41dd3db5aa42ce818e86d723b8b499399",
+        "approved_revision": 107646814627926,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cad0fb04-efcb-4de3-a08a-b6a4ef8664a7",
+        "content_hash": "258cc1b6942639639dc3e2d0da1c885cd151d4ee529010db30c0d8a87a8cce07",
+        "approved_revision": 54757118223813,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f6e68b07-42ab-46e6-8828-50cbb7bfc8e4",
+        "content_hash": "5b8375c897bd11f3f12aaa5c7e4623ca7dd01e89063b133f6f259d02f9bdbcca",
+        "approved_revision": 259392083312212,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "897a40cf-316a-483a-9db5-024df6542423",
+        "content_hash": "7d836cbf895c3aab481a9fce27f3cbad1d29022adc16089cd1947ae7990367ed",
+        "approved_revision": 73889709437810,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b221025d-a866-49e5-98e4-361ffcb14dd9",
+        "content_hash": "b1f67d2726e92816125cdc6a3781809b3b240eb91c63886cf2c6a60b47d1654c",
+        "approved_revision": 111292098404001,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a85c0902-572d-4377-b216-559de2e38de8",
+        "content_hash": "4ff79735558e0ab5ba452ff9c6ff46112cef1ab4f7a0503a09adb83a625beb26",
+        "approved_revision": 195215329700302,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1ea24357-cf65-416e-9940-c990fcb77353",
+        "content_hash": "b6a0bcf69e62e036c9d2638fd7f6a49bcd2ebbc0ed7449b6c64a83a509bd5022",
+        "approved_revision": 146601374062880,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "54032362-5cf5-478b-9103-6cd880a32546",
+        "content_hash": "c27d2a84cf6be856c8142390c19a174741676db667495db667220b36bfcc46c3",
+        "approved_revision": 113113814934226,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0d3c7457-c5b2-4494-b8f6-37584b95914b",
+        "content_hash": "e10b8badf361109c495facfc6dd92172f93e886b86b91d33a75d6a86e008d4df",
+        "approved_revision": 155400111119893,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ef3ade9f-770f-44a1-bc3a-d4aac69c45a0",
+        "content_hash": "f54ae984022ac0b249bb6673af9066745fe09262a17aecae116e5dfb12ed51d9",
+        "approved_revision": 96653529090811,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "51df5904-a165-4567-96f2-bd3f99c2b9db",
+        "content_hash": "dff0b9af2a3a0059ba1ad95e3c2fcbe348ad6ed1f7ee7a61c0271ec17417fba4",
+        "approved_revision": 89084018047940,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "930700f9-434d-455c-b405-40e8ec42ce5c",
+        "content_hash": "c1d73c418506c71c6e8637627b8d2bd320f062cc9217d9bf776b4323f6561d1f",
+        "approved_revision": 234001616602319,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2b5e311d-5772-46f9-aed6-ec6985d6b4f7",
+        "content_hash": "a7048027af23198281ea7eaf09a82113e85c6a83ce7bf74b0eca67f1b1d445cc",
+        "approved_revision": 155210844690540,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6da99f38-7911-4326-9b56-7a3bd042aafa",
+        "content_hash": "c3878b12c15e6b5b883b9fd068e32582eb35f74580f5d1571e8cd17db8905bdf",
+        "approved_revision": 180973476155612,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7a85d63d-9f91-41dc-a4ae-24af86141673",
+        "content_hash": "8d770c692831505acb1a2eb9d005d30f65283b5bc5a3311a013de520f92d21df",
+        "approved_revision": 159367123925697,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4c7500c3-9436-4c23-a080-0e7d23f9a0b6",
+        "content_hash": "d45c001fea15b51644b09046973ce040030432277fefeb2ed950f13759652d1c",
+        "approved_revision": 112882280913895,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e70909fc-dc65-46c9-a4f2-24779650401b",
+        "content_hash": "cfb53da194a3d44dba8779b16a020ab2542d52e673aaa50ed1df0311aa1067ff",
+        "approved_revision": 10075174200945,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c030ead6-79ce-4101-b15d-7b93c8a2baa7",
+        "content_hash": "9dfc2c70e7f7d70811fd2ecb4ab7cd8924678bcc6ce8c3de882d4b70b157f5c4",
+        "approved_revision": 209094113205839,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3e312643-22c0-4298-ae03-eb848801b595",
+        "content_hash": "a1e763373c999721317e125831265e2e2661ca71c94ffa98885dbe592cb4be0e",
+        "approved_revision": 75305893681328,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "40d0a564-7bf7-4d44-883d-7c5b3caae2c7",
+        "content_hash": "d7130e1c2318ceb3cc6edd439461bff705d236b09e3b16ed48bd552c1bc64fcc",
+        "approved_revision": 236563153479764,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "31f64761-afba-4669-aa00-499009273680",
+        "content_hash": "070803a83702b6af4ad12a31fcf15f0d3a8fb5331af404eb0499c390a216b584",
+        "approved_revision": 257309434471399,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0d7b888f-3a5b-4a00-a7f3-512905b97808",
+        "content_hash": "7f4290b06c35dd37b38c864c2a634a9c53a1211402e11c88c087e507de0ba9a6",
+        "approved_revision": 37552480970133,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9fbe0e9a-c8c4-477b-b7f0-2445f3838e9d",
+        "content_hash": "1a0b19dbadfda94954a807a1d010948662da0a483af7b97d83f2f0023971685b",
+        "approved_revision": 26750971450299,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "beebc634-4880-45f7-b912-6a325a641d36",
+        "content_hash": "b32713999e96edd8e98f1a3c0785821828586fe6672aa4b9dfd7856f7db86482",
+        "approved_revision": 177302312625254,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1efd3574-d255-4fed-9068-682937917221",
+        "content_hash": "8590cfcec11c3285989157e69e390e3ae33f17c577fe97d944df1b33de9194fb",
+        "approved_revision": 136218790633047,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9e949830-4068-499e-a528-e7b86654bcee",
+        "content_hash": "02e7e3df844da7a603eacd49b2d9aed50bdd1bbb82f7a7b52ce6f4ff9815058a",
+        "approved_revision": 78212239603676,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "abcbbab0-3048-4b01-bb78-bd827a341f1b",
+        "content_hash": "342f54c3f39de318b7504a882f2fdf3055196bee849dccbacf837a08b3f50232",
+        "approved_revision": 37599939052601,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "78cad44a-1b5f-41e3-9a73-c78c2e7223d5",
+        "content_hash": "2adbeaccc80f18e962fdfb28adb6866cb73a4fdf0c04af4d29a051833b752b4b",
+        "approved_revision": 240202418095803,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e7584027-cbee-42bf-be38-b2b2c7d69d08",
+        "content_hash": "038e63b532854c7c76bdde0f5c9b86349f3765904e4d82ba8d93fe70d5468888",
+        "approved_revision": 68707282958308,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "87d20570-83f3-45ab-b314-4bceec2b823b",
+        "content_hash": "6416b04f983ba68463274a2bd2f75ffc490c157bda9a91e5852844db3dab0e18",
+        "approved_revision": 119683276691696,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b824c046-549b-4573-bd4b-50bede1b6ac3",
+        "content_hash": "57c3f37d11e4fda786d3906688251d5189618a131fba64c27380c6fa69d35640",
+        "approved_revision": 199448867967242,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1e247fe1-07c9-4f93-b11c-376a693c5e75",
+        "content_hash": "a06509012f6290721de38f84c7cb5378b2ac18b2f3daa101129a77e0e5851639",
+        "approved_revision": 40327609165327,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "18e6ea92-463f-4d4e-82a0-f5ff4291e3b8",
+        "content_hash": "cd12e96a189d8635a43a3c9bde28b62bea3c3e0ac672a215b300510b5532f42a",
+        "approved_revision": 165522456403897,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "972199f0-648e-464d-bc97-797ed08ed63b",
+        "content_hash": "170050155e425f2a409197c1456de16ca5f3e00b4aea1ce418d6e00ec46b883a",
+        "approved_revision": 268690320212115,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e8fbd744-2740-4b5e-8198-6c66db0b8e28",
+        "content_hash": "caf308274d9971caecad6a7523054bfd0aa8c85257d69f1820746c89bf50c6d5",
+        "approved_revision": 178148963361527,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "25f11f4d-181d-460a-b39f-2e54032d1363",
+        "content_hash": "f6d62cecc1b4357ebdacfb53dcb30ed9637cf7c513a80388ebc2d47cd31f597e",
+        "approved_revision": 11380222081665,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8e7c83ec-86b2-41da-a116-b6626f94f10b",
+        "content_hash": "046f89f5c8beee5179e0f2494da9685259e972eaffb7c3681451a25cd5ee0a7b",
+        "approved_revision": 212022001834614,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1e0a1ee2-90c9-4ef7-ab6f-545f32b20bce",
+        "content_hash": "de993210d96074e63aaf866c1ac98c4fee33bc5604be3c06280a7040039be471",
+        "approved_revision": 193393592714670,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5fcc044c-6ccc-4c53-bb9a-d36502ad6296",
+        "content_hash": "ba7dc93ed808267e9d452627d5ea57a99690736853595f86495cf94f6aa4fa4c",
+        "approved_revision": 42446037564557,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b82d12ab-f28f-40c7-96ec-bc29c2aa9509",
+        "content_hash": "9ebe4f77e157054f8cae10863050d802b7e70a1045a121616c30264241294d9d",
+        "approved_revision": 217830189528724,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "23b6cbb3-94ed-4376-bc30-3ad2f2191993",
+        "content_hash": "bd7ca2b80b7ea5db366818069ba2a990735744b80a1e92f1e67033d90694aade",
+        "approved_revision": 242563663160425,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "990c56bb-7205-4de2-a985-95f18cdd49e4",
+        "content_hash": "aeff27a8ed25fdbe93d21d12bb73a84a7c2533f4b36567718861fbaa747bcf30",
+        "approved_revision": 130280852131689,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "473ea89b-2d79-428c-b45e-883e2c24f9df",
+        "content_hash": "f1f73e8c51f677cfe73b79d9c35cb62b736daa0ec3564ca9739563c8695ed67a",
+        "approved_revision": 60879409115686,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0c50c569-2fda-4cc6-aa96-cd3a06756636",
+        "content_hash": "b568ffa5519a63d16a97919bf3214038d2d4e5f2f2b24447e3bc4fdd2be67f41",
+        "approved_revision": 11167364517497,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f0ea2a2b-3e7b-491e-b2e4-49eda07e49ce",
+        "content_hash": "1cdf990ab5108b8ace052ac8f4a08cb31cdf1685bb78c5778507e9e8b408e0d6",
+        "approved_revision": 71576994658547,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "29166270-eb24-4046-9eea-16216fbb2cbe",
+        "content_hash": "baf986974db64224dd565ce037cde32f37c91b231526c9847f69b3e415a76853",
+        "approved_revision": 73844729053290,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "eda50ce6-7822-45d6-a775-2e8f78aee04a",
+        "content_hash": "bcc7a79ef2ae9c81710d48cdbaee60ced213afc28befeb0648108d5a3bfa8ed2",
+        "approved_revision": 183651281639620,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "26d0a4ac-22c6-4ec8-af42-23ed1bcec3b4",
+        "content_hash": "57407bd353d6bc00dbed7eafae7eb67234b58b7370a4641a9871785f880daf88",
+        "approved_revision": 27980711696991,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a83310d8-c864-4655-a90c-766d11e38755",
+        "content_hash": "f0959ed1a479b132b716e1ed5b1df06b9a1879e407383c65912bccddbc9a5411",
+        "approved_revision": 155789297604040,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6535b23b-3be7-403f-ae13-4484ee3e019c",
+        "content_hash": "6dd52d141563e786e23ed52e2852ad847ffed041293bcb8bf993140f1451f095",
+        "approved_revision": 60213176169376,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f41fe6e9-6b0d-46e5-9763-8034e74f94e5",
+        "content_hash": "78f6fae1376a44f50c749add8c4bcbfd470dbdbeb76921230fbeda8d86c6f10f",
+        "approved_revision": 198005018374282,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3557d790-70a7-436f-8a9b-fadbec873440",
+        "content_hash": "be875b5ee27ceaadafc7a3b4575ed729f73a1383dced2143c2ef2af774a3c6d5",
+        "approved_revision": 115940796785266,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "238df1cb-5cf5-41b2-b2f0-e12155bc8be8",
+        "content_hash": "3dba3e7ce174c411a8c0ae381af0010b972a57d76887528306c585f344183d6b",
+        "approved_revision": 109845799932672,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b7b5ef61-a3d9-4e19-85cb-3624dafd9d17",
+        "content_hash": "8431d1e0c610c32894fd4a1c40270571310719a87415d43243ff33709031b6d2",
+        "approved_revision": 33542774663419,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4320eb20-1d71-4b2d-8bf8-9ee5a2344a4f",
+        "content_hash": "1b6db9a338da48d6387260de8ae5ef80adf7bbff1ab75b3d059a8a480ea07756",
+        "approved_revision": 7106269982222,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "bcbc5b3a-84b1-4224-94f4-0ca92737b798",
+        "content_hash": "24afed65d4d3d37728f4358430907d141e7cd0d7065c86746976dcd3fb1dad6d",
+        "approved_revision": 128881247197844,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "93cb2af3-c8b0-49a8-b912-16c3e49a2010",
+        "content_hash": "f3694baad17edef4ae4859aa2b6a90d6ca3ca8ad7a7037cfeaf70a64be5c69d1",
+        "approved_revision": 199676710951393,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "eeeaf167-8b32-45f0-944a-729765a54c72",
+        "content_hash": "2e57e0ce47b4c2a7effea517c0538a0b0538c856b2dae3386ca3cb50848d25e7",
+        "approved_revision": 136351339142717,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ed9937dc-488e-4829-9cb1-7d1d12ecd959",
+        "content_hash": "3f0b303a585104e3200134fe32523f7dcb039c4a27a4867df61ce178c7585285",
+        "approved_revision": 188832870654318,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7e42a735-5a5f-4520-9635-e41b1a4217c7",
+        "content_hash": "f1a68b4449f6d9dcb61c12821885f8f06106ac8113f94314022bfbc69e39aa76",
+        "approved_revision": 7735256164522,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "50970483-10ff-470e-b715-922fe8567c83",
+        "content_hash": "95591cccd5f0b02a5a8931b515f5c908cb00d2148d6d268a1e85720cf8af3007",
+        "approved_revision": 46897832451961,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6b51ed2b-875b-45ab-bdd1-86eecae586e2",
+        "content_hash": "b9758145d5bba764e0d804664afefd2174607f5044292f250dda1dce6e61bc06",
+        "approved_revision": 35808569177857,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "8f093e3e-d66a-4d68-9652-478800443dd0",
+        "content_hash": "e25186d4eed59727368e69a2fdd13ed73092c5fec526aa4767eba90b4acc1767",
+        "approved_revision": 120261645205108,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "ac133c47-5c87-4dd1-8a0f-1cdbb41e0e75",
+        "content_hash": "89ac02905c8697b7366a2df471f89b65b697c31cf2bda40f2d164d224d11bec3",
+        "approved_revision": 32291144061161,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1e216b9b-3bf5-42f7-9e7c-72ee0a14bf9c",
+        "content_hash": "82f06ef5b73548fdbf7c3cc728ab344cb8d3f1bac4532853aa431ca34b89260b",
+        "approved_revision": 198476431941578,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "256827d8-f0f2-466c-bab9-701de507d291",
+        "content_hash": "f70c40b1dd67a570116ab9f373e1398126d0d12b2f5b17d6a4b009c384e10980",
+        "approved_revision": 133199957455265,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5b1f28cf-b28b-4f58-afb7-7c27ad1b56a2",
+        "content_hash": "fc4376a583f8ee5648682476dd808bbb6dac7801079f0395b50c11a96cc381a4",
+        "approved_revision": 32269878209325,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9be9ce65-9234-4dda-8e3b-d77d56594b02",
+        "content_hash": "34f6282f1e4537d01ead6d9c8342e80a505285f510c8565e763bce56400f3c84",
+        "approved_revision": 198809082585425,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "cec0bc33-c4b6-47d1-bff2-b13404e877dc",
+        "content_hash": "e3d569b62c150765b7830a62cc1f4084490304d67e882cebaed6ef97488d3f9f",
+        "approved_revision": 278459262376998,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a4b54e6f-b8e6-4231-86bb-fe64f514c5bb",
+        "content_hash": "a8f1076f73bda0428bbaae2df1330068cebc3c47dc0e52590b92197bff97daf6",
+        "approved_revision": 15827238620978,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "701b3d26-220e-43e3-b6a1-aff73e066eed",
+        "content_hash": "c44bc405a5a7c07b843bbd95acc609d99f94e99d0157605e6b280a77b830316f",
+        "approved_revision": 250675460579254,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      }
+    ],
+    "validation": [
+      {
+        "id": "e1fcb108-f1b7-42e1-8b55-a40c50251bdb",
+        "content_hash": "61508250971fe55597fcfec21a8008d8ff73e1033ef9bed12f16ac9a7cfc8d20",
+        "approved_revision": 85714023951360,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "571a989f-1648-436f-9bef-9353414d607c",
+        "content_hash": "55c4ca7bd4b0e0e12356afac4b8a87beb9dc2037a953635c828d3a7072075ca6",
+        "approved_revision": 100869411126339,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "520b6f77-38d6-4dae-8929-7ac0415e8bad",
+        "content_hash": "99876fc233229a1f660b19c85576d2a0e8039f94f9eb0f3eee6380b027b1fa4b",
+        "approved_revision": 167117506709490,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "4363acc0-1dac-4473-94fd-d248b46e4863",
+        "content_hash": "fd324010b0ce1d615fc1bc6a3b9e2a0522d5ef80fd97584be7b8e6a9985ec818",
+        "approved_revision": 133990624281511,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c8774cfc-3986-4f32-8dcc-1b9246f6e9b4",
+        "content_hash": "3ecc4f41de1abd0e298937acb3bf175c30f05b5126c98eb097af8fa39b2ccc07",
+        "approved_revision": 222745638213896,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "305aec82-50d6-41b6-a3f0-5fb5608cf29e",
+        "content_hash": "fa4833c65f000689707259515d6d42a1a715f3df113100ea662f97ecb503ddf1",
+        "approved_revision": 85585008850186,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "78828a11-b43d-47b6-8c03-c8fff1c4d03f",
+        "content_hash": "9ace392b36e68029175578c0e110b249bd288e7150ffcae90f27a95398ee81a5",
+        "approved_revision": 4137074854528,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "a6c381dd-836c-4b12-ab93-1ceae7a96779",
+        "content_hash": "4c322aaaf7e3b73aaa56edb3a5d5252f1a1795f53261c962052741fdfbae7a82",
+        "approved_revision": 252693496684180,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "96212e85-5830-429a-8c66-e448135abfe3",
+        "content_hash": "796bc6baf0bfd9a9c75fde122b4cb7b7c176ce6ba9c3c1db298df22a30254827",
+        "approved_revision": 248603745762329,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f5db1d24-ebae-4070-95eb-e29c3f37a3b1",
+        "content_hash": "ff3e6b80c42b43710aa506d4a56945cd2909e65e62ac03cd20fd7a9d2995caa2",
+        "approved_revision": 174521514986090,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b6947466-fc24-47de-b05c-316f792b96ff",
+        "content_hash": "ce3d6373811a734fe5e5a50d33995553b49dceb3d162ffb3e1491976920c626b",
+        "approved_revision": 83449501928788,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d60c15d4-5d40-4c8f-bc08-9fea0e300765",
+        "content_hash": "2aa411de33a62f9a810d6001e9c0913fc50bb79c27ea5aaa860da42a3176377b",
+        "approved_revision": 57867644309061,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7656bcef-aaea-4c3f-befb-adf6570dd26d",
+        "content_hash": "bb93b54b5645dd290008eb1f0f81c20fa282f5904d03825cc8e1ec6e0986cbb6",
+        "approved_revision": 66303093472500,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c06826a7-5c94-425b-8243-6c8a15aa6368",
+        "content_hash": "57f8c9121ef00549d0d65310398b5f0e3a5d7775f8feb562005e5734878c024d",
+        "approved_revision": 258340437247059,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0dc0aeaf-b68a-4db4-92a5-9786dae08988",
+        "content_hash": "22eb745b1da6d02b795022f70909f1e5d6aed13dca0b2330b62112a19ac30e8f",
+        "approved_revision": 137826014440828,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "275bdf7a-6a3e-4cd7-be1f-22ff4c5d6282",
+        "content_hash": "0e09455f98ec5b42be0909795aa1c852e676d6626e8ee8049d4fbdf49211b11a",
+        "approved_revision": 11262777294774,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "524286b4-6689-45fe-adf4-ecae9fea490e",
+        "content_hash": "29bd18d424ee0f6e6b0cb125e6ddf78d8d68f0dca78e25c00a84cd1cf9658863",
+        "approved_revision": 106994675377385,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "fe2dc35a-8031-4b77-a924-c67d653620f0",
+        "content_hash": "87ce85ce3520ad333622b131c67d6acc08221a67af6273b91e8c92ab3a741bbd",
+        "approved_revision": 164661563531031,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "0434a6a9-e88d-4f65-bf3c-fc2c44deb9ba",
+        "content_hash": "1c83acf704162b69b2234c910364188bc7e81b3cd113aaf318dbbcc972783708",
+        "approved_revision": 70565343560438,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "da4c0d48-d513-47dc-aef4-fe6a2b41d4b0",
+        "content_hash": "7699fe5d14b7210898c279e5b38802f63a5aa1dcac3fb26f4a6a535d2115a966",
+        "approved_revision": 18945198701864,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "bca3acb2-cea6-4dcf-88ba-e48d6c1c5e8e",
+        "content_hash": "e6244cf15c7e73cb2bea9d6bd7a78c853aa23f303205ca038c42b62920efdfad",
+        "approved_revision": 30251647411178,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e1247aea-678f-4c91-bf24-668328e3b3ef",
+        "content_hash": "24a6a2351fdafb26ac4e6c393f5ae1df4eea63c0d4d21cba454714a300ee7f7a",
+        "approved_revision": 135413960081919,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b6f845c1-150a-4584-ba63-750a8ba51dd1",
+        "content_hash": "967c44b19ce14e6e7be90d863ef24a368895aef7b950f18dfcb473df41aa86b1",
+        "approved_revision": 222816689312705,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "61aff308-c389-42e8-a25c-7f23a85f68c1",
+        "content_hash": "0ff3a8d17df3a5468adce1d81e226c3a2339380d6d3cfa4e80c7d1b4c80e48ce",
+        "approved_revision": 155412508874657,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "dd6f54f1-0999-4daa-933b-54fc60db7b57",
+        "content_hash": "4279c0250d7bd93d22eba28928f49e22ff1f2325d088f058b55265c99fce6dfb",
+        "approved_revision": 10073743775110,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9b30b55a-41fb-4bda-b372-f5b2e63b53ca",
+        "content_hash": "6b7476efd59efbb77f677684605878fe608c682992818c0b0735f2803ece65a9",
+        "approved_revision": 199745065794841,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c33016ed-ce76-4f50-9639-2e76749b980a",
+        "content_hash": "52888d919ec02d3cfd0da1ed525df7d74005828f66160c999242795871e00c37",
+        "approved_revision": 227133603375330,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "12625a52-bbf9-411a-ad4b-6848891a2062",
+        "content_hash": "b9fc1fa727ed5206c2f64f3c412abe3690483787858ec9154099273b314e6fd5",
+        "approved_revision": 239961873082201,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "25b91bbb-c8a2-4d70-9466-2cf594afce6a",
+        "content_hash": "be515e23799c34a41556c4b18984a151f8154da40b148f459ed4b34d044bcda0",
+        "approved_revision": 201517668586728,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "51bf4001-ae46-4dbf-98b9-e0e40e4e4486",
+        "content_hash": "2d307017ccf46f9755410e9aaffad7d5508052826de793dd64282180d4fc949c",
+        "approved_revision": 223237675704124,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f7eeb066-84f9-4f85-8372-68a337de7ba8",
+        "content_hash": "490d0e71441bdce99f596b7e7a2adffc06d1f9e6d9b7b0bebb9fe93f92f3073c",
+        "approved_revision": 85459292724341,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "9e669db1-2779-432c-96fb-3b7c92d4913f",
+        "content_hash": "6f32991b37f4dacac2f937c0d1ef04dd830c0b5000c42b66d71b20d464fefe93",
+        "approved_revision": 109867138585289,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "1f2f6b6d-6b15-49b0-b1e6-bb33861c53a6",
+        "content_hash": "527331ba8c3827a4b23205217af65372b3cf21e3c2e7e554cdda9d5697efa134",
+        "approved_revision": 193575812084884,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f9070834-5c9d-4287-9b15-eae6aff10660",
+        "content_hash": "c10bff8cca34d465d6d190a79fb7a93f9568d0d2c16fe1cd27a177a9471e4ac3",
+        "approved_revision": 27721078614622,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "d66856b9-f078-4b06-b85b-8fd243b55106",
+        "content_hash": "adeeabc5feb3619b0b408773dad8bb32302e46f9b6d03e8982559f1cf7e0dabd",
+        "approved_revision": 234357359371069,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5173e376-f09e-4564-bdfc-0cdb90c60d01",
+        "content_hash": "e9362690c4b78197bbc350c97c5e962ffe30f09cfef68299d776c45ee4dbe35e",
+        "approved_revision": 201997170733384,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "554d916a-e9e5-4ba0-9839-e8a81707ae18",
+        "content_hash": "21cb5687598ce69b05602e858fb30b1ab4913d3eee35326a1e03af528575b207",
+        "approved_revision": 33352985760366,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "565e67b0-a887-46d9-9f1b-a2b42d5808bd",
+        "content_hash": "db85442dac33e8d74e786f341da3e07eb6f3210a3c5ac1e81598a7beabbbe1a6",
+        "approved_revision": 15587533150677,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "2f7d8a57-4219-426b-98c4-3a8545187125",
+        "content_hash": "b22d1ab8204db64c84f939a6de83e00c2b62927eba5e92fcb55345d34ceaace1",
+        "approved_revision": 172509399680568,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "5ea74719-1103-489c-97ef-7dec07cd0174",
+        "content_hash": "33e445d2f78245999286ccf7b67fa80361013ce23dd840b37cef8e3bd4778891",
+        "approved_revision": 29059406725978,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "83b9f035-c599-4813-bd02-ac4372b8b209",
+        "content_hash": "c91bc49ec79e10c2afb75eebc8d83e366006d73e50da8b46a4a5a4cb25f06fa9",
+        "approved_revision": 160464511223613,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3fb8629a-f281-4f20-9301-60c45263f8cc",
+        "content_hash": "915e63fdab8bb4047acae76d663e59bb81ace131adf466803825e6d2a58e443c",
+        "approved_revision": 144821405069859,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "15010c41-4eab-4a84-96a5-38ff94f2de62",
+        "content_hash": "5bbebd2d489be9be164207f74e155f5813533a2df3160723b239faf92a35d35e",
+        "approved_revision": 198602124578020,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e1f503f0-2d5f-4f4e-8ebe-f192b0676aa6",
+        "content_hash": "c9c5dc05fdbd98ecbfeeacc68e993377d3251f5f2f887a3842c7e3869b243386",
+        "approved_revision": 277300288624599,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "954a622f-109a-4385-b1b8-28df9ecd5979",
+        "content_hash": "7cd6de139c247167c47364bc83041e5c933710e915f0f2a65fc74a87ba88635b",
+        "approved_revision": 51664635897924,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7f0f3067-f646-4042-8cd1-2525b1d5b03e",
+        "content_hash": "37de2a6118deeb296705709f29a18fdad51211b7aa510c7568e317646349dcd4",
+        "approved_revision": 150051298684924,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "e14c71de-6d40-4948-a882-35a112dc26ed",
+        "content_hash": "53651bb0372d53be73bec1fac78f1187c207baceec16b6426854a400c5bfc17f",
+        "approved_revision": 153688876413803,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "acaeeb0b-66c2-42e7-a3b3-79ac03c93f82",
+        "content_hash": "692a23cf492d972adcbdfa3670b71cefcbfe04c4849ee1521da3bd56b84e86d9",
+        "approved_revision": 30163078439507,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "54641ea9-d7ef-4e6c-b592-bf3aa6a679d6",
+        "content_hash": "a9dc932af67150b96512a73c7bb26e88d02e090a62d9f23151eae0e5e858f1d4",
+        "approved_revision": 223298331621760,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0111fca2-2948-4d35-a024-73a3395ff7c6",
+        "content_hash": "023a7c6f073be82ec417b6231e8341287b4a0b0cc7f2d8a0672ade7f68576197",
+        "approved_revision": 174826868451065,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "6bb548c0-db8f-4040-bdbe-868085d29244",
+        "content_hash": "45874de45ed9ad805bf156eb60a818b4ffa069ce21295a9b9056e412c2ad8a9e",
+        "approved_revision": 259981559158889,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "96944a7a-0985-483d-9cce-d8b5a7f8395e",
+        "content_hash": "1f63635a0a796232c03fa7dd50d2b11f31e0e65fed6007ca729ba0e03a3a3b54",
+        "approved_revision": 16087661455452,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "00f84d3e-e7b7-48d7-be77-c7048516fd9f",
+        "content_hash": "0fb6a9251ee2f6466354ba81afc36a5d007e72621c56f77ca7e9e3369e16e879",
+        "approved_revision": 211913361075271,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "3c359b3a-7026-453b-b59c-b654d409c43f",
+        "content_hash": "3db38bc7d0db0b7258a69d1d880c9dba6fd48629835330f0375c25382f079a8f",
+        "approved_revision": 162402169088722,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "0d0be366-ddf6-4473-82a6-52e719e69430",
+        "content_hash": "d7f1fa4c2fdd5248fc2a0035459b6d7cf9b10819f660a53e89f543f079d8ad70",
+        "approved_revision": 178034798907193,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "19822191-6fa0-432b-8141-def52c884e4f",
+        "content_hash": "96f056fb0fd773a60c4d1e746bdbf3715622935b5b4d9569e7fcb085e8fb9275",
+        "approved_revision": 26274849429616,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "7e35bd6d-43d8-4a07-8b5e-6a610e315528",
+        "content_hash": "0c2d1713268ead6afbd7806e2041dd5e08b9b245ce59239ba32044ad6a53c6a9",
+        "approved_revision": 43794535217629,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c0f56b08-ebd5-48a1-9814-507bde2e2926",
+        "content_hash": "d51fa58fa24c848585d9f74f53394229e1d6f69612fc4e6751b2ea2f103892c7",
+        "approved_revision": 92620861202789,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "818752de-2173-4d7f-8139-f2627052f4c7",
+        "content_hash": "e25fd4fe8a6eb91fdcf442df79dd4e3761244ba41af0d1cdeb046c1de1e35ae7",
+        "approved_revision": 260149331143440,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "f390e9cc-2896-4a9e-98a0-177e0e91662f",
+        "content_hash": "ac2f25d302ee44dff99726d5e87c4a8c7dce98bac84f1db4ed6758ccd68290f1",
+        "approved_revision": 221788537530888,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "92b79f1e-fbc7-4196-9657-ad9638a9a2e0",
+        "content_hash": "375d566d7b8cde11a80ce9cee56177ad61d98f122b0c8666e45a60d86227a144",
+        "approved_revision": 48672866209539,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "c48a1ff2-8ad8-4b2a-be46-58fe674041ed",
+        "content_hash": "e6071e8811bb1f2e03f27d4dc8d38ca724aeb17f172f83723d2a64f9e84b231b",
+        "approved_revision": 44929494520963,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "16277a6e-73b2-40f0-a705-be960ef677b3",
+        "content_hash": "c43af3688fe95556212e00f513ee0762dbbb16bda50f9b14178ff59d9b85ed83",
+        "approved_revision": 129303923233690,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      },
+      {
+        "id": "b72ffd81-172a-4bfe-aed4-cd48f7a5ffff",
+        "content_hash": "1ff48c56306474c1a4b123af257d44b625acd3de24cc98797e2743adc6dd44ee",
+        "approved_revision": 7443392009463,
+        "approved_at": "2026-10-25T15:39:05.380543+00:00"
+      }
+    ],
+    "gold": [
+      {
+        "id": "cc6feb63-10a3-4fd4-a8a8-7866032cdf89",
+        "content_hash": "0c1fa0785ebc6f486c967c8e0b7c4b40126f91f998df452aca5f43f47fe33eb9",
+        "approved_revision": 119481661170965,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "aa358eaf-d423-4c98-bd65-c25816481813",
+        "content_hash": "1a2f1a4895cc09b588cac594403224d1d1a5b086d3d8a4153ba98c32f4c44254",
+        "approved_revision": 62112901688891,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "3d912a36-e664-4477-8e30-416373c71d76",
+        "content_hash": "1c7dafed636c26eecb52a3b22776f62fd848a7b4038e45b6e1cfe11e81ab3c05",
+        "approved_revision": 65410655970123,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "eee0a69b-8eb0-47bc-8f80-7e97481e78b3",
+        "content_hash": "270f506f45ba1cbeb6c445c542f271554673d07af7b3f313e52b3e2b048b7bb9",
+        "approved_revision": 8784423983397,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "3a15ac82-32c5-4de3-9854-0e0a377d8ca3",
+        "content_hash": "2d0dd4999b7210e6bbde7898d121e72d43ee0f1ed0c40fc404ae7611978b12f1",
+        "approved_revision": 152283197880422,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "99ec2a7c-fc03-41be-a4d9-5ac3c3c06808",
+        "content_hash": "4ae41fbd9088717fa7c814d7c467227838b1418bc8c9c8164044668ba7c5dc3e",
+        "approved_revision": 199380445186804,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "643ae4b2-9652-469e-b6b9-394010ca9f36",
+        "content_hash": "4d300552b96d1718c7ab76511b71fe4ae5fce22b66214ab63022fc261109e3ea",
+        "approved_revision": 177835215937800,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "60a3fbc0-7fad-4cfb-930b-3f171d94219d",
+        "content_hash": "68d4f5d7141518796db67562de9ce47f22d6fd7ee20c11ee9b0867ed6ca23aa4",
+        "approved_revision": 118849621812796,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "aad0eb33-80f6-4dc3-8833-4e3ecb08c838",
+        "content_hash": "76b94171be446b31aaa4b0a130057348446ddf3eab665272aaa5599c407bcdd5",
+        "approved_revision": 182233532822185,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "998d3bea-f3b5-4748-a96c-436ddb27e598",
+        "content_hash": "8032fb7f16d2b0a949600f0f440019abe784b5e20372b8903e66c38be6999fa5",
+        "approved_revision": 250682366881956,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "b132ac44-56bb-49c0-8fca-15099add287c",
+        "content_hash": "806bcd17995546e1849383e42eaf87f2e1febe929b663735f9dcc7a4622a8950",
+        "approved_revision": 10650789058294,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "f8c4770e-2bcb-4b85-9f21-5e1b06a0386b",
+        "content_hash": "90d675eccafbf09842a30990947e314c7b5b63574f71567bc8671b6a1cd527cc",
+        "approved_revision": 38683767276416,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "ef0fa2f4-76f2-4ce2-a144-ae0b9206012e",
+        "content_hash": "926da149b6361abc5051702ebad20d28cf847b665e7bdb2f68b78226f123847f",
+        "approved_revision": 2637979194632,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "839ec534-6d63-4685-9662-34f9dbe5436a",
+        "content_hash": "94287554687a62ef0347f5a883d0d0cfb374ef75decc4de8e5261208fc855131",
+        "approved_revision": 199174988752800,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "b26647fb-47b0-42a9-ad59-33963087e0ba",
+        "content_hash": "9cd1550326cb58c0c3447cd7664302ffd70b2ca54e14677190f2f6cdb2be855b",
+        "approved_revision": 279530397831169,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "0bf4cd04-0e9c-4d9e-91de-f60318ea33db",
+        "content_hash": "9d6eb5baac9450bf08cce18c492473c719024f350b1f74bfb64a4e4ad22c1533",
+        "approved_revision": 215582244790396,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "c057c2ea-24aa-45b1-aa84-5742f24cc944",
+        "content_hash": "a7355a41395617894bcc8c93658cbda70d9616b6219cc3e544035d186cfbb5b1",
+        "approved_revision": 38544112896986,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "0a3e5a17-e656-4264-a4c6-03ab056a0687",
+        "content_hash": "aff20c379b932e470f0209c58ed04ac86c6e0f5d93f14c4bdfb7f2f0456b1262",
+        "approved_revision": 196746138145956,
+        "approved_at": "2026-10-25T07:53:19.478592+00:00"
+      },
+      {
+        "id": "ce0f2da9-063f-47f5-96db-f151072b8a83",
+        "content_hash": "baffc9d34a986ed39e6990739fb7c300583a2f19d7561121b51340aec1eab3e0",
+        "approved_revision": 103790008213199,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "d199cde4-fb8e-455e-87a0-f25ec066b699",
+        "content_hash": "bb4e994fffb4229f648addae6e10d6157917f3cccfb2a333f14c90173aab33f9",
+        "approved_revision": 248910579584034,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "bc095648-b81d-4c2e-9e7f-41223f36eb42",
+        "content_hash": "e505575413bdbf1ed9b7541f2b98022c8308dc2ca7224b15b32f82802ebfbaf4",
+        "approved_revision": 132871466222467,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "33aecfd4-af3c-44e5-84ec-411d6ff9261c",
+        "content_hash": "f5107e93ed79b4f77bc724e68c242ffd827467b228d6fc9a65c8332b3186b812",
+        "approved_revision": 123928168157859,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "70decc08-eab7-45d4-8059-a453af3ff22a",
+        "content_hash": "f54d7ccaf9460f73b7fdb2c7ed8ae235eaafea3e7ebbe2d6a45888bf4eaadc08",
+        "approved_revision": 142684636628227,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      },
+      {
+        "id": "93f242b0-1653-4072-a56b-92fdc94e065d",
+        "content_hash": "f54da0db64357882f08e7e6b837b6b3af76c2b9a2491d2b3b8b87ebdb8b54196",
+        "approved_revision": 271735734023162,
+        "approved_at": "2026-10-25T07:52:59.753018+00:00"
+      },
+      {
+        "id": "2746c0fa-bfe2-440d-81df-82a7b8dd4aa7",
+        "content_hash": "f9ce74ba3ff1698c38ecf5a135f60121f74ba9cb2a5cd7f7c227ab0275267ac1",
+        "approved_revision": 219300632058551,
+        "approved_at": "2026-10-25T07:53:32.376605+00:00"
+      }
+    ],
+    "excluded": []
+  },
+  "warnings": [
+    "Gold has no examples of category:airport",
+    "Gold has no examples of category:bank",
+    "Gold has no examples of category:market",
+    "Gold has no examples of category:pharmacy",
+    "Gold has no examples of category:restaurant",
+    "Gold has no examples of category:sports_facility",
+    "Gold has no examples of category:university"
+  ]
+}

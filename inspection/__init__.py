@@ -1,0 +1,1 @@
+"""Interactive POI prediction inspection."""

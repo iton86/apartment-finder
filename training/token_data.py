@@ -58,8 +58,8 @@ def split_rows(rows: list[dict], validation_fraction: float, seed: int) -> dict[
 
 
 def name_spans(row: dict) -> list[tuple[int, int, str]]:
-    """Locate names within evidence; reject overlaps that a BIO head cannot express."""
-    spans = set()
+    """Locate names within evidence, keeping the first POI when names overlap."""
+    spans = []
     for poi in row["pois"]:
         evidence = find_evidence(poi["evidence"], row["description"])
         if evidence is None:
@@ -67,12 +67,14 @@ def name_spans(row: dict) -> list[tuple[int, int, str]]:
         name = find_evidence(poi["name"], row["description"][evidence[0] : evidence[1]])
         if name is None:
             raise ValueError("POI name not found in evidence")
-        spans.add((evidence[0] + name[0], evidence[0] + name[1], poi["category"]))
-    ordered = sorted(spans)
-    for left, right in zip(ordered, ordered[1:]):
-        if left[1] > right[0]:
-            raise ValueError(f"Row {row.get('id')}: overlapping POI names cannot use BIO tagging")
-    return ordered
+        start, end = evidence[0] + name[0], evidence[0] + name[1]
+        if any(
+            start < existing_end and end > existing_start
+            for existing_start, existing_end, _ in spans
+        ):
+            continue
+        spans.append((start, end, poi["category"]))
+    return sorted(spans)
 
 
 def encode_row(row: dict, tokenizer, max_length: int | None) -> dict:

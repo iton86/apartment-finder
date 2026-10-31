@@ -45,6 +45,10 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.5",
 ]
+inspection = [
+    "streamlit>=1.40",
+    "pandas>=2.2",
+]
 tracking = [
     "mlflow>=3.7,<4",
 ]
