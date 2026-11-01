@@ -8,33 +8,43 @@ import xml.etree.ElementTree as ET
 from training.label_studio import build_tasks, convert_export, labeling_config
 from training.schema import PoiExtraction, find_problems
 from training.teacher.prompt import SYSTEM_PROMPT
+from training.token_data import name_spans
 
 
 class StreetMarketContractTest(unittest.TestCase):
     def test_prompt_examples_validate_and_round_trip(self):
         examples = [
-            (match.group(1), json.JSONDecoder().raw_decode(SYSTEM_PROMPT[match.end():])[0])
+            (match.group(1), json.JSONDecoder().raw_decode(SYSTEM_PROMPT[match.end() :])[0])
             for match in re.finditer(r"<ad>\n(.*?)\n</ad>\n", SYSTEM_PROMPT, re.DOTALL)
         ]
-        self.assertEqual(len(examples), 2)
+        self.assertEqual(len(examples), 4)
         for text, output in examples:
             extraction = PoiExtraction.model_validate(output)
             self.assertEqual(find_problems(extraction, text), [])
             pois = extraction.model_dump(mode="json")["pois"]
             raw = {
-                "id": "imot.bg:1", "content_hash": "a" * 64,
-                "title": "Продава", "city": "София", "area": "",
-                "url": "https://example.com/1", "description": text,
+                "id": "imot.bg:1",
+                "content_hash": "a" * 64,
+                "title": "Продава",
+                "city": "София",
+                "area": "",
+                "url": "https://example.com/1",
+                "description": text,
             }
             teacher = {
-                "content_hash": raw["content_hash"], "model": "test",
-                "status": "ok", "problems": [], "pois": pois,
+                "content_hash": raw["content_hash"],
+                "model": "test",
+                "status": "ok",
+                "problems": [],
+                "pois": pois,
             }
             [task] = build_tasks([raw], [teacher], gold_percent=0)
-            task["annotations"] = [{
-                "result": task["predictions"][0]["result"],
-                "updated_at": "2026-10-24T00:00:00Z",
-            }]
+            task["annotations"] = [
+                {
+                    "result": task["predictions"][0]["result"],
+                    "updated_at": "2026-10-24T00:00:00Z",
+                }
+            ]
             rows, rejected = convert_export([task], [], include_teacher=False)
             self.assertEqual(rejected, [])
             self.assertEqual(rows[0]["pois"], pois)
@@ -49,12 +59,25 @@ class StreetMarketContractTest(unittest.TestCase):
         self.assertEqual(pois[1]["name"], "Женски пазар")
         self.assertEqual(pois[1]["distance"], {"value": 5, "unit": "min_walk"})
 
+    def test_quoted_road_prefixes_preserve_exact_training_spans(self):
+        example = SYSTEM_PROMPT.split("Quoted road prefixes example\n<ad>\n", 1)[1]
+        text, output = example.split("\n</ad>\n", 1)
+        result, _ = json.JSONDecoder().raw_decode(output)
+        expected = [("бул.'България'", "boulevard"), ("ул.'Шишман'", "street")]
+        self.assertEqual([(p["name"], p["category"]) for p in result["pois"]], expected)
+        spans = name_spans({"description": text, "pois": result["pois"]})
+        self.assertEqual([(text[start:end], category) for start, end, category in spans], expected)
+
     def test_reviewer_guidance_is_valid_xml(self):
         root = ET.fromstring(labeling_config())
         guidance = " ".join(h.get("value", "") for h in root.iter("Header"))
         self.assertNotIn("street: named", guidance)
         self.assertNotIn("market: named", guidance)
         self.assertNotIn("No name/number", guidance)
+        name_field = root.find(".//TextArea")
+        self.assertEqual(name_field.get("editable"), "true")
+        self.assertEqual(name_field.get("transcription"), "true")
+        self.assertEqual(name_field.get("perRegion"), "true")
         notes = root.findall(".//Text[@name='review_notes']")
         self.assertEqual(len(notes), 1)
         self.assertEqual(notes[0].get("value"), "$review_notes")

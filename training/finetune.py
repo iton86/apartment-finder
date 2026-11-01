@@ -115,6 +115,10 @@ def run(args: argparse.Namespace) -> None:
         trainer.save_model(str(args.output / "model"))
         tokenizer.save_pretrained(args.output / "model")
         trainer.save_metrics("validation", trainer.evaluate())
+        trainer.save_metrics(
+            "train_evaluation",
+            trainer.evaluate(datasets["train"], metric_key_prefix="train_eval"),
+        )
     print(f"Saved best validation checkpoint to {args.output / 'model'}")
     print("Gold data was not used for training or checkpoint selection.")
 

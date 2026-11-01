@@ -406,8 +406,22 @@ Errors during training mark the tracking run failed.
 
 Select runs in the UI and choose **Compare** to inspect parameters and metric curves.
 An expanded dataset can change the validation split, so compare split manifests
-before interpreting changes in scores. Gold evaluation remains a separate command
-and is not logged into training runs.
+before interpreting changes in scores. The selected best model is also evaluated once on the training split: MLflow
+records `train_eval_loss`, `train_eval_precision`, `train_eval_recall`, and
+`train_eval_f1`, with a local `train_evaluation_results.json` artifact. This
+adds an inference pass over the training set, not per-epoch train evaluation.
+Gold evaluation remains a separate command. To attach its results to the
+original tracked training run:
+
+```bash
+uv run --group training --group tracking python -m training.evaluate_encoder \
+  checkpoints/poi-v7 --mlflow
+```
+
+This logs `gold_*` metrics and `gold_metrics.json` to the run identified by
+`mlflow_run.json`, using the tracking URI in its local `run_config.json`.
+Without `--mlflow`, gold evaluation only writes local results. Gold does not
+influence training or checkpoint selection.
 
 Data safeguards:
 
@@ -459,3 +473,14 @@ Convenience commands: `make training-fit`, `make training-evaluate`, and
 `make training-predict TEXT_FILE=data/example-description.txt`. Override
 `TRAINING_RUN` and `TRAINING_MODEL` to select a different output/checkpoint.
 
+
+
+### POIs inside an indivisible tokenizer token
+
+When a valid name occupies only part of a token (for example route `1` in
+`1,5`), training warns and masks that token from loss and token metrics with
+`-100`. Tokens shared by multiple POIs are also masked instead of assigning
+an arbitrary label. Annotations and descriptions are unchanged. Other tokens
+remain supervised. Chunks with no supervised tokens are omitted to avoid an
+undefined loss. This does not teach the model separate character spans inside
+that token; exact-span inspection can still count those POIs as missed.

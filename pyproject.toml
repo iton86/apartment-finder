@@ -18,6 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
+apartment-finder-enrich = "apartment_finder.interface.enrich_cli:main"
 apartment-finder-labeling = "apartment_finder.interface.labeling_cli:main"
 apartment-finder-scrape = "apartment_finder.interface.cli:main"
 apartment-finder-select-labeling = "apartment_finder.interface.labeling_cli:main"

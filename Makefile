@@ -4,6 +4,9 @@
 .PHONY: help install install-deps up down db-reset migrate test test-unit test-integration lint format check select-labeling labeling-export labeling-approve labeling-sync labeling-export-training training-export training-select-ads label-studio label-try label-run label-submit label-collect label-tasks
 
 help:
+	@echo "poi-register     - package POI_RUN in the local MLflow model registry"
+	@echo "poi-serve        - serve POI_MODEL_URI on localhost:5001 (CPU)"
+	@echo "poi-enrich       - save service predictions on listings; set POI_MODEL_VERSION"
 	@echo "training-fit     - fine-tune a POI name/category encoder on reviewed labels"
 	@echo "training-evaluate - evaluate the saved encoder on held-out gold labels"
 	@echo "training-predict - extract POI names/categories from TEXT_FILE"
@@ -150,3 +153,19 @@ training-evaluate:
 
 training-predict:
 	uv run --group training python -m training.predict_encoder "$(TRAINING_RUN)" --text-file "$(TEXT_FILE)"
+
+# Local MLflow deployment: use the immutable version printed by registration.
+POI_RUN ?= checkpoints/poi-v7-cuda-debug
+POI_MODEL_URI ?= models:/poi-encoder/1
+POI_SERVICE_URL ?= http://127.0.0.1:5001
+POI_LIMIT ?= 100
+
+.PHONY: poi-register poi-serve poi-enrich
+poi-register:
+	uv run --group training --group tracking python -m training.register_model "$(POI_RUN)"
+
+poi-serve:
+	MLFLOW_TRACKING_URI=sqlite:///mlflow.db uv run --group training --group tracking mlflow models serve --model-uri "$(POI_MODEL_URI)" --env-manager local --host 127.0.0.1 --port 5001
+
+poi-enrich:
+	uv run python -m apartment_finder.interface.enrich_cli --url "$(POI_SERVICE_URL)" --model-version "$(POI_MODEL_VERSION)" --limit "$(POI_LIMIT)"

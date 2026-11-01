@@ -50,6 +50,21 @@ def track_training(args, trainer):
                 {f"best_model_{k}": v for k, v in metrics.items()}, step=trainer.state.global_step
             )
             mlflow.log_artifact(str(args.output / "validation_results.json"))
+            mlflow.log_artifact(str(args.output / "train_evaluation_results.json"))
             mlflow.log_artifact(str(args.output / "mlflow_run.json"))
         finally:
             trainer.remove_callback(callback)
+
+
+def log_gold_metrics(run_directory, config, metrics):
+    """Attach held-out evaluation to its original run without changing its status."""
+    from mlflow.tracking import MlflowClient
+
+    info = json.loads((run_directory / "mlflow_run.json").read_text())
+    client = MlflowClient(tracking_uri=config["mlflow_tracking_uri"])
+    # Verify the destination before writing anything; never create an unrelated run.
+    client.get_run(info["run_id"])
+    for key, value in metrics.items():
+        if isinstance(value, Real) and math.isfinite(value):
+            client.log_metric(info["run_id"], key, float(value))
+    client.log_artifact(info["run_id"], str(run_directory / "gold_metrics.json"))

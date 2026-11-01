@@ -2,6 +2,7 @@
 
 import hashlib
 import unicodedata
+import warnings
 
 from training.dedup import cluster_near_duplicates, content_hash
 from training.schema import PoiCategory, PoiExtraction, find_evidence, find_problems
@@ -78,7 +79,12 @@ def name_spans(row: dict) -> list[tuple[int, int, str]]:
 
 
 def encode_row(row: dict, tokenizer, max_length: int | None) -> dict:
-    """Label every name subtoken; refuse truncation rather than lose annotations."""
+    """Encode names, ignoring tokens whose boundaries cannot express their spans."""
+    encoded, _ = _encode_row(row, tokenizer, max_length)
+    return encoded
+
+
+def _encode_row(row: dict, tokenizer, max_length: int | None) -> tuple[dict, list]:
     encoded = tokenizer(row["description"], return_offsets_mapping=True, truncation=False)
     if max_length is not None and len(encoded["input_ids"]) > max_length:
         raise ValueError(
@@ -87,26 +93,44 @@ def encode_row(row: dict, tokenizer, max_length: int | None) -> dict:
         )
     offsets = encoded.pop("offset_mapping")
     labels = [-100 if start == end else 0 for start, end in offsets]
+    assignments: dict[int, list[tuple[int, int, str]]] = {}
+    ambiguous = set()
     for start, end, category in name_spans(row):
         indices = [i for i, (a, b) in enumerate(offsets) if a != b and a < end and b > start]
         if not indices:
             raise ValueError("Tokenizer produced no tokens for an annotated name")
-        for position, index in enumerate(indices):
+        for index in indices:
             a, b = offsets[index]
-            # Tokens can include edge whitespace or punctuation (e.g. "7.").
-            # Permit those edges, but never absorb neighbouring word characters.
             outside = row["description"][a:start] + row["description"][end:b]
+            assignments.setdefault(index, []).append((start, end, category))
             if any(
                 not char.isspace() and not unicodedata.category(char).startswith("P")
                 for char in outside
-            ) or labels[index] not in (0, -100):
-                raise ValueError(
-                    f"Row {row.get('id')}: POI {row['description'][start:end]!r} "
-                    f"conflicts with token {row['description'][a:b]!r} at offsets {a}:{b}"
-                )
-            labels[index] = LABEL2ID[f"{'B' if position == 0 else 'I'}-{category}"]
+            ):
+                ambiguous.add(index)
+    ambiguous.update(index for index, owners in assignments.items() if len(owners) > 1)
+    previous_owner = None
+    for index in range(len(offsets)):
+        owners = assignments.get(index)
+        if index in ambiguous:
+            labels[index] = -100
+            previous_owner = None
+        elif owners:
+            owner = owners[0]
+            prefix = "I" if owner == previous_owner else "B"
+            labels[index] = LABEL2ID[f"{prefix}-{owner[2]}"]
+            previous_owner = owner
+        else:
+            previous_owner = None
+    if ambiguous:
+        warnings.warn(
+            f"Row {row.get('id')}: ignored {len(ambiguous)} ambiguous POI token(s) "
+            "whose boundaries do not match the annotated names",
+            UserWarning,
+            stacklevel=2,
+        )
     encoded["labels"] = labels
-    return dict(encoded)
+    return dict(encoded), offsets
 
 
 def encode_chunks(row: dict, tokenizer, max_length: int) -> list[dict]:
@@ -115,11 +139,13 @@ def encode_chunks(row: dict, tokenizer, max_length: int) -> list[dict]:
     Call after dataset splitting, so every chunk stays with its source row.
     Preserve the tokenizer's original boundary special tokens in each chunk.
     """
-    encoded = encode_row(row, tokenizer, max_length=None)
+    encoded, offsets = _encode_row(row, tokenizer, max_length=None)
+    if not any(label >= 0 for label in encoded["labels"]):
+        return []
     if len(encoded["input_ids"]) <= max_length:
         return [encoded]
     labels = encoded["labels"]
-    content = [i for i, label in enumerate(labels) if label != -100]
+    content = [i for i, (start, end) in enumerate(offsets) if start != end]
     if not content:
         raise ValueError(f"Row {row.get('id')}: no content tokens")
     first, stop = content[0], content[-1] + 1
@@ -131,18 +157,22 @@ def encode_chunks(row: dict, tokenizer, max_length: int) -> list[dict]:
     while start < stop:
         end = min(start + capacity, stop)
         # Move the cut to the entity's beginning if it falls inside a name.
-        while end < stop and end > start and LABELS[labels[end]].startswith("I-"):
+        while (
+            end < stop and end > start and labels[end] >= 0 and LABELS[labels[end]].startswith("I-")
+        ):
             end -= 1
         if end == start:
             raise ValueError(
                 f"Row {row.get('id')}: one POI name exceeds the chunk capacity {capacity}"
             )
-        chunks.append(
-            {
-                key: values[:first] + values[start:end] + values[stop:]
-                for key, values in encoded.items()
-            }
-        )
+        # An all-ignored chunk produces an undefined cross-entropy loss.
+        if any(label >= 0 for label in labels[start:end]):
+            chunks.append(
+                {
+                    key: values[:first] + values[start:end] + values[stop:]
+                    for key, values in encoded.items()
+                }
+            )
         start = end
     return chunks
 

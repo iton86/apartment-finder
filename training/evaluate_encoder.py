@@ -16,6 +16,11 @@ def main() -> None:
         "run", type=Path, help="Run directory containing model/ and run_config.json"
     )
     parser.add_argument("--cpu", action="store_true")
+    parser.add_argument(
+        "--mlflow",
+        action="store_true",
+        help="Log gold metrics to this training run in MLflow",
+    )
     args = parser.parse_args()
     from transformers import (
         AutoModelForTokenClassification,
@@ -26,6 +31,10 @@ def main() -> None:
     )
 
     config = json.loads((args.run / "run_config.json").read_text())
+    if args.mlflow and (
+        not (args.run / "mlflow_run.json").is_file() or not config.get("mlflow_tracking_uri")
+    ):
+        parser.error("Gold tracking requires a run originally trained with --mlflow")
     if hashlib.sha256(Path(config["labels"]).read_bytes()).hexdigest() != config["dataset_sha256"]:
         parser.error("Dataset changed since training; restore the original labels file")
     splits = split_rows(
@@ -63,6 +72,10 @@ def main() -> None:
     )
     metrics = trainer.evaluate(dataset, metric_key_prefix="gold")
     write_json(args.run / "gold_metrics.json", metrics)
+    if args.mlflow:
+        from training.tracking import log_gold_metrics
+
+        log_gold_metrics(args.run, config, metrics)
     print(json.dumps(metrics, indent=2))
 
 

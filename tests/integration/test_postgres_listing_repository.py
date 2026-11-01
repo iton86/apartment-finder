@@ -178,3 +178,31 @@ def test_filter_unseen_returns_only_results_absent_from_database(repository):
 
 def test_filter_unseen_accepts_an_empty_list(repository):
     assert repository.filter_unseen([]) == []
+
+
+def test_poi_enrichment_persists_and_skips_processed_listings(repository):
+    from sqlalchemy import select
+    from sqlalchemy.orm import Session
+
+    from apartment_finder.infrastructure.persistence.models import ListingModel
+    from apartment_finder.infrastructure.poi.repository import (
+        ListingPoiRepository,
+        description_hash,
+    )
+
+    listing = make_test_listing("poi-enrichment")
+    repository.save(listing)
+    pois = ListingPoiRepository(repository._engine)
+    [candidate] = list(pois.pending("test-v1"))
+    prediction = {
+        "pois": [],
+        "model_version": "test-v1",
+        "description_sha256": description_hash(candidate.description),
+    }
+    assert pois.save(candidate, prediction)
+    assert list(pois.pending("test-v1")) == []
+    with Session(repository._engine) as session:
+        stored = session.scalar(select(ListingModel))
+        assert stored.pois == []
+        assert stored.poi_model_version == "test-v1"
+        assert stored.poi_predicted_at is not None

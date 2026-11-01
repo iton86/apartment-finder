@@ -185,6 +185,9 @@ def test_real_roberta_training_and_reload(tmp_path, monkeypatch, capsys, trackin
             tracked.data.params["dataset_sha256"]
             == json.loads((output / "run_config.json").read_text())["dataset_sha256"]
         )
+        assert "train_eval_f1" in tracked.data.metrics
+        assert "train_eval_precision" in tracked.data.metrics
+        assert "train_eval_recall" in tracked.data.metrics
         assert "eval_f1" in tracked.data.metrics
         assert "best_model_eval_f1" in tracked.data.metrics
         assert not any("gold" in key for key in tracked.data.metrics)
@@ -193,13 +196,20 @@ def test_real_roberta_training_and_reload(tmp_path, monkeypatch, capsys, trackin
             "run_config.json",
             "split_manifest.json",
             "validation_results.json",
+            "train_evaluation_results.json",
             "mlflow_run.json",
         }
         assert mlflow.active_run() is None
     from training import evaluate_encoder, predict_encoder
 
-    monkeypatch.setattr("sys.argv", ["evaluate", str(output), "--cpu"])
+    evaluation_args = ["evaluate", str(output), "--cpu"] + (["--mlflow"] if tracking else [])
+    monkeypatch.setattr("sys.argv", evaluation_args)
     evaluate_encoder.main()
+    if tracking:
+        gold_run = client.get_run(info["run_id"])
+        assert gold_run.info.status == "FINISHED"
+        assert "gold_f1" in gold_run.data.metrics
+        assert "gold_metrics.json" in {a.path for a in client.list_artifacts(info["run_id"])}
     assert "gold_f1" in json.loads((output / "gold_metrics.json").read_text())
     text_file = tmp_path / "description.txt"
     text_file.write_text("до Южен парк", encoding="utf-8")
@@ -256,14 +266,15 @@ def test_alignment_accepts_token_edge_punctuation(suffix):
     assert encode_row(example, tokenizer, 512)["labels"] == [LABEL2ID["B-park"], LABEL2ID["I-park"]]
 
 
-def test_alignment_rejects_extra_word_characters():
+def test_alignment_masks_extra_word_characters():
     example = row("трамвай 74", pois=[poi("трамвай 7", "трамвай 7")])
 
     def tokenizer(text, **kwargs):
         return {"input_ids": [4, 5], "offset_mapping": [(0, 7), (8, 10)]}
 
-    with pytest.raises(ValueError, match="conflicts with token '74'"):
-        encode_row(example, tokenizer, 512)
+    with pytest.warns(UserWarning, match="ignored 1 ambiguous"):
+        encoded = encode_row(example, tokenizer, 512)
+    assert encoded["labels"] == [LABEL2ID["B-park"], -100]
 
 
 def test_long_row_chunks_preserve_tokens_and_complete_entities():
@@ -290,3 +301,38 @@ def test_long_row_chunks_preserve_tokens_and_complete_entities():
     assert encode_chunks(example, tokenizer, 20) == [encode_row(example, tokenizer, 20)]
     with pytest.raises(ValueError, match="one POI name exceeds"):
         encode_chunks(example, tokenizer, 3)
+
+
+@pytest.mark.parametrize("names", [["1"], ["1", "5"]])
+def test_shared_numeric_token_is_ignored_without_losing_other_tokens(names):
+    from training.token_data import encode_chunks
+
+    text = "трамваи 1,5 парк"
+    example = row(text, pois=[poi(name, "трамваи 1,5") for name in names])
+
+    def tokenizer(text, **kwargs):
+        return {
+            "input_ids": [0, 4, 5, 6, 2],
+            "attention_mask": [1, 1, 1, 1, 1],
+            "offset_mapping": [(0, 0), (0, 7), (8, 11), (12, 16), (0, 0)],
+        }
+
+    with pytest.warns(UserWarning, match="ignored 1 ambiguous"):
+        encoded = encode_row(example, tokenizer, 10)
+    assert encoded["labels"] == [-100, 0, -100, 0, -100]
+    with pytest.warns(UserWarning, match="ignored 1 ambiguous"):
+        chunks = encode_chunks(example, tokenizer, 3)
+    assert [chunk["input_ids"][1] for chunk in chunks] == [4, 6]
+    assert [chunk["labels"][1] for chunk in chunks] == [0, 0]
+
+
+def test_fully_ambiguous_row_has_no_chunks_with_undefined_loss():
+    from training.token_data import encode_chunks
+
+    example = row("1,5", pois=[poi("1", "1,5")])
+
+    def tokenizer(text, **kwargs):
+        return {"input_ids": [0, 5, 2], "offset_mapping": [(0, 0), (0, 3), (0, 0)]}
+
+    with pytest.warns(UserWarning, match="ambiguous"):
+        assert encode_chunks(example, tokenizer, 512) == []

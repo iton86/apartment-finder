@@ -151,3 +151,68 @@ Back up a database before destructive schema or infrastructure changes. Local
 Compose volumes hold persistent state, and removing them deletes that state.
 Export required records and training artifacts before deleting a temporary cloud
 environment. Dataset and model output directories are not backed up by Git.
+
+## Local MLflow POI service
+
+The model registry and the prediction service are separate local processes.
+The prediction service loads the model once on CPU and exposes MLflow's
+`POST /invocations` endpoint on `127.0.0.1:5001`. It has no database credentials
+or database writes. A separate enrichment command saves its results on listing
+rows. The model returns names, categories, character offsets and confidence;
+it does not predict distances.
+
+From the repository root, apply the listing POI migration and register a completed
+training run (its `model/` directory must exist):
+
+```bash
+make migrate
+make poi-register POI_RUN=checkpoints/poi-v7-cuda-debug
+```
+
+Registration copies model weights, tokenizer and inference code into MLflow and
+prints an immutable model URI, for example `models:/poi-encoder/1`, and a
+`Prediction version` fingerprint (weights, tokenizer, inference settings and code). Keep both. Registration creates a new model
+version each time, and does not change any running service. This adds model
+artifacts to local MLflow storage; ensure enough disk space for the weights.
+You can browse registered versions with `make mlflow-ui` at localhost:5000.
+
+Start the service in a separate terminal, using the printed URI:
+
+```bash
+make poi-serve POI_MODEL_URI=models:/poi-encoder/1
+```
+
+Send descriptions without accessing the database:
+
+```bash
+curl --fail http://127.0.0.1:5001/invocations \
+  -H 'Content-Type: application/json' \
+  -d '{"dataframe_records":[{"description":"До Южен парк."}]}'
+```
+
+The response has `predictions`, one object per input description, each containing
+`pois`, `model_version` and `description_sha256`. An empty `pois` list is a
+successful prediction. Requests accept 1–100 nonempty descriptions, at most
+100000 characters each; long descriptions are processed in token chunks.
+
+After scraping, enrich up to 100 pending local listings using the fingerprint
+printed by registration:
+
+```bash
+make poi-enrich POI_MODEL_VERSION=<prediction-fingerprint> POI_LIMIT=100
+```
+
+Repeat to process more listings. The command stores `pois` (JSON),
+`poi_model_version`, `poi_description_sha256` and `poi_predicted_at` directly in
+`listings`. It skips rows already predicted for that model and unchanged
+text, including rows with no detected POIs. Changing model or description makes
+a row eligible again. It refuses output from a different model or mismatched
+text spans. If a description changes during inference, the old prediction is
+not written. Already committed rows remain saved after a service failure, so
+retrying is safe. Human-reviewed labeling annotations are unchanged.
+
+Enrichment is an explicit post-scraping step, not automatically invoked by the
+scraper. The command defaults to `APP_ENV=local` and rejects `APP_ENV=cloud`;
+its database destination still follows local PostgreSQL environment overrides.
+The existing scraper Docker image does not include the training dependencies;
+run this local model service with the training and tracking groups as above.

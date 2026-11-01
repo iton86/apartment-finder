@@ -77,11 +77,25 @@ min_unspecified.
 name (always required — no name or number means no POI)
 - The shortest part of the evidence that identifies the place: its proper \
 name ("Южен парк", "Лидл", "бул. Братя Бъкстон"), or its number with the \
-word the number belongs to ("33 СУ", "автобус 204", "трамваи 6 и 7").
+word the number belongs to ("33 СУ", "автобус 204").
 - Copy it from the ad word for word. The only change allowed is \
 capitalization: write all-caps text normally ("ЮЖЕН ПАРК" → "Южен парк", \
 "МОЛ БЪЛГАРИЯ" → "МОЛ България") and keep brand spelling (Billa, Kaufland). \
 Never translate, expand abbreviations or add words the ad doesn't have.
+- Keep road type prefixes such as "бул." and "ул." in the name when \
+they appear in the identifying phrase. Copy the complete phrase as one \
+contiguous span, including its original quotes, punctuation and spacing. \
+Never insert a space, remove quotes, or change quote characters: for \
+evidence "в близост до бул.'България'", the name is "бул.'България'", \
+not "бул. България" and not just "България".
+- For enumerated transport routes, emit one entry per route. Use only the \
+route number as the name for EVERY entry in that enumeration, including \
+the first. Keep the shared transport words in evidence. For "автобусни \
+линии 204, 288 и 76", names are "204", "288", "76", never "автобусни линии \
+288". Never reconstruct omitted words or combine separate text fragments.
+- Map bus and trolleybus routes to bus_stop; tram routes to tram_stop. \
+A route number is an identifier, not a distance. Preserve single-route \
+phrases such as "автобус 204" when they occur contiguously in the ad.
 
 evidence
 - A verbatim, contiguous quote from the ad: the shortest span that contains \
@@ -114,6 +128,106 @@ Example
 ]}
 Skipped: ул. Луи Айер is the building's own address; "метростанция", \
 "училище" and "детска градина" have no name or number.
+
+Transport enumeration example
+<ad>
+В близост има автобусни линии 204, 288 и 76. Наблизо са тролейбусни \
+линии 8 и 11. До трамвайни линии 6 и 27.
+</ad>
+{
+ "pois": [
+  {
+   "category": "bus_stop",
+   "name": "204",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "В близост има автобусни линии 204, 288 и 76."
+  },
+  {
+   "category": "bus_stop",
+   "name": "288",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "В близост има автобусни линии 204, 288 и 76."
+  },
+  {
+   "category": "bus_stop",
+   "name": "76",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "В близост има автобусни линии 204, 288 и 76."
+  },
+  {
+   "category": "bus_stop",
+   "name": "8",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "Наблизо са тролейбусни линии 8 и 11."
+  },
+  {
+   "category": "bus_stop",
+   "name": "11",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "Наблизо са тролейбусни линии 8 и 11."
+  },
+  {
+   "category": "tram_stop",
+   "name": "6",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "До трамвайни линии 6 и 27."
+  },
+  {
+   "category": "tram_stop",
+   "name": "27",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "До трамвайни линии 6 и 27."
+  }
+ ]
+}
+
+Quoted road prefixes example
+<ad>
+В близост до бул.'България' и до ул.'Шишман'.
+</ad>
+{
+ "pois": [
+  {
+   "category": "boulevard",
+   "name": "бул.'България'",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "В близост до бул.'България'"
+  },
+  {
+   "category": "street",
+   "name": "ул.'Шишман'",
+   "distance": {
+    "value": null,
+    "unit": "nearby"
+   },
+   "evidence": "до ул.'Шишман'"
+  }
+ ]
+}
 
 Street and market example
 <ad>
@@ -148,4 +262,3 @@ Skipped: the own-address street, unnamed "пазара", and "пазарна ц�
 def user_message(row: dict) -> str:
     ad = f"{row['title']}\nРайон: {row['city']}, {row['area']}\n\n{row['description']}"
     return f"<ad>\n{ad}\n</ad>"
-

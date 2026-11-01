@@ -75,6 +75,7 @@ def labeling_config() -> str:
       <View visibleWhen="region-selected">
         <Header value="Selected POI" size="5"/>
         <TextArea name="{NAME}" toName="{TEXT}" perRegion="true" maxSubmissions="1"
+                  editable="true" transcription="true"
                   placeholder="Required, as in the ad: Южен парк, 33 СУ, автобус 204"/>
         <Choices name="{UNIT}" toName="{TEXT}" perRegion="true" required="true"
                  choice="single-radio">
@@ -374,4 +375,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

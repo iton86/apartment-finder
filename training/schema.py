@@ -77,7 +77,10 @@ class PointOfInterest(BaseModel):
     category: PoiCategory
     name: str = Field(
         description="What identifies the place, copied from the evidence: a proper name "
-        "('Южен парк', 'Лидл') or a number with its word ('33 СУ', 'автобус 204')."
+        "('Южен парк', 'Лидл') or a number with its word ('33 СУ', 'автобус 204'). "
+        "For enumerated transport routes, use one entry per route with only its number "
+        "as the name ('204', '288', '76'). Each name must be a contiguous span "
+        "of its evidence; never reconstruct omitted words."
     )
     distance: Distance
     evidence: str = Field(

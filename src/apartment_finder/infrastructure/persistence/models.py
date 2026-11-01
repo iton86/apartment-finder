@@ -84,6 +84,10 @@ class ListingModel(Base):
     area: Mapped[str] = mapped_column(Text, nullable=False)
     street: Mapped[str | None] = mapped_column(Text)
     description: Mapped[str | None] = mapped_column(Text)
+    pois: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    poi_model_version: Mapped[str | None] = mapped_column(Text, nullable=True)
+    poi_description_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    poi_predicted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     agency_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     phone: Mapped[str | None] = mapped_column(Text)
     scraped_at: Mapped[datetime] = mapped_column(
