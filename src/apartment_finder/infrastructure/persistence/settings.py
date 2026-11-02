@@ -27,6 +27,11 @@ load_dotenv()
 
 
 def build_postgres_connection_url() -> str:
+    """Build the Postgres URL for the environment chosen by ``APP_ENV``.
+
+    Raises:
+        ValueError: If ``APP_ENV`` is neither ``local`` nor ``cloud``.
+    """
     app_env = os.environ.get("APP_ENV", "local")
 
     if app_env == "local":

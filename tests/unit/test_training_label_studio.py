@@ -9,8 +9,9 @@ import copy
 
 import pytest
 
-from training.label_studio import build_tasks, convert_export, is_gold, labeling_config
-from training.schema import DistanceUnit, PoiCategory
+from apartment_finder.domain.label_studio import labeling_config
+from apartment_finder.domain.poi import DistanceUnit, PoiCategory
+from training.label_studio import build_tasks, convert_export, is_gold
 
 AD = "Двустаен до ЮЖЕН ПАРК, 10 мин от МОЛ БЪЛГАРИЯ."
 PARK = {

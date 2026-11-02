@@ -18,13 +18,13 @@ from sqlalchemy import and_, create_engine, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from apartment_finder.infrastructure.jsonl import write_jsonl
 from apartment_finder.infrastructure.persistence.models import (
     ListingModel,
     TrainingAdSelectionModel,
 )
 from apartment_finder.infrastructure.persistence.settings import build_postgres_connection_url
 from apartment_finder.interface.logging_config import configure_logging
-from training.jsonl import write_jsonl
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,8 @@ DEFAULT_SAMPLE_RATE = 0.2
 
 @dataclass(frozen=True)
 class CandidateAd:
+    """A stored listing that has not yet been selected for the dataset."""
+
     listing_id: UUID
     source: str
     external_id: str
@@ -48,6 +50,8 @@ class CandidateAd:
 
 @dataclass(frozen=True)
 class SelectionRequest:
+    """Parameters of one selection run, including the sampling seed and audit reason."""
+
     dataset: str
     selection_run: str
     limit: int
@@ -56,6 +60,7 @@ class SelectionRequest:
     reason: str
 
     def validate(self) -> None:
+        """Raise ValueError if any field is empty or out of range."""
         if not self.dataset.strip():
             raise ValueError("dataset must not be empty")
         if not self.selection_run.strip():
@@ -69,12 +74,20 @@ class SelectionRequest:
 
 
 def default_run_id(now: datetime | None = None) -> str:
+    """Build a timestamped run id such as ``ad-selection-20260101T000000Z`` (UTC)."""
     return (now or datetime.now(UTC)).strftime("ad-selection-%Y%m%dT%H%M%SZ")
 
 
 def choose_candidate_ids[CandidateId](
     candidate_ids: list[CandidateId], limit: int, sample_rate: float, seed: str
 ) -> list[CandidateId]:
+    """Deterministically sample candidate ids with a seeded shuffle.
+
+    Keeps ``round(len * sample_rate)`` ids (at least one), capped at ``limit``.
+
+    Raises:
+        ValueError: If ``limit`` < 1 or ``sample_rate`` is not in (0, 1].
+    """
     if limit < 1:
         raise ValueError("limit must be positive")
     if not 0 < sample_rate <= 1:
@@ -93,6 +106,7 @@ def manifest_record(
     request: SelectionRequest,
     selected_at: datetime,
 ) -> dict:
+    """Build the JSONL manifest row describing one selected ad."""
     return {
         "dataset": request.dataset,
         "selection_run": request.selection_run,
@@ -111,13 +125,24 @@ def manifest_record(
 
 
 class TrainingAdSelectionService:
+    """Selects unseen listings for a dataset and records the choice in the ledger table."""
+
     def __init__(self, connection_url: str):
         self._engine = create_engine(connection_url, pool_pre_ping=True)
 
     def close(self) -> None:
+        """Dispose of the database engine and its connection pool."""
         self._engine.dispose()
 
     def select(self, request: SelectionRequest) -> list[dict]:
+        """Sample never-selected listings, claim them in the ledger, and return manifest rows.
+
+        Each claim is inserted in a savepoint, so an ad already claimed concurrently is
+        skipped (and logged) rather than failing the run.
+
+        Raises:
+            ValueError: If the request fails validation.
+        """
         request.validate()
         with Session(self._engine) as session:
             candidates = self._load_candidates(session, request.dataset)
@@ -183,6 +208,7 @@ class TrainingAdSelectionService:
 
 
 def main() -> None:
+    """Command-line entry point: select ads, then write the JSONL manifest."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", default=DEFAULT_DATASET)
     parser.add_argument("--selection-run", default=None)

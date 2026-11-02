@@ -74,6 +74,7 @@ class ShortNameFilter(logging.Filter):
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
+        """Set ``record.short_name`` and keep the record."""
         record.short_name = shorten_logger_name(record.name)
         return True
 

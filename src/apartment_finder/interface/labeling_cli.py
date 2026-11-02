@@ -1,32 +1,38 @@
+"""Labeling pipeline CLI: select, export, approve and sync labels, and export training data."""
+
 import argparse
 import os
 from uuid import UUID
 
 from dotenv import load_dotenv
 
-from apartment_finder.application.use_cases.approve_batch import ApproveBatch
-from apartment_finder.application.use_cases.export_selected_batch import ExportSelectedBatch
-from apartment_finder.application.use_cases.select_for_labeling import (
+from apartment_finder.application.use_cases.labeling import (
     DEFAULT_LABELING_BATCH_SIZE,
+    ApproveBatch,
+    ExportSelectedBatch,
     SelectForLabeling,
+    SyncAnnotations,
 )
-from apartment_finder.application.use_cases.sync_annotations import SyncAnnotations
+from apartment_finder.domain.label_studio import labeling_config
+from apartment_finder.infrastructure.jsonl import write_jsonl
 from apartment_finder.infrastructure.label_studio.client import LabelStudioClient
-from apartment_finder.infrastructure.label_studio.teacher_adapter import (
-    ExistingTeacherAnnotationProvider,
-)
 from apartment_finder.infrastructure.persistence.postgres_labeling_repository import (
     PostgresLabelingRepository,
 )
 from apartment_finder.infrastructure.persistence.settings import build_postgres_connection_url
+from apartment_finder.infrastructure.teacher import (
+    DEFAULT_PROVIDER,
+    get_provider,
+    resolve_model_and_effort,
+)
+from apartment_finder.infrastructure.teacher.adapter import (
+    ExistingTeacherAnnotationProvider,
+)
 from apartment_finder.interface.logging_config import configure_logging
-from training.jsonl import write_jsonl
-from training.label_studio import labeling_config
-from training.label_with_teacher import DEFAULT_PROVIDER, resolve_model_and_effort
-from training.teacher import get_provider
 
 
 def main() -> None:
+    """Dispatch the labeling sub-commands (select, export, approve, sync, ...)."""
     load_dotenv()
     parser = argparse.ArgumentParser(description="Apartment Finder labeling pipeline")
     parser.add_argument(

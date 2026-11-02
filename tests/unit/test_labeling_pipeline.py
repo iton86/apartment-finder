@@ -3,9 +3,19 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from apartment_finder.application.use_cases.approve_batch import ApproveBatch
-from apartment_finder.application.use_cases.export_selected_batch import ExportSelectedBatch
-from apartment_finder.application.use_cases.sync_annotations import SyncAnnotations
+from apartment_finder.application.use_cases.labeling import (
+    ApproveBatch,
+    ExportSelectedBatch,
+    SyncAnnotations,
+)
+from apartment_finder.domain.label_studio import (
+    CATEGORY,
+    NAME,
+    TEXT,
+    UNIT,
+    task_payload,
+    validate_prediction_offsets,
+)
 from apartment_finder.domain.labeling import (
     LabelingBatch,
     LabelingTask,
@@ -18,11 +28,6 @@ from apartment_finder.infrastructure.label_studio.client import (
     LabelStudioError,
     task_data_matches,
 )
-from apartment_finder.infrastructure.label_studio.mapper import (
-    task_payload,
-    validate_prediction_offsets,
-)
-from training.label_studio import CATEGORY, NAME, TEXT, UNIT
 
 TEXT_VALUE = "Двустаен до ЮЖЕН ПАРК, 10 мин от МОЛ БЪЛГАРИЯ."
 PARK = {

@@ -28,27 +28,29 @@ class ReconciliationTest(unittest.TestCase):
         self.payload = LabelStudioTaskPayload(task_id=self.key, data=self.data, predictions=[])
 
     def task(self, task_id, annotated=False):
-        return {"id": task_id, "data": self.data,
-                "annotations": [{"id": 99}] if annotated else []}
+        return {"id": task_id, "data": self.data, "annotations": [{"id": 99}] if annotated else []}
 
     def test_total_without_next_reads_all_pages_and_does_not_import(self):
-        client = ListingClient([
-            {"tasks": [{"id": 1, "data": {}}], "total": 2},
-            {"tasks": [self.task(2)], "total": 2},
-        ])
+        client = ListingClient(
+            [
+                {"tasks": [{"id": 1, "data": {}}], "total": 2},
+                {"tasks": [self.task(2)], "total": 2},
+            ]
+        )
         self.assertEqual(client.import_tasks(7, [self.payload]), {str(self.key): 2})
         self.assertEqual(client.posts, [])
 
     def test_count_and_next_response(self):
-        client = ListingClient([
-            {"results": [{"id": 1, "data": {}}], "count": 2, "next": "page2"},
-            {"results": [self.task(2)], "count": 2, "next": None},
-        ])
+        client = ListingClient(
+            [
+                {"results": [{"id": 1, "data": {}}], "count": 2, "next": "page2"},
+                {"results": [self.task(2)], "count": 2, "next": None},
+            ]
+        )
         self.assertEqual(client.import_tasks(7, [self.payload]), {str(self.key): 2})
 
     def test_annotated_duplicate_is_preferred_in_either_order(self):
-        for tasks in ([self.task(1), self.task(2, True)],
-                      [self.task(2, True), self.task(1)]):
+        for tasks in ([self.task(1), self.task(2, True)], [self.task(2, True), self.task(1)]):
             client = ListingClient([{"tasks": tasks, "total": 2}])
             self.assertEqual(client.import_tasks(7, [self.payload]), {str(self.key): 2})
 

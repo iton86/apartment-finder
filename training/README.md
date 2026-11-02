@@ -2,7 +2,7 @@
 
 Offline tools for annotating listing descriptions and fine-tuning encoders for
 point-of-interest names and categories. The annotation format in
-[schema.py](schema.py) also supports distances; distance prediction is not yet
+[domain/poi.py](../src/apartment_finder/domain/poi.py) also supports distances; distance prediction is not yet
 implemented by the encoder.
 
 See the [project documentation](../docs/README.md) and
@@ -86,7 +86,7 @@ can label with several and keep them apart.
 make label-try          # 3 ads, printed — read them critically
 ```
 
-Tune `SYSTEM_PROMPT` in [teacher/prompt.py](teacher/prompt.py) until `try`
+Tune `SYSTEM_PROMPT` in [infrastructure/teacher/prompt.py](../src/apartment_finder/infrastructure/teacher/prompt.py) until `try`
 output matches the rules you want. The prompt is shared by every provider,
 so switching models never changes the rules. Then either:
 
@@ -107,12 +107,12 @@ for each ad. Changing `SYSTEM_PROMPT` does not relabel anything. Delete
 `data/teacher_labels.jsonl` and `data/teacher_batches.json` to start over.
 
 **Adding a provider** (Mistral, another hosted API, ...): subclass
-`TeacherProvider` in `teacher/<name>_provider.py`. Implement `label()`, and the
+`TeacherProvider` in `src/apartment_finder/infrastructure/teacher/<name>_provider.py`. Implement `label()`, and the
 three batch methods if the API has a batch endpoint. Then register it in
-`PROVIDERS` in [teacher/\_\_init\_\_.py](teacher/__init__.py). The contract
-and a checklist are in [teacher/base.py](teacher/base.py). For an
+`PROVIDERS` in [infrastructure/teacher/__init__.py](../src/apartment_finder/infrastructure/teacher/__init__.py). The contract
+and a checklist are in [infrastructure/teacher/base.py](../src/apartment_finder/infrastructure/teacher/base.py). For an
 OpenAI-compatible service it's even shorter: one subclass with an `Endpoint`
-in [teacher/openai_compatible.py](teacher/openai_compatible.py). Parsing,
+in [infrastructure/teacher/openai_compatible.py](../src/apartment_finder/infrastructure/teacher/openai_compatible.py). Parsing,
 validation and retries are shared, so an adapter only maps one request and
 response.
 

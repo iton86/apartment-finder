@@ -9,16 +9,16 @@ import json
 
 import pytest
 
-from training import label_with_teacher as lwt
-from training.jsonl import read_jsonl, write_jsonl
-from training.teacher import PROVIDERS, provider_class
-from training.teacher.base import (
+from apartment_finder.infrastructure.jsonl import read_jsonl, write_jsonl
+from apartment_finder.infrastructure.teacher import PROVIDERS, provider_class
+from apartment_finder.infrastructure.teacher.base import (
     BatchNotSupportedError,
     BatchProgress,
     Outcome,
     TeacherOutput,
     TeacherProvider,
 )
+from training import label_with_teacher as lwt
 
 PARK = {
     "category": "park",

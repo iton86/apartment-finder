@@ -37,10 +37,14 @@ from apartment_finder.domain.labeling import (
 
 
 class Base(DeclarativeBase):
+    """Declarative base shared by all persistence models."""
+
     pass
 
 
 class ApartmentModel(Base):
+    """A physical apartment; several listings (ads) may point to the same one."""
+
     __tablename__ = "apartments"
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
@@ -52,6 +56,12 @@ class ApartmentModel(Base):
 
 
 class ListingModel(Base):
+    """One scraped advertisement.
+
+    Unique on (source, external_id, price_amount), so a price change on the
+    same ad is stored as a new row.
+    """
+
     __tablename__ = "listings"
     __table_args__ = (
         UniqueConstraint("source", "external_id", "price_amount"),
@@ -119,6 +129,8 @@ class ListingModel(Base):
 
 
 class ListingImageModel(Base):
+    """An image stored for a listing, ordered by ``sequence``."""
+
     __tablename__ = "listing_images"
     __table_args__ = (UniqueConstraint("listing_id", "sequence"),)
 
@@ -133,6 +145,8 @@ class ListingImageModel(Base):
 
 
 class TrainingAdSelectionModel(Base):
+    """Records why and when a listing was selected for a training dataset."""
+
     __tablename__ = "training_ad_selections"
     __table_args__ = (
         UniqueConstraint("dataset", "listing_id"),
@@ -150,6 +164,8 @@ class TrainingAdSelectionModel(Base):
 
 
 class LabelingTaskModel(Base):
+    """A description snapshot moving through teacher labeling, review and approval."""
+
     __tablename__ = "labeling_tasks"
     __table_args__ = (
         UniqueConstraint("listing_id"),
@@ -254,6 +270,8 @@ class LabelingTaskModel(Base):
 
 
 class LabelingBatchModel(Base):
+    """A group of labeling tasks exported to one Label Studio project and approved together."""
+
     __tablename__ = "labeling_batches"
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)

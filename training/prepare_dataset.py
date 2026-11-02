@@ -6,29 +6,34 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from apartment_finder.domain.poi import PoiExtraction, find_problems
+from apartment_finder.infrastructure.jsonl import write_jsonl
 from training.dedup import cluster_near_duplicates
-from training.jsonl import write_jsonl
-from training.schema import PoiExtraction, find_problems
 from training.token_data import split_rows
 
 FORMAT_VERSION = 1
 
 
 def digest(value: object) -> str:
+    """Return the SHA-256 hex digest of the canonical (sorted-key) JSON of ``value``."""
     return hashlib.sha256(
         json.dumps(value, ensure_ascii=False, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
 
 def label_fingerprint(row: dict) -> str:
+    """Hash a row's description and POIs, ignoring approval metadata."""
     # Approval timestamps may change without changing the benchmark's labels.
-    return digest({
-        "description": row["description"],
-        "pois": sorted(row["pois"], key=lambda poi: json.dumps(poi, sort_keys=True)),
-    })
+    return digest(
+        {
+            "description": row["description"],
+            "pois": sorted(row["pois"], key=lambda poi: json.dumps(poi, sort_keys=True)),
+        }
+    )
 
 
 def features(row: dict) -> set[str]:
+    """Return coverage feature tags for a row (POI categories, no_pois, long text, city, area)."""
     values = {f"category:{poi['category']}" for poi in row["pois"]}
     if not row["pois"]:
         values.add("no_pois")
@@ -41,6 +46,7 @@ def features(row: dict) -> set[str]:
 
 
 def coverage(rows: list[dict]) -> dict:
+    """Count how many rows carry each feature."""
     counts = Counter(feature for row in rows for feature in features(row))
     return {"rows": len(rows), "features": dict(sorted(counts.items()))}
 
@@ -71,9 +77,7 @@ def select_gold(groups: list[list[dict]], target: int, seed: int, *, exact: bool
     selected: set[str] = set()
     touched: set[int] = set()
     for _ in range(target):
-        untouched = sorted(
-            (len(group), i) for i, group in enumerate(groups) if i not in touched
-        )
+        untouched = sorted((len(group), i) for i, group in enumerate(groups) if i not in touched)
 
         def feasible(candidate):
             index, _records = candidate
@@ -167,8 +171,10 @@ def prepare(
         # Fraction is of independent clusters, not individual duplicate ads.
         target = min(len(groups) - 2, max(1, round(len(groups) * gold_fraction)))
         gold = select_gold(
-            groups, gold_count if gold_count is not None else target,
-            seed, exact=gold_count is not None,
+            groups,
+            gold_count if gold_count is not None else target,
+            seed,
+            exact=gold_count is not None,
         )
     for row in ordered:
         row["split"] = "gold" if row["content_hash"] in gold else "train"
@@ -190,6 +196,15 @@ def build_snapshot(
     gold_count: int | None = None,
     validation_fraction: float = 0.15,
 ) -> dict:
+    """Create a new dataset-version directory from approved labels.
+
+    Writes labels, per-split JSONL files and ``manifest.json`` (hashes, coverage,
+    gold membership and warnings), and returns the manifest.
+
+    Raises:
+        ValueError: If ``output`` exists, gold versioning is inconsistent, or the
+            labels fail validation in :func:`prepare`.
+    """
     if output.exists():
         raise ValueError("Output already exists; use a new dataset version directory")
     frozen = json.loads(gold_manifest.read_text(encoding="utf-8")) if gold_manifest else None
@@ -200,8 +215,12 @@ def build_snapshot(
     raw = source.read_bytes()
     rows = [json.loads(line) for line in raw.decode("utf-8").splitlines() if line.strip()]
     labels, splits, reused = prepare(
-        rows, seed=seed, gold_fraction=gold_fraction, gold_count=gold_count,
-        validation_fraction=validation_fraction, frozen=frozen,
+        rows,
+        seed=seed,
+        gold_fraction=gold_fraction,
+        gold_count=gold_count,
+        validation_fraction=validation_fraction,
+        frozen=frozen,
     )
     if reused and gold_version and gold_version != reused:
         raise ValueError("Cannot rename a reused frozen gold benchmark")
@@ -258,6 +277,7 @@ def build_snapshot(
 
 
 def main() -> None:
+    """Command-line entry point: build a snapshot and print the training command."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--labels", type=Path, required=True, help="Approved JSONL export")
     parser.add_argument("--output", type=Path, required=True, help="New dataset version directory")
@@ -265,7 +285,8 @@ def main() -> None:
     parser.add_argument("--gold-version", help="Name a new gold benchmark, e.g. gold-v1")
     parser.add_argument("--gold-fraction", type=float, default=0.15)
     parser.add_argument(
-        "--gold-count", type=int,
+        "--gold-count",
+        type=int,
         help="Total gold records, balanced by POI type; overrides --gold-fraction. "
         "With --gold-manifest, reselect gold and require a new --gold-version.",
     )
@@ -274,9 +295,13 @@ def main() -> None:
     args = parser.parse_args()
     try:
         manifest = build_snapshot(
-            args.labels, args.output, gold_manifest=args.gold_manifest,
-            gold_version=args.gold_version, seed=args.seed,
-            gold_fraction=args.gold_fraction, gold_count=args.gold_count,
+            args.labels,
+            args.output,
+            gold_manifest=args.gold_manifest,
+            gold_version=args.gold_version,
+            seed=args.seed,
+            gold_fraction=args.gold_fraction,
+            gold_count=args.gold_count,
             validation_fraction=args.validation_fraction,
         )
     except (ValueError, OSError, KeyError) as exc:
@@ -296,4 +321,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

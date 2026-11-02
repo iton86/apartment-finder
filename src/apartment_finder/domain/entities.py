@@ -15,12 +15,16 @@ from uuid import UUID
 
 
 class Currency(StrEnum):
+    """Currencies prices are quoted in."""
+
     EUR = "EUR"
     BGN = "BGN"
 
 
 @dataclass(frozen=True)
 class Money:
+    """A non-negative price amount in a given currency."""
+
     amount: float
     currency: Currency
 
@@ -30,12 +34,16 @@ class Money:
 
 
 class ListingStatus(StrEnum):
+    """Whether an ad is still live on the site, as far as we last checked."""
+
     ACTIVE = "active"
     UNREACHABLE = "unreachable"
     EXPIRED = "expired"
 
 
 class TransactionType(StrEnum):
+    """Whether the property is offered for sale or for rent."""
+
     SALE = "sale"
     RENT = "rent"
 
@@ -73,6 +81,7 @@ class SearchScope:
     rooms: frozenset[int] = frozenset()
 
     def matches(self, listing: "Listing") -> bool:
+        """Return whether the listing falls inside the filters; an empty filter allows all."""
         if self.area_slugs and slugify_bg(listing.area) not in self.area_slugs:
             return False
         return not (self.rooms and listing.rooms not in self.rooms)
@@ -105,6 +114,7 @@ class Listing:
 
     @property
     def price_per_sqm(self) -> float | None:
+        """Price divided by area, or None when either is missing or the area is not positive."""
         if self.price and self.area_sqm and self.area_sqm > 0:
             return self.price.amount / self.area_sqm
         return None
@@ -147,6 +157,7 @@ _CYRILLIC_TO_LATIN = str.maketrans(
 
 
 def slugify_bg(value: str) -> str:
+    """Transliterate Bulgarian Cyrillic to a lowercase, hyphen-separated Latin slug."""
     return "-".join(value.lower().translate(_CYRILLIC_TO_LATIN).split())
 
 

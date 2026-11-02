@@ -9,9 +9,13 @@ def test_exact_span_errors():
 
 
 def test_micro_metrics():
-    rows = [{"ground_truth": [{"start": 0, "end": 4, "category": "park"}],
-             "predictions": [{"start": 0, "end": 4, "category": "park"}]},
-            {"ground_truth": [], "predictions": [{"start": 0, "end": 2, "category": "school"}]}]
+    rows = [
+        {
+            "ground_truth": [{"start": 0, "end": 4, "category": "park"}],
+            "predictions": [{"start": 0, "end": 4, "category": "park"}],
+        },
+        {"ground_truth": [], "predictions": [{"start": 0, "end": 2, "category": "school"}]},
+    ]
     result = summarize(rows)
     assert result["precision"] == 0.5
     assert result["recall"] == 1.0

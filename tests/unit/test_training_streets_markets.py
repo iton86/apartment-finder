@@ -5,9 +5,10 @@ import re
 import unittest
 import xml.etree.ElementTree as ET
 
-from training.label_studio import build_tasks, convert_export, labeling_config
-from training.schema import PoiExtraction, find_problems
-from training.teacher.prompt import SYSTEM_PROMPT
+from apartment_finder.domain.label_studio import labeling_config
+from apartment_finder.domain.poi import PoiExtraction, find_problems
+from apartment_finder.infrastructure.teacher.prompt import SYSTEM_PROMPT
+from training.label_studio import build_tasks, convert_export
 from training.token_data import name_spans
 
 

@@ -30,6 +30,8 @@ USER_AGENT = (
 
 
 class AzureBlobImageDownloader(ImageDownloader):
+    """Download listing images and upload them to Azure Blob Storage."""
+
     def __init__(self, storage_account_name: str, container_name: str):
         account_url = f"https://{storage_account_name}.blob.core.windows.net"
         self._blob_service = BlobServiceClient(
@@ -39,6 +41,10 @@ class AzureBlobImageDownloader(ImageDownloader):
         self._container_name = container_name
 
     def download(self, listing: Listing) -> list[DownloadedImage]:
+        """Upload each of the listing's images to blob storage and return the stored ones.
+
+        Images that fail to download are skipped with a warning.
+        """
         listing_prefix = str(listing.id).replace(":", "_")
         downloaded: list[DownloadedImage] = []
         logger.debug(

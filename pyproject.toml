@@ -1,7 +1,7 @@
 [project]
 name = "apartment-finder"
 version = "0.1.0"
-description = "Add your description here"
+description = "Scrapes imot.bg apartment listings and enriches them with POIs extracted by a fine-tuned model."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -21,7 +21,6 @@ dependencies = [
 apartment-finder-enrich = "apartment_finder.interface.enrich_cli:main"
 apartment-finder-labeling = "apartment_finder.interface.labeling_cli:main"
 apartment-finder-scrape = "apartment_finder.interface.cli:main"
-apartment-finder-select-labeling = "apartment_finder.interface.labeling_cli:main"
 apartment-finder-temporal = "apartment_finder.interface.temporal_cli:main"
 
 [build-system]
@@ -38,7 +37,21 @@ select = [
     "F",   # pyflakes (unused imports/variables, etc.)
     "I",   # isort — automatic import sorting
     "UP",  # pyupgrade — flags outdated Python patterns
+    "D1",  # pydocstyle — every public module, class and function is documented
 ]
+ignore = [
+    "D105",  # magic methods are self-explanatory
+    "D107",  # __init__ is documented on the class
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+"db_migrations/**" = ["D"]
+"**/__init__.py" = ["D104"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
 
 [dependency-groups]
 dev = [

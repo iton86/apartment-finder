@@ -6,19 +6,27 @@ from datetime import UTC, datetime
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from apartment_finder.application.ports.poi import PoiCandidate
+from apartment_finder.application.ports import PoiCandidate
 from apartment_finder.infrastructure.persistence.models import ListingModel
 
 
 def description_hash(text: str) -> str:
+    """Return the SHA-256 hex digest of the description, used to detect stale predictions."""
     return hashlib.sha256(text.encode()).hexdigest()
 
 
 class ListingPoiRepository:
+    """Reads listings that need POI prediction and saves the results."""
+
     def __init__(self, engine):
         self.engine = engine
 
     def pending(self, model_version):
+        """Yield listings with a nonblank description whose POIs are missing or stale.
+
+        Stale means the model version or the description hash differs. Listings are
+        read in pages of 100 ordered by ID.
+        """
         last_id = None
         while True:
             query = (
@@ -52,6 +60,17 @@ class ListingPoiRepository:
             last_id = rows[-1].id
 
     def save(self, candidate, prediction):
+        """Save the prediction if the description is unchanged.
+
+        The update is conditional on the stored description still equalling the
+        candidate's, so a concurrent edit is never overwritten.
+
+        Returns:
+            True if the row was updated, False if the description changed meanwhile.
+
+        Raises:
+            ValueError: If the prediction was made for a different description.
+        """
         if prediction["description_sha256"] != description_hash(candidate.description):
             raise ValueError("Prediction does not belong to this description")
         with Session(self.engine) as session:

@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ScrapeResult:
+    """Summary of one scrape run."""
+
     total_found: int
     new_listings: list[Listing]
     skipped_duplicates: int
@@ -55,6 +57,13 @@ class ScrapeAndStoreListings:
         self._repository = repository
 
     def execute(self, search_url: str, max_pages: int = 1) -> ScrapeResult:
+        """Scrape new listings from a search page and keep stored ones up to date.
+
+        Listings found in the results are marked as seen. New ones are scraped and saved.
+        Stored listings of the same source and search scope that are missing from the
+        results are re-checked individually, and marked unreachable if their page fails.
+        A missing search page ends the run cleanly with ``search_not_found`` set.
+        """
         logger.info("Discovering listing URLs from %s (max_pages=%d)", search_url, max_pages)
         try:
             search_results = self._scraper.discover_listing_urls(search_url, max_pages)

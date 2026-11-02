@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import pytest
 
-from apartment_finder.application.use_cases.select_for_labeling import SelectForLabeling
+from apartment_finder.application.use_cases.labeling import SelectForLabeling
 from apartment_finder.domain.labeling import (
     LabelingTask,
     description_content_hash,

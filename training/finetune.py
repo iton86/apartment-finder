@@ -5,16 +5,26 @@ import hashlib
 import json
 from pathlib import Path
 
-from training.jsonl import read_jsonl
+from apartment_finder.infrastructure.jsonl import read_jsonl
 from training.token_data import LABEL2ID, LABELS, compute_metrics, encode_chunks, split_rows
 from training.tracking import track_training
 
 
 def write_json(path: Path, value: dict) -> None:
+    """Write ``value`` to ``path`` as indented UTF-8 JSON with a trailing newline."""
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def run(args: argparse.Namespace) -> None:
+    """Fine-tune a token-classification encoder from parsed CLI arguments.
+
+    Saves the run config, split manifest and the best-validation checkpoint under
+    ``args.output``; gold rows are never used for training or checkpoint selection.
+
+    Raises:
+        ValueError: On invalid hyperparameters, a non-empty output directory, no rows,
+            teacher labels without ``--allow-teacher``, or an unsuitable tokenizer.
+    """
     # Keep the normal scraper and data preparation independent of the ML runtime.
     from transformers import (
         AutoModelForTokenClassification,
@@ -124,6 +134,7 @@ def run(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
+    """Command-line entry point: parse arguments and run fine-tuning."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--labels", type=Path, default=Path("data/labels.jsonl"))
     parser.add_argument("--model", default="FacebookAI/xlm-roberta-base")

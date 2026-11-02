@@ -8,6 +8,7 @@ from training.token_data import LABELS, entities
 
 
 def main() -> None:
+    """Print the POI entities (name, category, character span) found in a text file."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run", type=Path)
     parser.add_argument("--text-file", type=Path, required=True, help="UTF-8 description")

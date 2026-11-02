@@ -16,3 +16,11 @@ data/
 checkpoints/
 mlflow.db*
 mlruns/
+
+# IDE / local tooling
+.idea/
+.claude/settings.local.json
+.vscode/*
+!.vscode/launch.json
+.ruff_cache/
+.pytest_cache/

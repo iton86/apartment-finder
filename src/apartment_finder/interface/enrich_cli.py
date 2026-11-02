@@ -12,6 +12,7 @@ from apartment_finder.infrastructure.poi.repository import ListingPoiRepository
 
 
 def main():
+    """Enrich pending listings via the local model service (local APP_ENV only)."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default="http://127.0.0.1:5001")
     parser.add_argument(

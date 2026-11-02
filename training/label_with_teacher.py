@@ -2,12 +2,12 @@
 Step 3a of the POI pipeline: a large "teacher" model pre-labels every ad.
 
 These labels are drafts. Every one is checked against the schema and
-against the ad text (training.schema.find_problems), then loaded into
+against the ad text (apartment_finder.domain.poi.find_problems), then loaded into
 Label Studio as predictions for a human to confirm or fix. Nothing here
 is trusted blindly — the human-reviewed set is what training and
 evaluation stand on.
 
-The model behind it is pluggable (training/teacher/): pick it with
+The model behind it is pluggable (apartment_finder/infrastructure/teacher/): pick it with
 --provider / --model, or TEACHER_PROVIDER / TEACHER_MODEL in .env.
 
 Commands:
@@ -39,17 +39,26 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pydantic import ValidationError
 
+from apartment_finder.infrastructure.jsonl import read_jsonl, write_jsonl
+from apartment_finder.infrastructure.teacher import (
+    DEFAULT_PROVIDER,
+    PROVIDERS,
+    get_provider,
+    label_safely,
+    resolve_model_and_effort,
+    to_record,
+)
+from apartment_finder.infrastructure.teacher.base import (
+    BatchNotSupportedError,
+    Outcome,
+    TeacherOutput,
+    TeacherProvider,
+)
 from apartment_finder.interface.logging_config import configure_logging
-from training.jsonl import read_jsonl, write_jsonl
-from training.schema import PoiExtraction, find_problems
-from training.teacher import PROVIDERS, get_provider, provider_class
-from training.teacher.base import BatchNotSupportedError, Outcome, TeacherOutput, TeacherProvider
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_PROVIDER = "openai"
 DEFAULT_RAW = Path("data/raw.jsonl")
 DEFAULT_LABELS = Path("data/teacher_labels.jsonl")
 DEFAULT_BATCHES = Path("data/teacher_batches.json")
@@ -58,48 +67,13 @@ DEFAULT_BATCHES = Path("data/teacher_batches.json")
 MAX_CONSECUTIVE_FAILURES = 3
 
 
-def to_record(row: dict, provider: TeacherProvider, output: TeacherOutput) -> dict:
-    """Turn one normalized provider result into a labels-file line."""
-    record = {
-        "id": row["id"],
-        "content_hash": row["content_hash"],
-        "description": row["description"],
-        "provider": provider.name,
-        "model": provider.model,
-        "labeled_at": datetime.now(UTC).isoformat(),
-        "status": "error",
-        "pois": None,
-        "problems": [output.detail] if output.detail else [],
-        "usage": output.usage,
-    }
-    if output.outcome is Outcome.REFUSED:
-        record["status"] = "refused"
-        return record
-    if output.outcome is Outcome.TRUNCATED:
-        record["problems"] = ["hit the output token limit — response truncated"]
-        return record
-    if output.outcome is Outcome.FAILED:
-        return record
-
-    try:
-        extraction = PoiExtraction.model_validate_json(output.text or "")
-    except ValidationError as e:
-        record["problems"] = [f"schema validation failed: {e}"]
-        return record
-
-    record["pois"] = extraction.model_dump(mode="json")["pois"]
-    record["problems"] = find_problems(extraction, row["description"])
-    # "invalid" rows still go to Label Studio — a human fixing one bad
-    # evidence quote is cheaper than relabeling the whole ad.
-    record["status"] = "invalid" if record["problems"] else "ok"
-    return record
-
-
 def load_batches(path: Path) -> list[dict]:
+    """Read the batch ledger from ``path``, or an empty list if it does not exist."""
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
 
 
 def save_batches(path: Path, batches: list[dict]) -> None:
+    """Write the batch ledger to ``path``, creating parent directories."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(batches, indent=2), encoding="utf-8")
 
@@ -124,15 +98,8 @@ def pending_rows(args: argparse.Namespace, provider: TeacherProvider) -> list[di
     return rows[: args.limit] if args.limit else rows
 
 
-def label_safely(provider: TeacherProvider, row: dict) -> TeacherOutput:
-    try:
-        return provider.label(row)
-    except Exception as e:  # noqa: BLE001 — any SDK's errors, recorded and retried later
-        logger.warning("%s failed on %s: %s", provider.name, row["id"], e)
-        return TeacherOutput(Outcome.FAILED, detail=f"{type(e).__name__}: {e}")
-
-
 def cmd_try(args: argparse.Namespace, provider: TeacherProvider) -> None:
+    """Label a few pending ads and print the results; append them only with ``--save``."""
     for row in pending_rows(args, provider):
         record = to_record(row, provider, label_safely(provider, row))
         print(f"\n=== {row['id']}  [{record['status']}]  {row['url']}")
@@ -147,6 +114,11 @@ def cmd_try(args: argparse.Namespace, provider: TeacherProvider) -> None:
 
 
 def cmd_run(args: argparse.Namespace, provider: TeacherProvider) -> None:
+    """Label pending ads one by one, appending each record so a run can resume.
+
+    Raises:
+        SystemExit: After too many consecutive provider failures.
+    """
     rows = pending_rows(args, provider)
     logger.info("Labeling %d ads with %s/%s", len(rows), provider.name, provider.model)
     statuses: Counter[str] = Counter()
@@ -168,6 +140,11 @@ def cmd_run(args: argparse.Namespace, provider: TeacherProvider) -> None:
 
 
 def cmd_submit(args: argparse.Namespace, provider: TeacherProvider) -> None:
+    """Submit pending ads as a provider batch job and record it in the batch ledger.
+
+    Raises:
+        SystemExit: If the provider does not support batches.
+    """
     rows = pending_rows(args, provider)
     if not rows:
         logger.info("Nothing to submit — every row is labeled or already in a batch")
@@ -193,6 +170,10 @@ def cmd_submit(args: argparse.Namespace, provider: TeacherProvider) -> None:
 
 
 def cmd_collect(args: argparse.Namespace, _provider: TeacherProvider) -> None:
+    """Collect finished batches and append their labels; with ``--wait``, poll until done.
+
+    Items without a result are recorded as failures so a later ``submit`` retries them.
+    """
     rows_by_hash = {r["content_hash"]: r for r in read_jsonl(args.raw)}
     batches = load_batches(args.batches)
     for entry in (b for b in batches if not b["collected"]):
@@ -240,28 +221,11 @@ def cmd_collect(args: argparse.Namespace, _provider: TeacherProvider) -> None:
         )
 
 
-def resolve_model_and_effort(
-    provider: str, model: str | None, effort: str | None
-) -> tuple[str | None, str | None]:
-    """Flags win; then TEACHER_MODEL / TEACHER_EFFORT; then provider defaults.
-
-    The env vars belong to TEACHER_PROVIDER: `--provider gemini` with
-    TEACHER_MODEL=gpt-5.5 in .env must not send gpt-5.5 to Gemini.
-    """
-    if provider == os.environ.get("TEACHER_PROVIDER", DEFAULT_PROVIDER):
-        model = model or os.environ.get("TEACHER_MODEL") or None
-        effort = effort or os.environ.get("TEACHER_EFFORT") or None
-    if effort is None:
-        effort = provider_class(provider).default_effort
-    elif effort == "default":
-        effort = None
-    return model, effort
-
-
 COMMANDS = {"try": cmd_try, "run": cmd_run, "submit": cmd_submit, "collect": cmd_collect}
 
 
 def main() -> None:
+    """Command-line entry point: resolve the teacher provider and dispatch the command."""
     # .env holds the provider API key(s) and optional TEACHER_* settings.
     load_dotenv()
     parser = argparse.ArgumentParser(description="Pre-label ads with a teacher model")

@@ -26,12 +26,12 @@ by the use case. The diagram shows component relationships, not enabled features
 
 | Location | Responsibility |
 |---|---|
-| `src/apartment_finder/domain/` | Listing identity, money, status, search scope, and entities |
-| `src/apartment_finder/application/` | Scraping orchestration and abstract integration ports |
-| `src/apartment_finder/infrastructure/` | Browser, persistence, storage, and Temporal adapters |
+| `src/apartment_finder/domain/` | Pure rules: listing entities, labeling tasks, the POI schema (`poi.py`), the Label Studio contract (`label_studio.py`) and evaluation metrics (`evaluation.py`) |
+| `src/apartment_finder/application/` | Use cases (`use_cases/`) and every abstract port in one file, `ports.py` |
+| `src/apartment_finder/infrastructure/` | Adapters: scraper, Postgres, Label Studio, teacher LLM providers (`teacher/`), POI models (`poi/`), Temporal, JSONL |
 | `src/apartment_finder/interface/` | CLI parsing, dependency composition, and logging setup |
+| `training/`, `inspection/` | Export, annotation, encoder training, evaluation and the Streamlit inspector. Offline tools. They may import `apartment_finder`; the package never imports them |
 | `db_migrations/` | Alembic schema history |
-| `training/` | Export, annotation, encoder training, evaluation, and prediction |
 | `tests/` | Unit tests and PostgreSQL integration tests |
 
 ## Scrape lifecycle

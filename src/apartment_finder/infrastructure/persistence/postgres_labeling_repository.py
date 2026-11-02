@@ -1,3 +1,5 @@
+"""Postgres implementation of the labeling repository."""
+
 import logging
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
@@ -6,7 +8,7 @@ from sqlalchemy import create_engine, func, make_url, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
-from apartment_finder.application.ports.labeling_repository import LabelingRepository
+from apartment_finder.application.ports import LabelingRepository
 from apartment_finder.domain.labeling import (
     MIN_DESCRIPTION_LENGTH,
     LabelingBatch,
@@ -26,12 +28,22 @@ logger = logging.getLogger(__name__)
 
 
 class PostgresLabelingRepository(LabelingRepository):
+    """Postgres implementation of ``LabelingRepository``."""
+
     def __init__(self, connection_url: str):
         self._engine = create_engine(connection_url, pool_pre_ping=True)
         safe_url = make_url(connection_url).render_as_string(hide_password=True)
         logger.info("Connected to %s", safe_url)
 
     def reserve_candidates(self, limit: int) -> list[LabelingTask]:
+        """Create pending labeling tasks for up to ``limit`` unlabeled listings.
+
+        Candidates are locked with ``SKIP LOCKED`` so concurrent runs do not collide,
+        spread across areas, and skipped if their description cannot form a task.
+
+        Raises:
+            ValueError: If ``limit`` is not positive.
+        """
         if limit < 1:
             raise ValueError("limit must be positive")
 
@@ -82,6 +94,11 @@ class PostgresLabelingRepository(LabelingRepository):
         return reserved
 
     def get_pending(self, limit: int) -> list[LabelingTask]:
+        """Return up to ``limit`` pending tasks, oldest first.
+
+        Raises:
+            ValueError: If ``limit`` is not positive.
+        """
         if limit < 1:
             raise ValueError("limit must be positive")
         with Session(self._engine) as session:
@@ -104,6 +121,13 @@ class PostgresLabelingRepository(LabelingRepository):
         limit: int,
         batch_id: UUID | None = None,
     ) -> LabelingBatch:
+        """Claim up to ``limit`` unexported pending tasks for a new batch.
+
+        Idempotent on ``batch_id``: an existing batch is returned unchanged.
+
+        Raises:
+            ValueError: If ``limit`` is not positive.
+        """
         if limit < 1:
             raise ValueError("limit must be positive")
         batch_id = batch_id or uuid4()
@@ -138,6 +162,7 @@ class PostgresLabelingRepository(LabelingRepository):
             return result
 
     def get_batch_tasks(self, batch_id: UUID) -> list[LabelingTask]:
+        """Return the tasks assigned to the batch, oldest first."""
         with Session(self._engine) as session:
             models = (
                 session.execute(
@@ -151,6 +176,7 @@ class PostgresLabelingRepository(LabelingRepository):
             return [self._to_entity(model) for model in models]
 
     def get_by_label_studio_task_id(self, label_studio_task_id: int) -> LabelingTask | None:
+        """Return the task linked to a Label Studio task ID, or ``None``."""
         with Session(self._engine) as session:
             model = session.scalar(
                 select(LabelingTaskModel).where(
@@ -160,6 +186,11 @@ class PostgresLabelingRepository(LabelingRepository):
             return self._to_entity(model) if model else None
 
     def save_teacher_annotation(self, task_id: UUID, annotation: TeacherAnnotation) -> None:
+        """Store the teacher model's annotation on the task and clear any error.
+
+        Raises:
+            KeyError: If the task does not exist.
+        """
         with Session(self._engine) as session:
             model = session.get(LabelingTaskModel, task_id)
             if model is None:
@@ -175,6 +206,11 @@ class PostgresLabelingRepository(LabelingRepository):
             session.commit()
 
     def mark_exported(self, task_id: UUID, *, project_id: int, label_studio_task_id: int) -> None:
+        """Record that the task was exported to Label Studio.
+
+        Raises:
+            KeyError: If the task does not exist.
+        """
         with Session(self._engine) as session:
             model = session.get(LabelingTaskModel, task_id)
             if model is None:
@@ -187,6 +223,11 @@ class PostgresLabelingRepository(LabelingRepository):
             session.commit()
 
     def record_export_error(self, task_id: UUID, error: str) -> None:
+        """Mark the task's export as failed and keep the error message.
+
+        Raises:
+            KeyError: If the task does not exist.
+        """
         with Session(self._engine) as session:
             model = session.get(LabelingTaskModel, task_id)
             if model is None:
@@ -202,6 +243,12 @@ class PostgresLabelingRepository(LabelingRepository):
         actor: str,
         approved_task_ids: list[UUID],
     ) -> None:
+        """Approve the given tasks by freezing their synced human annotation.
+
+        Raises:
+            KeyError: If the batch does not exist.
+            ValueError: If a task is outside the batch or has no synced annotation.
+        """
         now = datetime.now(UTC)
         approved = set(approved_task_ids)
         with Session(self._engine) as session:
@@ -243,6 +290,14 @@ class PostgresLabelingRepository(LabelingRepository):
         updated_at,
         deleted: bool = False,
     ) -> None:
+        """Copy the human annotation state from Label Studio onto the task.
+
+        If the task was already approved and the annotation changed or was deleted,
+        the approval is invalidated and the task returns to the exported state.
+
+        Raises:
+            KeyError: If the task does not exist.
+        """
         with Session(self._engine) as session:
             model = session.get(LabelingTaskModel, task_id)
             if model is None:
@@ -271,6 +326,11 @@ class PostgresLabelingRepository(LabelingRepository):
             session.commit()
 
     def record_sync_error(self, task_id: UUID, error: str) -> None:
+        """Mark the task's sync as failed and keep the error message.
+
+        Raises:
+            KeyError: If the task does not exist.
+        """
         with Session(self._engine) as session:
             model = session.get(LabelingTaskModel, task_id)
             if model is None:
@@ -280,6 +340,11 @@ class PostgresLabelingRepository(LabelingRepository):
             session.commit()
 
     def approved_training_rows(self) -> list[dict]:
+        """Return approved, still-valid human labels joined with listing metadata.
+
+        Rows whose approval was invalidated, or whose approved revision no longer
+        matches the latest human revision, are excluded.
+        """
         with Session(self._engine) as session:
             rows = session.execute(
                 select(
@@ -418,4 +483,3 @@ def _coerce_datetime(value):
     if isinstance(value, str):
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
     raise TypeError(f"Expected datetime, ISO string, or None, got {type(value).__name__}")
-

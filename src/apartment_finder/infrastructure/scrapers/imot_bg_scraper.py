@@ -79,6 +79,7 @@ class RateLimiter:
         self._next_allowed = 0.0
 
     def acquire(self) -> None:
+        """Block until this caller's reserved request slot arrives."""
         with self._lock:
             now = time.monotonic()
             wait_for = self._next_allowed - now
@@ -173,6 +174,7 @@ class ImotBgScraper(SiteScraper):
         return deduped
 
     def search_scope(self, search_url: str) -> SearchScope:
+        """Derive the area and room filters encoded in a search URL's path."""
         parts = [
             unquote(part)
             for part in urlsplit(search_url).path.strip("/").split("/")
