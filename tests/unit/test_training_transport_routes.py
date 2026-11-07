@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from training.schema import PoiExtraction, find_problems
-from training.teacher.prompt import SYSTEM_PROMPT
+from apartment_finder.domain.poi import PoiExtraction, find_problems
+from apartment_finder.infrastructure.teacher.prompt import SYSTEM_PROMPT
 from training.token_data import name_spans
 
 

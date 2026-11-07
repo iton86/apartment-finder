@@ -29,6 +29,11 @@ logger = logging.getLogger(__name__)
 
 
 def build_schedule(request: ScrapeRequest, schedule_id: str, task_queue: str) -> Schedule:
+    """Build a 10-minute schedule that starts the scrape workflow, skipping overlapping runs.
+
+    Raises:
+        ValueError: If the request is invalid.
+    """
     request.validate()
     return Schedule(
         action=ScheduleActionStartWorkflow(
@@ -46,6 +51,7 @@ def build_schedule(request: ScrapeRequest, schedule_id: str, task_queue: str) ->
 
 
 async def run(args: argparse.Namespace) -> None:
+    """Connect to Temporal, then run the worker or create/update the schedule."""
     request = None
     if args.command == "schedule":
         request = ScrapeRequest(
@@ -94,6 +100,7 @@ async def run(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
+    """Parse the command line and run the ``worker`` or ``schedule`` command."""
     load_dotenv()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--address", default=os.getenv("TEMPORAL_ADDRESS", "localhost:7233"))

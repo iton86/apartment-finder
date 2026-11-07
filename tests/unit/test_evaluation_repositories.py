@@ -8,13 +8,13 @@ from pathlib import Path
 
 def test_prediction_repositories_work_without_training_on_path(tmp_path):
     project_root = Path(__file__).resolve().parents[2]
-    script = '''
+    script = """
 import importlib.util
 from pathlib import Path
 
 assert importlib.util.find_spec("training") is None
-from apartment_finder.infrastructure.evaluation.jsonl_repository import JsonlPredictionRepository
-from apartment_finder.infrastructure.evaluation.mlflow_repository import MlflowExperimentRepository
+from apartment_finder.infrastructure.evaluation_repositories import JsonlPredictionRepository
+from apartment_finder.infrastructure.evaluation_repositories import MlflowExperimentRepository
 
 rows = [{"id": 1, "text": "София"}]
 path = Path("predictions.jsonl")
@@ -30,10 +30,13 @@ class FakeClient:
 mlflow_repository = MlflowExperimentRepository("unused")
 mlflow_repository._client = lambda: FakeClient()
 assert mlflow_repository.load_predictions("run", "inspection/predictions.jsonl") == rows
-'''
+"""
     env = {**os.environ, "PYTHONPATH": str(project_root / "src")}
     result = subprocess.run(
-        [sys.executable, "-c", script], cwd=tmp_path, env=env,
-        capture_output=True, text=True,
+        [sys.executable, "-c", script],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
     )
     assert result.returncode == 0, result.stderr

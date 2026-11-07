@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
+    """Entry point of ``apartment-finder-scrape``: wire adapters, run one scrape, print a report."""
     parser = argparse.ArgumentParser(description="Scrape apartment listings")
     parser.add_argument("search_url", help="Search/results page URL to scrape")
     parser.add_argument("--max-pages", type=int, default=1)

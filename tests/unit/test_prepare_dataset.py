@@ -8,8 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from apartment_finder.infrastructure.jsonl import read_jsonl, write_jsonl
 from training.dedup import cluster_near_duplicates
-from training.jsonl import read_jsonl, write_jsonl
 from training.prepare_dataset import build_snapshot, poi_types, prepare
 from training.token_data import split_rows
 
@@ -35,12 +35,18 @@ def fixtures():
         entries = copy.deepcopy(pois[i]) if i < len(pois) else []
         for poi in entries:
             poi["distance"] = {"value": None, "unit": "nearby"}
-        rows.append({
-            "id": str(i), "content_hash": hashlib.sha256(text.encode()).hexdigest(),
-            "description": text, "pois": entries, "label_source": "human",
-            "approved_revision": 199174988752800, "city": "София",
-            "area": "Център" if i % 2 else "Лозенец",
-        })
+        rows.append(
+            {
+                "id": str(i),
+                "content_hash": hashlib.sha256(text.encode()).hexdigest(),
+                "description": text,
+                "pois": entries,
+                "label_source": "human",
+                "approved_revision": 199174988752800,
+                "city": "София",
+                "area": "Център" if i % 2 else "Лозенец",
+            }
+        )
     return rows
 
 
@@ -71,9 +77,10 @@ class DatasetPreparationTest(unittest.TestCase):
             )
         self.assertEqual(manifest["gold_version"], "gold-v1")
         self.assertEqual(manifest["splits"]["gold"][0]["approved_revision"], 199174988752800)
-        self.assertIn("category:street", set().union(*(
-            set(report["features"]) for report in manifest["coverage"].values()
-        )))
+        self.assertIn(
+            "category:street",
+            set().union(*(set(report["features"]) for report in manifest["coverage"].values())),
+        )
 
     def test_reordering_input_does_not_change_membership(self):
         labels, splits, _ = prepare(self.rows)
@@ -113,9 +120,9 @@ class DatasetPreparationTest(unittest.TestCase):
         self.assertEqual(len(splits["validation"]), 1)
         _, splits, _ = prepare(rows, gold_count=1)
         self.assertEqual(len(splits["gold"]), 1)
-        clusters = cluster_near_duplicates([
-            row["description"] for row in splits["gold"] + splits["train"] + splits["validation"]
-        ])
+        clusters = cluster_near_duplicates(
+            [row["description"] for row in splits["gold"] + splits["train"] + splits["validation"]]
+        )
         self.assertNotIn(clusters[0], clusters[1:])
 
     def test_invalid_or_impossible_absolute_count_is_rejected(self):
@@ -129,13 +136,19 @@ class DatasetPreparationTest(unittest.TestCase):
         for version in (None, "gold-v1"):
             with self.assertRaisesRegex(ValueError, "new --gold-version"):
                 build_snapshot(
-                    self.source, self.root / "v2", gold_manifest=previous,
-                    gold_count=4, gold_version=version,
+                    self.source,
+                    self.root / "v2",
+                    gold_manifest=previous,
+                    gold_count=4,
+                    gold_version=version,
                 )
             self.assertFalse((self.root / "v2").exists())
         manifest = build_snapshot(
-            self.source, self.root / "v2", gold_manifest=previous,
-            gold_count=4, gold_version="gold-v2",
+            self.source,
+            self.root / "v2",
+            gold_manifest=previous,
+            gold_count=4,
+            gold_version="gold-v2",
         )
         self.assertEqual(manifest["gold_version"], "gold-v2")
         self.assertEqual(manifest["gold_count"], 4)
@@ -156,8 +169,7 @@ class DatasetPreparationTest(unittest.TestCase):
         manifest = self.snapshot()
         key = manifest["gold_rows"][0]["content_hash"]
         member = next(r for r in self.rows if r["content_hash"] == key)
-        neighbor = {**member, "id": "new",
-                    "description": member["description"] + " !!!"}
+        neighbor = {**member, "id": "new", "description": member["description"] + " !!!"}
         neighbor["content_hash"] = hashlib.sha256(neighbor["description"].encode()).hexdigest()
         _labels, splits, version = prepare(self.rows + [neighbor], frozen=manifest)
         self.assertEqual(version, "gold-v1")
@@ -171,7 +183,7 @@ class DatasetPreparationTest(unittest.TestCase):
         assignments = {}
         offset = 0
         for split, rows in splits.items():
-            assignments[split] = set(clusters[offset:offset + len(rows)])
+            assignments[split] = set(clusters[offset : offset + len(rows)])
             offset += len(rows)
         self.assertFalse(assignments["gold"] & assignments["train"])
         self.assertFalse(assignments["gold"] & assignments["validation"])
@@ -184,11 +196,18 @@ class DatasetPreparationTest(unittest.TestCase):
             prepare([r for r in self.rows if r["content_hash"] != key], frozen=manifest)
         edited = copy.deepcopy(self.rows)
         member = next(r for r in edited if r["content_hash"] == key)
-        member["pois"] = [] if member["pois"] else [{
-            "category": "other", "name": member["description"].split()[0],
-            "distance": {"value": None, "unit": "nearby"},
-            "evidence": member["description"],
-        }]
+        member["pois"] = (
+            []
+            if member["pois"]
+            else [
+                {
+                    "category": "other",
+                    "name": member["description"].split()[0],
+                    "distance": {"value": None, "unit": "nearby"},
+                    "evidence": member["description"],
+                }
+            ]
+        )
         with self.assertRaisesRegex(ValueError, "changed"):
             prepare(edited, frozen=manifest)
 
@@ -198,8 +217,12 @@ class DatasetPreparationTest(unittest.TestCase):
             self.snapshot()
 
     def test_empty_small_duplicate_or_teacher_input_is_rejected(self):
-        for rows in ([], self.rows[:2], self.rows + [self.rows[0]],
-                     [{**r, "label_source": "teacher"} for r in self.rows]):
+        for rows in (
+            [],
+            self.rows[:2],
+            self.rows + [self.rows[0]],
+            [{**r, "label_source": "teacher"} for r in self.rows],
+        ):
             with self.subTest(rows=len(rows)), self.assertRaises(ValueError):
                 prepare(rows)
 
@@ -216,12 +239,22 @@ class DatasetPreparationTest(unittest.TestCase):
     def test_cli_creates_snapshot_and_reports_training_command(self):
         result = subprocess.run(
             [
-                sys.executable, "-m", "training.prepare_dataset",
-                "--labels", str(self.source), "--output", str(self.root / "cli-v1"),
-                "--gold-version", "gold-v1",
-                "--gold-count", "4",
+                sys.executable,
+                "-m",
+                "training.prepare_dataset",
+                "--labels",
+                str(self.source),
+                "--output",
+                str(self.root / "cli-v1"),
+                "--gold-version",
+                "gold-v1",
+                "--gold-count",
+                "4",
             ],
-            capture_output=True, text=True, encoding="utf-8", check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=False,
             env={**os.environ, "PYTHONIOENCODING": "utf-8"},
         )
         self.assertEqual(result.returncode, 0, result.stderr)

@@ -5,12 +5,17 @@ import hashlib
 import json
 from pathlib import Path
 
+from apartment_finder.infrastructure.jsonl import read_jsonl
 from training.finetune import write_json
-from training.jsonl import read_jsonl
 from training.token_data import LABELS, compute_metrics, encode_chunks, split_rows
 
 
 def main() -> None:
+    """Score a saved encoder on the gold split and write ``gold_metrics.json``.
+
+    Refuses to run if the labels file or split membership changed since training, or
+    if the checkpoint's label mapping differs from the POI schema.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "run", type=Path, help="Run directory containing model/ and run_config.json"

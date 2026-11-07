@@ -23,11 +23,11 @@ from pathlib import Path
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import Session
 
+from apartment_finder.infrastructure.jsonl import write_jsonl
 from apartment_finder.infrastructure.persistence.models import ListingModel
 from apartment_finder.infrastructure.persistence.settings import build_postgres_connection_url
 from apartment_finder.interface.logging_config import configure_logging
 from training.dedup import cluster_near_duplicates, content_hash
-from training.jsonl import write_jsonl
 from training.text_cleaning import clean_description
 
 logger = logging.getLogger(__name__)
@@ -44,6 +44,10 @@ _POI_HINT = re.compile(
 
 
 def fetch_listings(connection_url: str) -> list[ListingModel]:
+    """Load all listings that have a description, newest ``last_seen_at`` first.
+
+    Runs in a READ ONLY transaction and returns detached ORM objects.
+    """
     engine = create_engine(connection_url, pool_pre_ping=True)
     with Session(engine) as session:
         session.execute(text("SET TRANSACTION READ ONLY"))
@@ -61,6 +65,14 @@ def fetch_listings(connection_url: str) -> list[ListingModel]:
 
 
 def build_rows(listings: list[ListingModel], min_chars: int, threshold: float) -> tuple[list, dict]:
+    """Clean, de-duplicate and summarize listings into export rows.
+
+    Drops descriptions shorter than ``min_chars``, then exact duplicates, then near
+    duplicates (Jaccard >= ``threshold``), recording dropped ids on the survivor.
+
+    Returns:
+        The output rows and a statistics report.
+    """
     stats: Counter[str] = Counter(listings_read=len(listings))
 
     # Pass 1 — clean and drop exact duplicates (same text modulo whitespace,
@@ -130,6 +142,7 @@ def build_rows(listings: list[ListingModel], min_chars: int, threshold: float) -
 
 
 def main() -> None:
+    """Command-line entry point: export descriptions to JSONL plus a ``_report.json``."""
     parser = argparse.ArgumentParser(description="Export listing descriptions for POI labeling")
     parser.add_argument("--out", type=Path, default=Path("data/raw.jsonl"))
     parser.add_argument(

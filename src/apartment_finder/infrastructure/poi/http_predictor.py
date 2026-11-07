@@ -9,6 +9,8 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 
 
 class Poi(BaseModel):
+    """One predicted POI: its name, category and character span in the description."""
+
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     name: StrictStr = Field(min_length=1)
     category: StrictStr = Field(pattern=r"^[a-z][a-z_]*$")
@@ -18,6 +20,8 @@ class Poi(BaseModel):
 
 
 class Prediction(BaseModel):
+    """The model server's response for one description, tied to it by SHA-256."""
+
     model_config = ConfigDict(extra="forbid")
     pois: list[Poi]
     model_version: StrictStr = Field(min_length=1)
@@ -25,6 +29,8 @@ class Prediction(BaseModel):
 
 
 class MlflowHttpPredictor:
+    """Client for an MLflow model server that verifies every prediction it receives."""
+
     def __init__(self, url: str, timeout: float = 120):
         parsed = urlsplit(url)
         if parsed.scheme not in {"http", "https"} or not parsed.hostname:
@@ -33,6 +39,12 @@ class MlflowHttpPredictor:
         self.timeout = timeout
 
     def predict(self, description: str) -> dict:
+        """Return the model's prediction for one description.
+
+        Raises:
+            ValueError: If the response is oversized, malformed, built for a different
+                description, or contains spans that do not match the text.
+        """
         request = Request(
             self.url,
             data=json.dumps({"dataframe_records": [{"description": description}]}).encode(),

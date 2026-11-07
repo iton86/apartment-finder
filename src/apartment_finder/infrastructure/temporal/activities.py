@@ -28,6 +28,12 @@ async def stop_process(process: asyncio.subprocess.Process) -> None:
 
 @activity.defn
 async def scrape_listings(request: ScrapeRequest) -> None:
+    """Run the scraper CLI as a subprocess, heartbeating until it exits.
+
+    Raises:
+        ApplicationError: Non-retryable if the request is invalid; otherwise if
+            the scraper exits nonzero. A timeout cancels the run.
+    """
     try:
         request.validate()
     except ValueError as exc:

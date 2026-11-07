@@ -9,6 +9,8 @@ TASK_QUEUE = "apartment-finder"
 
 @dataclass(frozen=True)
 class ScrapeRequest:
+    """Parameters for one scrape run, passed from the workflow to the activity."""
+
     search_url: str
     max_pages: int = 1
     max_workers: int = 4
@@ -16,6 +18,11 @@ class ScrapeRequest:
     timeout_minutes: int = 60
 
     def validate(self) -> None:
+        """Check the request's values.
+
+        Raises:
+            ValueError: If the URL is not HTTP(S) or a numeric limit is out of range.
+        """
         url = urlparse(self.search_url)
         if url.scheme not in {"http", "https"} or not url.netloc:
             raise ValueError("search_url must be an HTTP(S) URL")

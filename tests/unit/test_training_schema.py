@@ -6,7 +6,7 @@ taken from it, and distance value/unit must agree.
 
 import pytest
 
-from training.schema import (
+from apartment_finder.domain.poi import (
     Distance,
     DistanceUnit,
     PoiExtraction,

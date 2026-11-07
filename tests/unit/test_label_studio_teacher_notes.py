@@ -2,9 +2,9 @@ import unittest
 import xml.etree.ElementTree as ET
 from uuid import uuid4
 
+from apartment_finder.domain.label_studio import labeling_config, task_payload
 from apartment_finder.domain.labeling import LabelingTask, TeacherStatus
-from apartment_finder.infrastructure.label_studio.mapper import task_payload
-from training.label_studio import build_tasks, labeling_config
+from training.label_studio import build_tasks
 
 
 class TeacherNotesTest(unittest.TestCase):
@@ -21,13 +21,21 @@ class TeacherNotesTest(unittest.TestCase):
 
     def test_offline_export_preserves_per_poi_problems(self):
         raw = {
-            "id": "1", "content_hash": "a" * 64, "description": "до Южен парк",
-            "title": "Имот", "city": "София", "area": "", "url": "",
+            "id": "1",
+            "content_hash": "a" * 64,
+            "description": "до Южен парк",
+            "title": "Имот",
+            "city": "София",
+            "area": "",
+            "url": "",
         }
         problem = "pois[0]: distance value must be positive"
         teacher = {
-            "content_hash": raw["content_hash"], "model": "test",
-            "status": "invalid", "pois": [], "problems": [problem],
+            "content_hash": raw["content_hash"],
+            "model": "test",
+            "status": "invalid",
+            "pois": [],
+            "problems": [problem],
         }
         [task] = build_tasks([raw], [teacher], gold_percent=0)
         self.assertEqual(task["data"]["review_notes"], problem)
@@ -37,10 +45,13 @@ class TeacherNotesTest(unittest.TestCase):
     def test_api_export_displays_teacher_problem_or_empty(self):
         for problems in ([], ["pois[0]: needs a name or number"]):
             task = LabelingTask(
-                id=uuid4(), listing_id=uuid4(), content_hash="a" * 64,
+                id=uuid4(),
+                listing_id=uuid4(),
+                content_hash="a" * 64,
                 description_snapshot="до Южен парк",
                 teacher_status=TeacherStatus.INVALID if problems else TeacherStatus.OK,
-                teacher_result=[], teacher_problems=problems,
+                teacher_result=[],
+                teacher_problems=problems,
             )
             self.assertEqual(task_payload(task).data["review_notes"], "\n".join(problems))
 

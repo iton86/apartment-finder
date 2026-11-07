@@ -9,8 +9,8 @@ pytest.importorskip("openai")
 
 from openai.types.chat import ChatCompletion  # noqa: E402
 
-from training.teacher.base import Outcome  # noqa: E402
-from training.teacher.openai_provider import (  # noqa: E402
+from apartment_finder.infrastructure.teacher.base import Outcome  # noqa: E402
+from apartment_finder.infrastructure.teacher.openai_provider import (  # noqa: E402
     RESPONSE_FORMAT,
     OpenAIProvider,
     batch_line_to_output,

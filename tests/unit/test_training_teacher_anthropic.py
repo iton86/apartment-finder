@@ -7,8 +7,11 @@ import pytest
 
 types = pytest.importorskip("anthropic.types")
 
-from training.teacher.anthropic_provider import AnthropicProvider, message_to_output  # noqa: E402
-from training.teacher.base import Outcome  # noqa: E402
+from apartment_finder.infrastructure.teacher.anthropic_provider import (  # noqa: E402
+    AnthropicProvider,
+    message_to_output,
+)
+from apartment_finder.infrastructure.teacher.base import Outcome  # noqa: E402
 
 ROW = {
     "id": "imot.bg:1",

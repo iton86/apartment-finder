@@ -101,8 +101,8 @@ def test_real_roberta_training_and_reload(tmp_path, monkeypatch, capsys, trackin
     transformers = pytest.importorskip("transformers")
     pytest.importorskip("accelerate")
     tokenizers = pytest.importorskip("tokenizers")
+    from apartment_finder.infrastructure.jsonl import write_jsonl
     from training.finetune import run
-    from training.jsonl import write_jsonl
 
     torch.set_num_threads(1)
     backend = tokenizers.Tokenizer(

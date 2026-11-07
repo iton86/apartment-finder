@@ -28,6 +28,8 @@ logger = logging.getLogger(__name__)
 
 
 class PostgresListingRepository(ListingRepository):
+    """Postgres implementation of ``ListingRepository``."""
+
     def __init__(self, connection_url: str):
         # pool_pre_ping avoids using a dead connection after the DB has
         # been idle — cheap safety net for a server that isn't hit constantly.
@@ -38,6 +40,7 @@ class PostgresListingRepository(ListingRepository):
         logger.info("Connected to %s", safe_url)
 
     def save(self, listing: Listing) -> None:
+        """Insert the listing as a new row."""
         with Session(self._engine) as session:
             model = ListingModel(
                 source=listing.id.source,
@@ -66,6 +69,7 @@ class PostgresListingRepository(ListingRepository):
             logger.debug("Committed listing %s (row id=%s)", listing.id, model.id)
 
     def exists(self, listing_id: ListingId) -> bool:
+        """Return whether any row has this source and external ID, regardless of price."""
         with Session(self._engine) as session:
             stmt = select(ListingModel.id).where(
                 ListingModel.source == listing_id.source,
@@ -107,12 +111,14 @@ class PostgresListingRepository(ListingRepository):
         return unseen_results
 
     def all(self) -> list[Listing]:
+        """Return every stored listing."""
         with Session(self._engine) as session:
             models = session.execute(select(ListingModel)).scalars().all()
             logger.debug("Loaded %d listing(s) from the database", len(models))
             return [self._to_entity(m) for m in models]
 
     def record_seen(self, listing_ids: set[ListingId], seen_at: datetime) -> None:
+        """Mark the listings active and set their ``last_seen_at`` in one update."""
         if not listing_ids:
             return
         keys = {(key.source, key.external_id) for key in listing_ids}
@@ -125,6 +131,7 @@ class PostgresListingRepository(ListingRepository):
             session.commit()
 
     def record_unreachable(self, listing_id: ListingId, checked_at: datetime) -> None:
+        """Mark a listing expired if unseen for over three days, else unreachable."""
         with Session(self._engine) as session:
             session.execute(
                 update(ListingModel)

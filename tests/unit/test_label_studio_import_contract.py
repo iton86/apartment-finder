@@ -6,9 +6,8 @@ import unittest
 import xml.etree.ElementTree as ET
 from uuid import uuid4
 
+from apartment_finder.domain.label_studio import labeling_config, task_payload
 from apartment_finder.domain.labeling import LabelingTask, TeacherStatus
-from apartment_finder.infrastructure.label_studio.mapper import task_payload
-from training.label_studio import labeling_config
 
 
 class ImportContractTest(unittest.TestCase):
@@ -31,9 +30,14 @@ class ImportContractTest(unittest.TestCase):
                     for value in element.attrib.values()
                     if re.fullmatch(r"\$\w+", value)
                 }
-                wire = json.loads(json.dumps({
-                    "data": payload.data, "predictions": payload.predictions,
-                }))
+                wire = json.loads(
+                    json.dumps(
+                        {
+                            "data": payload.data,
+                            "predictions": payload.predictions,
+                        }
+                    )
+                )
                 self.assertFalse(required - wire["data"].keys())
                 self.assertEqual(wire["data"]["text"], task.description_snapshot)
                 self.assertIn(str(task.listing_id), wire["data"]["title"])

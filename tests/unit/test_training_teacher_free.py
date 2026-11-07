@@ -10,8 +10,12 @@ import pytest
 
 pytest.importorskip("openai")
 
-from training.teacher import openai_compatible as oc  # noqa: E402
-from training.teacher.base import BatchNotSupportedError, Outcome, TeacherOutput  # noqa: E402
+from apartment_finder.infrastructure.teacher import openai_compatible as oc  # noqa: E402
+from apartment_finder.infrastructure.teacher.base import (  # noqa: E402
+    BatchNotSupportedError,
+    Outcome,
+    TeacherOutput,
+)
 
 ROW = {
     "id": "imot.bg:1",

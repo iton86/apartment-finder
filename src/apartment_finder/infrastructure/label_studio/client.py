@@ -1,3 +1,5 @@
+"""Label Studio API client and helpers for reconciling tasks."""
+
 from __future__ import annotations
 
 import json
@@ -8,29 +10,36 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode, urljoin
 from urllib.request import Request, urlopen
 
-from apartment_finder.application.ports.label_studio import LabelStudioGateway
+from apartment_finder.application.ports import LabelStudioGateway
 from apartment_finder.domain.labeling import LabelStudioTaskPayload, LabelStudioTaskState
 
 logger = logging.getLogger(__name__)
 
 
 class LabelStudioError(RuntimeError):
+    """Raised when Label Studio rejects a request or returns data we refuse to trust."""
+
     pass
 
 
 @dataclass(frozen=True)
 class LabelStudioSettings:
+    """Connection settings for one Label Studio project."""
+
     base_url: str
     api_token: str
     project_id: int
 
 
 class LabelStudioClient(LabelStudioGateway):
+    """Minimal stdlib HTTP client for the Label Studio API, implementing ``LabelStudioGateway``."""
+
     def __init__(self, *, base_url: str, api_token: str):
         self._base_url = base_url.rstrip("/") + "/"
         self._api_token = api_token
 
     def version(self) -> dict:
+        """Return Label Studio's version info; a cheap connectivity and auth check."""
         return self._request("GET", "api/version")
 
     def import_tasks(
@@ -38,6 +47,18 @@ class LabelStudioClient(LabelStudioGateway):
         project_id: int,
         tasks: list[LabelStudioTaskPayload],
     ) -> dict[str, int]:
+        """Import tasks into a project, reusing tasks that already exist.
+
+        Idempotent: tasks are matched by ``labeling_task_id`` so reruns never create
+        duplicates, and any existing task whose text snapshot differs is rejected.
+
+        Returns:
+            Mapping of our labeling task ID to the Label Studio task ID.
+
+        Raises:
+            LabelStudioError: If an existing or imported task does not match the
+                snapshot, or the task listing cannot be trusted.
+        """
         if not tasks:
             return {}
 
@@ -76,6 +97,7 @@ class LabelStudioClient(LabelStudioGateway):
         }
 
     def get_task(self, task_id: int) -> LabelStudioTaskState:
+        """Fetch one task together with its predictions and annotations."""
         payload = self._request("GET", f"api/tasks/{task_id}")
         return _state_from_payload(payload)
 
@@ -86,6 +108,7 @@ class LabelStudioClient(LabelStudioGateway):
         result: list[dict],
         completed_by: int | None = None,
     ) -> dict:
+        """Create an annotation on a task, optionally attributed to user ``completed_by``."""
         payload: dict = {"result": result}
         if completed_by is not None:
             payload["completed_by"] = completed_by
@@ -96,9 +119,14 @@ class LabelStudioClient(LabelStudioGateway):
         seen: set[int] = set()
         page = 1
         while True:
-            query = urlencode({
-                "project": project_id, "page": page, "page_size": 100, "fields": "all",
-            })
+            query = urlencode(
+                {
+                    "project": project_id,
+                    "page": page,
+                    "page_size": 100,
+                    "fields": "all",
+                }
+            )
             payload = self._request("GET", f"api/tasks?{query}")
             if isinstance(payload, list):
                 results = payload
@@ -206,6 +234,7 @@ def _state_from_payload(payload: dict) -> LabelStudioTaskState:
 
 
 def task_data_matches(actual: dict, expected: dict) -> bool:
+    """Return whether two task payloads carry the same ID, content hash and text."""
     return (
         actual.get("labeling_task_id") == expected.get("labeling_task_id")
         and actual.get("content_hash") == expected.get("content_hash")

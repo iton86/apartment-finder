@@ -92,16 +92,6 @@
             ]
         },
         {
-            "name": "Image-Selection",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "training.image_selection",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "envFile": "${workspaceFolder}/.env",
-        },
-        {
             "name": "Labeling: Sync batch",
             "type": "debugpy",
             "request": "launch",

@@ -1,3 +1,5 @@
+"""Temporal workflow definitions."""
+
 from datetime import timedelta
 
 from temporalio import workflow
@@ -9,8 +11,11 @@ with workflow.unsafe.imports_passed_through():
 
 @workflow.defn
 class ScrapeListingsWorkflow:
+    """Workflow that runs the scrape activity once, with no automatic retries."""
+
     @workflow.run
     async def run(self, request: ScrapeRequest) -> None:
+        """Execute the ``scrape_listings`` activity for the request."""
         await workflow.execute_activity(
             "scrape_listings",
             request,

@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from apartment_finder.application.ports.poi import PoiCandidate
+from apartment_finder.application.ports import PoiCandidate
 from apartment_finder.application.use_cases.enrich_listings import enrich_listings
 from apartment_finder.infrastructure.persistence.models import Base, ListingModel
 from apartment_finder.infrastructure.poi.http_predictor import MlflowHttpPredictor

@@ -36,6 +36,11 @@ _HAS_WORD_CHAR = re.compile(r"[^\W_]")
 
 
 def clean_description(text: str | None) -> str:
+    """Strip contact noise and normalize whitespace in a listing description.
+
+    Removes URLs, e-mails, phone numbers and reference numbers, drops lines left
+    without letters or digits, and keeps paragraph breaks. ``None`` gives ``""``.
+    """
     if not text:
         return ""
 

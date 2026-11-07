@@ -15,8 +15,8 @@ def model_fingerprint(checkpoint: Path, max_length: int) -> str:
     package = Path(__file__).resolve().parents[1] / "src/apartment_finder"
     for relative in (
         "infrastructure/poi/mlflow_model.py",
-        "infrastructure/evaluation/hf_predictor.py",
-        "domain/evaluation/bio.py",
+        "infrastructure/poi/hf_predictor.py",
+        "domain/evaluation.py",
     ):
         checksum.update((package / relative).read_bytes())
     for path in sorted(checkpoint.rglob("*")):
@@ -29,6 +29,7 @@ def model_fingerprint(checkpoint: Path, max_length: int) -> str:
 
 
 def main():
+    """Log the checkpoint as an MLflow pyfunc model and register it under ``--name``."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run", type=Path)
     parser.add_argument("--tracking-uri", default="sqlite:///mlflow.db")

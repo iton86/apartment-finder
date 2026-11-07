@@ -3,8 +3,8 @@ Step 3b of the POI pipeline: human review in Label Studio.
 
 Each POI is one highlighted span of the ad — the span IS the evidence —
 labeled with its category. Clicking a span shows three per-region fields:
-name, unit, value. That maps 1:1 onto training.schema.PointOfInterest,
-so nothing is lost converting either way.
+name, unit, value. The contract itself lives in apartment_finder.domain.label_studio; this
+module is the file-based (legacy) import/export around it.
 
     config       print the labeling config to paste into the project
     to-tasks     raw ads + teacher labels -> Label Studio import file,
@@ -25,132 +25,34 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from xml.sax.saxutils import quoteattr
 
 from pydantic import ValidationError
 
-from apartment_finder.interface.logging_config import configure_logging
-from training.jsonl import read_jsonl, write_jsonl
-from training.schema import (
-    DistanceUnit,
-    PoiCategory,
-    PoiExtraction,
-    find_evidence,
-    find_problems,
+from apartment_finder.domain.label_studio import (
+    TEXT,
+    annotation_to_extraction,
+    labeling_config,
+    prediction_results,
 )
+from apartment_finder.domain.poi import find_problems
+from apartment_finder.infrastructure.jsonl import read_jsonl, write_jsonl
+from apartment_finder.interface.logging_config import configure_logging
 
 logger = logging.getLogger(__name__)
 
-TEXT = "text"
-CATEGORY = "category"
-NAME = "name"
-UNIT = "unit"
-VALUE = "value"
-
-# Distinct enough to tell neighbouring spans apart; cycles past the end.
-_COLORS = [
-    "#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4", "#46f0f0",
-    "#f032e6", "#bcf60c", "#fabebe", "#008080", "#e6beff", "#9a6324", "#fffac8",
-    "#800000", "#aaffc3", "#808000", "#ffd8b1", "#000075", "#808080", "#a9a9a9",
-]  # fmt: skip
-
-
-def labeling_config() -> str:
-    labels = "\n".join(
-        f"    <Label value={quoteattr(c.value)} background={quoteattr(_COLORS[i % len(_COLORS)])}/>"
-        for i, c in enumerate(PoiCategory)
-    )
-    units = "\n".join(f"          <Choice value={quoteattr(u.value)}/>" for u in DistanceUnit)
-    return f"""<View>
-  <Header value="$title"/>
-  <Text name="meta" value="$meta"/>
-  <Labels name="{CATEGORY}" toName="{TEXT}" showInline="true">
-{labels}
-  </Labels>
-  <View style="display: flex; align-items: flex-start; gap: 1.5em">
-    <View style="flex: 2">
-      <Text name="{TEXT}" value="$text"/>
-    </View>
-    <View style="flex: 1; position: sticky; top: 0">
-      <View visibleWhen="region-selected">
-        <Header value="Selected POI" size="5"/>
-        <TextArea name="{NAME}" toName="{TEXT}" perRegion="true" maxSubmissions="1"
-                  editable="true" transcription="true"
-                  placeholder="Required, as in the ad: Южен парк, 33 СУ, автобус 204"/>
-        <Choices name="{UNIT}" toName="{TEXT}" perRegion="true" required="true"
-                 choice="single-radio">
-{units}
-        </Choices>
-        <Number name="{VALUE}" toName="{TEXT}" perRegion="true" min="0" step="0.1"/>
-      </View>
-      <Text name="review_notes" value="$review_notes"/>
-    </View>
-  </View>
-</View>
-"""
-
 
 def is_gold(content_hash: str, gold_percent: int) -> bool:
+    """Return whether an ad belongs to the gold set, from a stable hash of its content hash."""
     bucket = int(hashlib.sha256(f"gold:{content_hash}".encode()).hexdigest()[:8], 16) % 100
     return bucket < gold_percent
 
 
-def prediction_results(pois: list[dict], text: str) -> tuple[list[dict], list[str]]:
-    """Teacher POIs -> Label Studio regions. Unplaceable ones become notes."""
-    results, notes = [], []
-    for i, poi in enumerate(pois):
-        span = find_evidence(poi["evidence"], text)
-        if span is None:
-            poi_json = json.dumps(poi, ensure_ascii=False)
-            notes.append(f"Teacher POI not drawn (evidence not in text): {poi_json}")
-            continue
-        start, end = span
-        region = {"start": start, "end": end, "text": text[start:end]}
-        region_id = f"t{i}"
-        results.append(
-            {
-                "id": region_id,
-                "from_name": CATEGORY,
-                "to_name": TEXT,
-                "type": "labels",
-                "value": {**region, "labels": [poi["category"]]},
-            }
-        )
-        results.append(
-            {
-                "id": region_id,
-                "from_name": UNIT,
-                "to_name": TEXT,
-                "type": "choices",
-                "value": {**region, "choices": [poi["distance"]["unit"]]},
-            }
-        )
-        if poi["name"]:
-            # Per-region TextArea results keep the typed text under "text",
-            # shadowing the region's own text key.
-            results.append(
-                {
-                    "id": region_id,
-                    "from_name": NAME,
-                    "to_name": TEXT,
-                    "type": "textarea",
-                    "value": {"start": start, "end": end, "text": [poi["name"]]},
-                }
-            )
-        if poi["distance"]["value"] is not None:
-            results.append(
-                {
-                    "id": region_id,
-                    "from_name": VALUE,
-                    "to_name": TEXT,
-                    "type": "number",
-                    "value": {**region, "number": poi["distance"]["value"]},
-                }
-            )
-    return results, notes
-
-
 def build_tasks(raw_rows: list[dict], teacher_rows: list[dict], gold_percent: int) -> list[dict]:
+    """Build Label Studio import tasks from raw ads, pre-filled with teacher predictions.
+
+    Each task is assigned a gold/train split and carries review notes about the
+    teacher's result (or its absence).
+    """
     # Last line wins: a retry appended after an error supersedes it.
     teacher = {r["content_hash"]: r for r in teacher_rows}
     tasks = []
@@ -185,49 +87,21 @@ def build_tasks(raw_rows: list[dict], teacher_rows: list[dict], gold_percent: in
     return tasks
 
 
-def annotation_to_extraction(annotation: dict, text: str) -> PoiExtraction:
-    regions: dict[str, dict] = {}
-    for result in annotation["result"]:
-        regions.setdefault(result["id"], {})[result["from_name"]] = result["value"]
-
-    pois = []
-    for parts in regions.values():
-        span = parts.get(CATEGORY)
-        if span is None:  # per-region field whose span was deleted
-            continue
-        name = (parts.get(NAME, {}).get("text") or [""])[0].strip()
-        unit = (parts.get(UNIT, {}).get("choices") or [None])[0]
-        pois.append(
-            (
-                span["start"],
-                {
-                    "category": span["labels"][0],
-                    # Empty stays "", so find_problems names the actual
-                    # problem instead of a bare type error.
-                    "name": name,
-                    "distance": {"value": parts.get(VALUE, {}).get("number"), "unit": unit},
-                    # Slice the source text rather than trusting value.text,
-                    # so evidence always matches the ad byte for byte.
-                    "evidence": text[span["start"] : span["end"]],
-                },
-            )
-        )
-
-    # Text order — a stable, learnable output order for the student model.
-    # POIs sharing one span ("между Южен парк и НДК") go by where their
-    # name appears inside it.
-    def text_order(item: tuple[int, dict]) -> tuple[int, int, str]:
-        start, poi = item
-        name_at = find_evidence(poi["name"], poi["evidence"]) if poi["name"] else None
-        return start, name_at[0] if name_at else 0, poi["category"]
-
-    pois.sort(key=text_order)
-    return PoiExtraction.model_validate({"pois": [p for _, p in pois]})
-
-
 def convert_export(
     tasks: list[dict], teacher_rows: list[dict], include_teacher: bool
 ) -> tuple[list[dict], list[str]]:
+    """Convert a Label Studio JSON export into labeled rows.
+
+    Uses the latest non-cancelled annotation per task; invalid ones are reported in
+    the rejected list. With ``include_teacher``, unreviewed train rows fall back to
+    clean teacher labels. One row is kept per ad, preferring human and newer labels.
+
+    Returns:
+        The labeled rows and human-readable rejection reasons.
+
+    Raises:
+        ValueError: If the export is not a list of tasks with the required data fields.
+    """
     if not isinstance(tasks, list):
         raise ValueError("Expected a Label Studio JSON export containing a list of tasks")
     required = ("id", "content_hash", TEXT, "split")
@@ -295,6 +169,7 @@ def convert_export(
 
 
 def main() -> None:
+    """Command-line entry point with ``config``, ``to-tasks`` and ``from-export`` commands."""
     parser = argparse.ArgumentParser(description="Label Studio import/export for POI labels")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("config", help="Print the labeling config XML")

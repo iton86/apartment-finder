@@ -26,6 +26,10 @@ def content_hash(text: str) -> str:
 
 
 def shingles(text: str, size: int = 3) -> frozenset[str]:
+    """Return the set of word n-grams (default trigrams) of ``text``, lowercased.
+
+    Texts shorter than ``size`` words yield a single shingle, or an empty set if blank.
+    """
     words = _WORD.findall(text.lower())
     if len(words) < size:
         return frozenset([" ".join(words)]) if words else frozenset()

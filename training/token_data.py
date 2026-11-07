@@ -4,8 +4,8 @@ import hashlib
 import unicodedata
 import warnings
 
+from apartment_finder.domain.poi import PoiCategory, PoiExtraction, find_evidence, find_problems
 from training.dedup import cluster_near_duplicates, content_hash
-from training.schema import PoiCategory, PoiExtraction, find_evidence, find_problems
 
 LABELS = ["O", *[f"{prefix}-{category.value}" for category in PoiCategory for prefix in ("B", "I")]]
 LABEL2ID = {label: i for i, label in enumerate(LABELS)}

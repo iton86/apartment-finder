@@ -34,9 +34,9 @@ The inspector reports **exact character-span + category** micro metrics. It stor
 
 The evaluation subsystem follows a modular Clean Architecture:
 
-- `apartment_finder/domain/evaluation`: framework-free spans, exact matching, and metrics
-- `apartment_finder/application/evaluation`: evaluation, inspection, comparison use cases and ports
-- `apartment_finder/infrastructure/evaluation`: Hugging Face predictor, JSONL persistence, MLflow adapter
+- `apartment_finder/domain/evaluation.py`: framework-free spans, exact matching, and metrics
+- `apartment_finder/application/use_cases/evaluation.py`: evaluation, inspection, comparison use cases (ports live in `application/ports.py`)
+- `apartment_finder/infrastructure/poi/hf_predictor.py` and `infrastructure/evaluation_repositories.py`: Hugging Face predictor, JSONL persistence, MLflow adapter
 - `training/inspection.py`: CLI composition root; validates original dataset hash and split manifest
 - `inspection/app.py`: Streamlit presentation
 
