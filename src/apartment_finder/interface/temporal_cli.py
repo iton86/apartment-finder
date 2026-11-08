@@ -20,8 +20,12 @@ from temporalio.client import (
 )
 from temporalio.worker import Worker
 
-from apartment_finder.infrastructure.temporal.activities import scrape_listings
-from apartment_finder.infrastructure.temporal.contracts import TASK_QUEUE, ScrapeRequest
+from apartment_finder.infrastructure.temporal.activities import enrich_listing_pois, scrape_listings
+from apartment_finder.infrastructure.temporal.contracts import (
+    TASK_QUEUE,
+    EnrichmentRequest,
+    ScrapeRequest,
+)
 from apartment_finder.infrastructure.temporal.workflows import ScrapeListingsWorkflow
 from apartment_finder.interface.logging_config import configure_logging
 
@@ -54,12 +58,23 @@ async def run(args: argparse.Namespace) -> None:
     """Connect to Temporal, then run the worker or create/update the schedule."""
     request = None
     if args.command == "schedule":
+        enrichment = None
+        if getattr(args, "poi_model_version", None) is not None:
+            enrichment = EnrichmentRequest(
+                args.poi_model_version,
+                args.poi_service_url,
+                args.poi_limit,
+                args.poi_timeout_minutes,
+            )
+            if os.environ.get("APP_ENV", "local") != "local":
+                raise ValueError("POI enrichment currently supports APP_ENV=local only")
         request = ScrapeRequest(
             args.search_url,
             args.max_pages,
             args.max_workers,
             args.request_delay,
             args.timeout_minutes,
+            enrichment,
         )
         request.validate()
     api_key = os.environ.get("TEMPORAL_API_KEY")
@@ -76,7 +91,7 @@ async def run(args: argparse.Namespace) -> None:
             client,
             task_queue=args.task_queue,
             workflows=[ScrapeListingsWorkflow],
-            activities=[scrape_listings],
+            activities=[scrape_listings, enrich_listing_pois],
             max_concurrent_activities=1,
             graceful_shutdown_timeout=timedelta(seconds=10),
         )
@@ -115,6 +130,12 @@ def main() -> None:
     schedule.add_argument("--max-workers", type=int, default=4)
     schedule.add_argument("--request-delay", type=float, default=3.0)
     schedule.add_argument("--timeout-minutes", type=int, default=60)
+    schedule.add_argument(
+        "--poi-model-version", help="Enable post-scrape POIs with this fingerprint"
+    )
+    schedule.add_argument("--poi-service-url", default="http://127.0.0.1:5001")
+    schedule.add_argument("--poi-limit", type=int, default=1000)
+    schedule.add_argument("--poi-timeout-minutes", type=int, default=60)
     args = parser.parse_args()
     configure_logging()
     try:

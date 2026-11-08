@@ -9,7 +9,7 @@ from contextlib import suppress
 from temporalio import activity
 from temporalio.exceptions import ApplicationError
 
-from apartment_finder.infrastructure.temporal.contracts import ScrapeRequest
+from apartment_finder.infrastructure.temporal.contracts import EnrichmentRequest, ScrapeRequest
 
 
 async def stop_process(process: asyncio.subprocess.Process) -> None:
@@ -54,8 +54,13 @@ async def scrape_listings(request: ScrapeRequest) -> None:
         str(request.request_delay),
         start_new_session=True,
     )
+    await wait_for_process(process, request.timeout_minutes, "Scraper")
+
+
+async def wait_for_process(process, timeout_minutes: int, label: str) -> None:
+    """Heartbeat until completion, stopping the process group on cancellation."""
     try:
-        async with asyncio.timeout(request.timeout_minutes * 60):
+        async with asyncio.timeout(timeout_minutes * 60):
             while True:
                 activity.heartbeat()
                 try:
@@ -64,6 +69,30 @@ async def scrape_listings(request: ScrapeRequest) -> None:
                 except TimeoutError:
                     continue
         if exit_code:
-            raise ApplicationError(f"Scraper exited with code {exit_code}; see worker logs")
+            raise ApplicationError(f"{label} exited with code {exit_code}; see worker logs")
     finally:
         await stop_process(process)
+
+
+@activity.defn
+async def enrich_listing_pois(request: EnrichmentRequest) -> None:
+    """Populate pending listing POIs through the existing local enrichment CLI."""
+    try:
+        request.validate()
+        if os.environ.get("APP_ENV", "local") != "local":
+            raise ValueError("POI enrichment currently supports APP_ENV=local only")
+    except ValueError as exc:
+        raise ApplicationError(str(exc), non_retryable=True) from exc
+    process = await asyncio.create_subprocess_exec(
+        sys.executable,
+        "-m",
+        "apartment_finder.interface.enrich_cli",
+        "--url",
+        request.url,
+        "--model-version",
+        request.model_version,
+        "--limit",
+        str(request.limit),
+        start_new_session=True,
+    )
+    await wait_for_process(process, request.timeout_minutes, "POI enrichment")

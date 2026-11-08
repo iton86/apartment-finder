@@ -96,12 +96,34 @@ command updates that schedule and preserves its paused state. The interval is
 10 minutes, overlapping ticks are skipped, and the catch-up window is one minute.
 The worker accepts one scraping activity at a time.
 
+To run POI enrichment after every successful scrape, keep the registered model
+service running and update the schedule with its prediction fingerprint:
+
+```bash
+APP_ENV=local uv run apartment-finder-temporal schedule "<search-url>" \
+  --poi-model-version <prediction-fingerprint> \
+  --poi-service-url http://127.0.0.1:5001 --poi-limit 1000 \
+  --poi-timeout-minutes 60
+```
+
+Restart the worker after deploying this change. The workflow shows two separate
+activities: `scrape_listings`, then `enrich_listing_pois`. Existing schedules
+remain scrape-only until updated with `--poi-model-version`. Enrichment processes
+up to the configured limit of missing/stale predictions across all stored ads,
+including earlier backlogs. Already current rows are skipped. It retries up to
+three times without repeating the scrape; committed predictions survive retries.
+A final enrichment failure fails the workflow while preserving scraped data.
+Both activities heartbeat and stop their subprocesses on cancellation or timeout.
+The schedule's overlap policy covers both steps. Enrichment currently requires
+`APP_ENV=local`. In a container, configure a service URL reachable from the worker;
+`127.0.0.1` refers to that container itself. The model service is started separately.
+
 Inspect executions and pause/resume schedules at <http://localhost:8233>.
 Both the server and worker must remain available. The Compose server persists
 state in `temporal_data` and is a development server, not a production setup.
 
 Activities launch the scraper CLI as a subprocess, heartbeat every 15 seconds,
-and terminate its process group on cancellation or timeout. Activity retries are
+and terminate its process group on cancellation or timeout. Scrape activity retries are
 disabled; future scheduled runs provide another attempt. Per-listing failures
 retain the CLI's success-exit behavior.
 
@@ -211,8 +233,8 @@ text spans. If a description changes during inference, the old prediction is
 not written. Already committed rows remain saved after a service failure, so
 retrying is safe. Human-reviewed labeling annotations are unchanged.
 
-Enrichment is an explicit post-scraping step, not automatically invoked by the
-scraper. The command defaults to `APP_ENV=local` and rejects `APP_ENV=cloud`;
+Enrichment can run manually or as the separate Temporal activity described above;
+the standalone scraper does not invoke it. The command defaults to `APP_ENV=local` and rejects `APP_ENV=cloud`;
 its database destination still follows local PostgreSQL environment overrides.
 The existing scraper Docker image does not include the training dependencies;
 run this local model service with the training and tracking groups as above.

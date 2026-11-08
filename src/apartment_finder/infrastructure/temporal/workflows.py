@@ -11,11 +11,11 @@ with workflow.unsafe.imports_passed_through():
 
 @workflow.defn
 class ScrapeListingsWorkflow:
-    """Workflow that runs the scrape activity once, with no automatic retries."""
+    """Scrape listings, then optionally enrich pending descriptions with POIs."""
 
     @workflow.run
     async def run(self, request: ScrapeRequest) -> None:
-        """Execute the ``scrape_listings`` activity for the request."""
+        """Execute scraping followed by configured POI enrichment."""
         await workflow.execute_activity(
             "scrape_listings",
             request,
@@ -26,3 +26,13 @@ class ScrapeListingsWorkflow:
             retry_policy=RetryPolicy(maximum_attempts=1),
             cancellation_type=workflow.ActivityCancellationType.WAIT_CANCELLATION_COMPLETED,
         )
+        # Keep workflow histories from older workers replay-compatible.
+        if workflow.patched("post-scrape-poi-enrichment") and request.enrichment is not None:
+            await workflow.execute_activity(
+                "enrich_listing_pois",
+                request.enrichment,
+                start_to_close_timeout=timedelta(minutes=request.enrichment.timeout_minutes + 1),
+                heartbeat_timeout=timedelta(minutes=1),
+                retry_policy=RetryPolicy(maximum_attempts=3),
+                cancellation_type=workflow.ActivityCancellationType.WAIT_CANCELLATION_COMPLETED,
+            )
