@@ -14,6 +14,7 @@ from apartment_finder.domain.entities import (
     SearchListingsResult,
     SearchScope,
 )
+from apartment_finder.domain.geo import GeoFeature
 from apartment_finder.domain.labeling import (
     LabelingBatch,
     LabelingTask,
@@ -21,6 +22,7 @@ from apartment_finder.domain.labeling import (
     LabelStudioTaskState,
     TeacherAnnotation,
 )
+from apartment_finder.domain.planning_unit_assignment import PlanningUnitAssignment
 
 
 class ListingUnavailableError(Exception):
@@ -329,4 +331,67 @@ class ExperimentRepository(Protocol):
 
     def load_predictions(self, run_id: str, artifact_path: str) -> list[dict]:
         """Load the prediction records stored under ``artifact_path`` for the run."""
+        ...
+
+
+class GeoCatalogueSource(Protocol):
+    """Downloads a complete catalogue into immutable source snapshots."""
+
+    def fetch(self) -> tuple[list[GeoFeature], dict]:
+        """Return validated features and a manifest identifying their raw snapshots."""
+        ...
+
+
+class GeoCatalogueRepository(Protocol):
+    """Publishes complete releases without exposing partially imported data."""
+
+    def publish(self, features: list[GeoFeature], manifest: dict) -> str:
+        """Atomically activate a validated release and return its fingerprint."""
+        ...
+
+    def locate(self, longitude: float, latitude: float) -> list[dict]:
+        """Return every active planning unit covering a WGS84 point."""
+        ...
+
+
+class PlanningUnitMapRepository(Protocol):
+    """Read-only boundary and current-listing data for a pinned map release."""
+
+    def map_data(self, assignments: list[PlanningUnitAssignment] | None) -> dict:
+        """Return planning units and fresh accepted assignments for display."""
+        ...
+
+
+class LocationResolutionRepository(Protocol):
+    """Versioned catalogue evidence and optimistic resolution output storage."""
+
+    release_id: str
+    bundle_id: str | None
+
+    def index(self):
+        """Build a source-name matching index from pinned reference versions."""
+        ...
+
+    def listings(self):
+        """Yield active listing snapshots in bounded database pages."""
+        ...
+
+    def support(self, identities: tuple, radius: float) -> dict[str, float]:
+        """Return metric spatial support per planning unit for a mention group."""
+        ...
+
+    def exists(self, listing_id: str, input_fingerprint: str) -> bool:
+        """Check whether these exact resolver inputs already have a result."""
+        ...
+
+    def activate_policy(self, policy: dict) -> str:
+        """Select the resolver context/model that may produce current map assignments."""
+        ...
+
+    def known_units(self) -> set[str]:
+        """List valid target planning units in the pinned catalogue."""
+        ...
+
+    def save(self, listing, result: dict) -> bool:
+        """Save only if listing source text, location and predictions are unchanged."""
         ...

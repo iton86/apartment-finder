@@ -1,0 +1,7 @@
+{
+"type": "FeatureCollection",
+"name": "addr_street",
+"features": [
+{ "type": "Feature", "properties": { }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 322581.5589, 4722265.84499999973923 ], [ 322526.362000000022817, 4722188.551 ] ], [ [ 322588.564000000013039, 4722275.650999999605119 ], [ 322581.559, 4722265.84499999973923 ] ] ] } }
+]
+}
