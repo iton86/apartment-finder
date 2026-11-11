@@ -1,0 +1,20 @@
+# Isolated PostGIS development database; existing PostgreSQL data is untouched.
+# docker compose -p apartment-finder-geo -f docker-compose.geo.yml up -d
+services:
+  postgres:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_USER: apartment_finder
+      POSTGRES_PASSWORD: local_dev_only
+      POSTGRES_DB: apartment_finder
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - geo_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apartment_finder"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+volumes:
+  geo_postgres_data:

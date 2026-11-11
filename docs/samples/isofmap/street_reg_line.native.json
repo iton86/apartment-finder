@@ -1,0 +1,7 @@
+{
+"type": "FeatureCollection",
+"name": "street_reg_line",
+"features": [
+{ "type": "Feature", "properties": { }, "geometry": { "type": "LineString", "coordinates": [ [ 323078.86099999997532, 4727121.132000000216067 ], [ 323142.6742, 4727149.122999999672174 ] ] } }
+]
+}

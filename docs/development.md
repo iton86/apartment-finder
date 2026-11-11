@@ -39,6 +39,11 @@ The worker's subprocess cleanup uses process groups.
    make migrate
    ```
 
+   The database image includes PostGIS for migration 0010. If you already have
+   a running `postgres:16` container, back up its data and recreate the service
+   with the updated Compose image before migrating. For an isolated database
+   instead, follow [geospatial operations](geospatial-operations.md).
+
    `make up` waits for database readiness. `make migrate` explicitly selects
    `APP_ENV=local`, but host and credential overrides still determine the actual
    database destination.

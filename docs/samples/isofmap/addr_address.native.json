@@ -1,0 +1,7 @@
+{
+"type": "FeatureCollection",
+"name": "addr_address",
+"features": [
+{ "type": "Feature", "properties": { "officialaddress": "с. Владая, ул. Виров дол № 6" }, "geometry": { "type": "Point", "coordinates": [ 311115.233, 4723847.65500000026077 ] } }
+]
+}

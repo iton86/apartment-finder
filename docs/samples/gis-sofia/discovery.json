@@ -1,0 +1,392 @@
+{
+  "inspected_at": "2026-11-08T15:12:49.071407+00:00",
+  "provider": "GIS-Sofia via Urban Data Sofia",
+  "street_package": {
+    "author": "",
+    "author_email": "",
+    "creator_user_id": "547c27ff-0570-410d-b686-f57e5001694d",
+    "id": "49d051a7-d671-47e9-a599-84f75a0e27da",
+    "isopen": true,
+    "license_id": "cc-by",
+    "license_title": "Creative Commons Признание",
+    "license_url": "http://www.opendefinition.org/licenses/cc-by",
+    "maintainer": "",
+    "maintainer_email": "",
+    "metadata_created": "2026-08-28T13:03:18.427637",
+    "metadata_modified": "2026-09-11T08:38:00.627984",
+    "name": "streets_curbs-zip",
+    "notes": "Наборът от данни съдържа пространствен слой (GeoJSON) с обхватите на уличните платна и тротоарите на територията на Столична община. Слоят представя очертанията на пътните настилки и прилежащите тротоари, чрез които се разграничават пространствата за движение на превозни средства и за пешеходци.\n\nДанните служат за анализ на уличната мрежа и градската среда, за планиране на ремонти и поддръжка, за изчисляване на площи, както и за картографски и устройствени разработки.\n\nАктуален към 28.08.2026 г.",
+    "num_resources": 1,
+    "num_tags": 14,
+    "organization": {
+      "id": "ae4da99b-2fef-456e-9b10-8761b772b7fe",
+      "name": "gis-sofia-eood",
+      "title": "\"Географска информационна система – София” ЕООД",
+      "type": "organization",
+      "description": "„Географска информационна система – София” ЕООД е търговско дружество, чийто едноличен собственик е Столична община и е една от най-големите геодезически фирми в България. Седалището на дружеството е гр. София, ул. „Сердика“ №5, ЕИК 000656403.\r\nКомпанията ни е създадена през 1999 година, с предмет на дейност изграждане, поддържане и управление на информационната система на кадастралните, регулационните и застроителните планове за територията на Столична община.\r\nОсновната ни цел е да предоставяме качествени услуги в областта на геодезията, кадастъра, устройственото планиране и географските информационни системи.\r\nНашата мисия е да облекчим потребителите си, осигурявайки лесен и удобен достъп до необходимата и полезна за тях пространствена информация.\r\nОсновни приоритети в нашата работа са пълнота, актуалност, точност, надеждност и достъпност на данните.\r\n\r\nЛинк към допълнителна информация относно начина на предоставяне на данни: https://www.sofia.bg/urbanization-data",
+      "image_url": "2026-02-12-151011.658642GIS-logo.png",
+      "created": "2026-02-12T15:10:11.666537",
+      "is_organization": true,
+      "approval_status": "approved",
+      "state": "active"
+    },
+    "owner_org": "ae4da99b-2fef-456e-9b10-8761b772b7fe",
+    "private": false,
+    "state": "active",
+    "title": "Улици и тротоари",
+    "type": "dataset",
+    "url": "",
+    "version": "",
+    "extras": [
+      {
+        "key": "Актуален към",
+        "value": "28.08.2026 г."
+      }
+    ],
+    "groups": [
+      {
+        "description": "",
+        "display_name": "Карти и планове",
+        "id": "e2636df6-8372-49aa-ad57-02519df4f1b5",
+        "image_display_url": "https://urbandata.sofia.bg/uploads/group/2026-08-26-122046.925494gradsko-planirane.png",
+        "name": "maps-and-plans",
+        "title": "Карти и планове"
+      },
+      {
+        "description": "Очаквайте всички данни на градската мобилност, статични и динамични: маршрути, спирки, време до пристигане, паркоместа и т.н., анонимизирани, отговарящи на всички европейски изисквания, заложени в актуализираната версия на Делегиран регламент (ЕС) 2017/1926. ",
+        "display_name": "Мобилност",
+        "id": "c7024a0e-0b63-41f2-b624-76865257c5ad",
+        "image_display_url": "https://urbandata.sofia.bg/uploads/group/2025-09-04-134646.098049transport.png",
+        "name": "mobility",
+        "title": "Мобилност"
+      }
+    ],
+    "resources": [
+      {
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-08-28T13:03:59.039298",
+        "datastore_active": false,
+        "description": "Обхвати на улични платна и тротоари\r\n\r\nАктуален към 28.08.2026 г.",
+        "format": "GeoJSON",
+        "hash": "",
+        "id": "47ec6ce6-4f51-4a7d-881d-007d9b009b8b",
+        "last_modified": "2026-08-28T13:03:59.010144",
+        "metadata_modified": "2026-09-11T08:38:00.632633",
+        "mimetype": "application/zip",
+        "mimetype_inner": null,
+        "name": "Улици и тротоари ",
+        "package_id": "49d051a7-d671-47e9-a599-84f75a0e27da",
+        "position": 0,
+        "resource_type": null,
+        "size": 26715561,
+        "state": "active",
+        "url": "https://urbandata.sofia.bg/dataset/49d051a7-d671-47e9-a599-84f75a0e27da/resource/47ec6ce6-4f51-4a7d-881d-007d9b009b8b/download/streets_curbs.zip",
+        "url_type": "upload",
+        "datastore_contains_all_records_of_source_file": false
+      }
+    ],
+    "tags": [
+      {
+        "display_name": "GeoJSON",
+        "id": "de597029-2e92-4fe6-aa51-1211dd1efe29",
+        "name": "GeoJSON",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "ГИС",
+        "id": "5fd97ea0-dc92-4fbc-a489-8073c7849d5a",
+        "name": "ГИС",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "София",
+        "id": "94ddd48a-08f8-49ab-b111-2580b60ea839",
+        "name": "София",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "градска",
+        "id": "7d41101e-884a-4782-9f6b-d6a9c295c531",
+        "name": "градска",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "мрежа",
+        "id": "a4c9a169-976b-4a8a-8f67-5f8b7884ad7a",
+        "name": "мрежа",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "настилка",
+        "id": "4f890a7a-6bda-4653-a28f-a1e8ffb49f12",
+        "name": "настилка",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "пешеходци",
+        "id": "2a69e589-c490-46b9-ab2a-8dca74e4c2c6",
+        "name": "пешеходци",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "платна",
+        "id": "05dd3590-39bd-46f4-9aaa-4999c596e6bd",
+        "name": "платна",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "пътна",
+        "id": "b5347da4-948b-4013-a4a6-7e89d66871c8",
+        "name": "пътна",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "среда",
+        "id": "d436924c-848b-4f73-a016-d48db70d343c",
+        "name": "среда",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "тротоари",
+        "id": "51a435a8-d3d7-4944-add6-31819c1081e3",
+        "name": "тротоари",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "улици",
+        "id": "4b651e49-7b79-4415-b250-1f700c88dc74",
+        "name": "улици",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "улична",
+        "id": "8801c9dc-7583-481f-80b8-a326d80aa94c",
+        "name": "улична",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "улични",
+        "id": "c7c9cf0d-b565-4222-83f2-c2095f9a4e16",
+        "name": "улични",
+        "state": "active",
+        "vocabulary_id": null
+      }
+    ],
+    "relationships_as_subject": [],
+    "relationships_as_object": []
+  },
+  "names_package": {
+    "author": "",
+    "author_email": "",
+    "creator_user_id": "547c27ff-0570-410d-b686-f57e5001694d",
+    "id": "ee06f1c1-869c-41fa-b2e9-8d09d1ea8d05",
+    "isopen": true,
+    "license_id": "cc-by",
+    "license_title": "Creative Commons Признание",
+    "license_url": "http://www.opendefinition.org/licenses/cc-by",
+    "maintainer": "",
+    "maintainer_email": "",
+    "metadata_created": "2026-08-28T12:59:24.804249",
+    "metadata_modified": "2026-09-11T08:39:41.876275",
+    "name": "streets_names_new_old-zip",
+    "notes": "Наборът от данни съдържа съответствието между старите и новите имена на улиците на територията на Столична община. За всяка улица са посочени предишното и актуалното наименование, което позволява проследяване на преименуванията във времето. \n\nДанните са предоставени във формат CSV и служат за уеднаквяване на адресна и картографска информация, за актуализиране на регистри и бази данни, както и за исторически и справочни цели.\n\nАктуален към 28.08.2026г.",
+    "num_resources": 1,
+    "num_tags": 10,
+    "organization": {
+      "id": "ae4da99b-2fef-456e-9b10-8761b772b7fe",
+      "name": "gis-sofia-eood",
+      "title": "\"Географска информационна система – София” ЕООД",
+      "type": "organization",
+      "description": "„Географска информационна система – София” ЕООД е търговско дружество, чийто едноличен собственик е Столична община и е една от най-големите геодезически фирми в България. Седалището на дружеството е гр. София, ул. „Сердика“ №5, ЕИК 000656403.\r\nКомпанията ни е създадена през 1999 година, с предмет на дейност изграждане, поддържане и управление на информационната система на кадастралните, регулационните и застроителните планове за територията на Столична община.\r\nОсновната ни цел е да предоставяме качествени услуги в областта на геодезията, кадастъра, устройственото планиране и географските информационни системи.\r\nНашата мисия е да облекчим потребителите си, осигурявайки лесен и удобен достъп до необходимата и полезна за тях пространствена информация.\r\nОсновни приоритети в нашата работа са пълнота, актуалност, точност, надеждност и достъпност на данните.\r\n\r\nЛинк към допълнителна информация относно начина на предоставяне на данни: https://www.sofia.bg/urbanization-data",
+      "image_url": "2026-02-12-151011.658642GIS-logo.png",
+      "created": "2026-02-12T15:10:11.666537",
+      "is_organization": true,
+      "approval_status": "approved",
+      "state": "active"
+    },
+    "owner_org": "ae4da99b-2fef-456e-9b10-8761b772b7fe",
+    "private": false,
+    "state": "active",
+    "title": "Стари/нови имена на улици",
+    "type": "dataset",
+    "url": "",
+    "version": "",
+    "extras": [
+      {
+        "key": "Актуален към",
+        "value": "28.08.2026 г."
+      }
+    ],
+    "groups": [
+      {
+        "description": "",
+        "display_name": "Карти и планове",
+        "id": "e2636df6-8372-49aa-ad57-02519df4f1b5",
+        "image_display_url": "https://urbandata.sofia.bg/uploads/group/2026-08-26-122046.925494gradsko-planirane.png",
+        "name": "maps-and-plans",
+        "title": "Карти и планове"
+      },
+      {
+        "description": "Очаквайте всички данни на градската мобилност, статични и динамични: маршрути, спирки, време до пристигане, паркоместа и т.н., анонимизирани, отговарящи на всички европейски изисквания, заложени в актуализираната версия на Делегиран регламент (ЕС) 2017/1926. ",
+        "display_name": "Мобилност",
+        "id": "c7024a0e-0b63-41f2-b624-76865257c5ad",
+        "image_display_url": "https://urbandata.sofia.bg/uploads/group/2025-09-04-134646.098049transport.png",
+        "name": "mobility",
+        "title": "Мобилност"
+      }
+    ],
+    "resources": [
+      {
+        "cache_last_updated": null,
+        "cache_url": null,
+        "created": "2026-08-28T13:00:21.767716",
+        "datastore_active": true,
+        "description": " Съответствие между стари и нови имена на улиците в София\r\n\r\nАктуален към 28.08.2026г.",
+        "format": "CSV",
+        "hash": "",
+        "id": "c3ec6293-b1b0-48b7-98ae-9693ae7abd77",
+        "last_modified": "2026-08-28T13:00:21.738924",
+        "metadata_modified": "2026-09-11T08:39:41.883698",
+        "mimetype": "application/zip",
+        "mimetype_inner": null,
+        "name": " Стари/нови имена на улици",
+        "package_id": "ee06f1c1-869c-41fa-b2e9-8d09d1ea8d05",
+        "position": 0,
+        "resource_type": null,
+        "size": 46110,
+        "state": "active",
+        "url": "https://urbandata.sofia.bg/dataset/ee06f1c1-869c-41fa-b2e9-8d09d1ea8d05/resource/c3ec6293-b1b0-48b7-98ae-9693ae7abd77/download/streets_names_new_old.zip",
+        "url_type": "upload",
+        "datastore_contains_all_records_of_source_file": false
+      }
+    ],
+    "tags": [
+      {
+        "display_name": "CSV",
+        "id": "766af2c1-1e1f-4feb-ac93-49a835cfa390",
+        "name": "CSV",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "София",
+        "id": "94ddd48a-08f8-49ab-b111-2580b60ea839",
+        "name": "София",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "адреси",
+        "id": "fc7aa46b-2b87-44d3-9454-9d8ea55f1a55",
+        "name": "адреси",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "имена",
+        "id": "c9ff0ccc-bd4a-4090-a90e-09aba81309f9",
+        "name": "имена",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "наименования",
+        "id": "7f54f36d-7c31-4fd8-b305-2e00b6a2a0f7",
+        "name": "наименования",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "нови",
+        "id": "4f2c2456-21cf-49c6-ba73-305ff32af252",
+        "name": "нови",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "преименуване",
+        "id": "d7977d2e-3625-43a5-a7a6-c6cee58cdcaa",
+        "name": "преименуване",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "справочник",
+        "id": "d1b82a9b-48d1-402f-81c8-a23124839c0d",
+        "name": "справочник",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "стари",
+        "id": "a7848d13-ef0b-4f7d-916b-fdadbb2c2fa6",
+        "name": "стари",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "улици",
+        "id": "4b651e49-7b79-4415-b250-1f700c88dc74",
+        "name": "улици",
+        "state": "active",
+        "vocabulary_id": null
+      }
+    ],
+    "relationships_as_subject": [],
+    "relationships_as_object": []
+  },
+  "street_download_sha256": "dbadf19408168ce132eee022cc8307304b17d774441a312406a9a39a30f2b2b0",
+  "street_feature_count": 91244,
+  "geometry_counts": {
+    "Polygon": 91242,
+    "MultiPolygon": 2
+  },
+  "surface_type_counts": {
+    "тротоар": 39100,
+    "паркинг на платното": 3074,
+    "паркинг на тротоара": 846,
+    "улично платно": 33348,
+    "тротоар без покритие": 3699,
+    "улично платно без покритие": 1813,
+    "зелени площи": 6869,
+    "укритие за смет": 54,
+    "трамвайно трасе": 226,
+    "тупик с паркинг": 243,
+    "тротоар на мост": 106,
+    "подлези": 280,
+    "зелени площи на мост": 5,
+    "велоалея на мост": 357,
+    "улично платно на мост": 137,
+    "велоалея": 535,
+    "пешеходно улично платно": 28,
+    "разделителна ивица": 422,
+    "тротоар на обръщало": 11,
+    "улично платно на обръщало": 20,
+    "трасе на метро": 5,
+    "улично платно в тунел": 16,
+    "разделителна ивица в тунел": 6,
+    "разделителна ивица на мост": 5,
+    "подпорна стена": 28,
+    "тротоар в тунел": 6,
+    "трамвайно трасе на мост": 2,
+    "тротоар стълбище": 1,
+    "": 2
+  },
+  "name_row_count": 2158,
+  "identity_note": "rn stability across exports unverified; do not join rn across datasets",
+  "samples_note": "Small representative subsets, not complete exports"
+}

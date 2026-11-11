@@ -33,7 +33,7 @@ services:
       - label_studio_data:/label-studio/data
 
   postgres:
-    image: postgres:16
+    image: postgis/postgis:16-3.5
     environment:
       POSTGRES_USER: apartment_finder
       POSTGRES_PASSWORD: local_dev_only

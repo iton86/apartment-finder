@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sofia · Planning unit explorer</title>
+<link rel="stylesheet" href="/vendor/leaflet.css"><link rel="stylesheet" href="/style.css">
+<script defer src="/vendor/leaflet.js"></script><script defer src="/app.js"></script>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/" aria-label="Sofia planning unit explorer"><span class="brand-mark">S</span><span>SOFIA<span class="brand-sub">APARTMENT FINDER</span></span></a><span class="top-title">Planning unit explorer</span><span class="local-badge"><i></i> Local catalogue</span></header>
+<main class="workspace">
+<aside class="sidebar" aria-label="Planning unit and ad filters">
+<div class="intro"><span class="eyebrow">A clearer view of Sofia</span><h1>Find the right <br>part of the city.</h1><p>Explore planning units and ads with a supported unit assignment.</p></div>
+<div class="stats"><div><strong id="unit-count">—</strong><span>planning units</span></div><div><strong id="ad-count">—</strong><span>eligible ads</span></div></div>
+<div class="filters"><label for="search">Search units or ads</label><input id="search" type="search" placeholder="Try Лозенец or a unit number…" autocomplete="off">
+<div class="confidence-heading"><label for="confidence">Minimum confidence</label><output id="confidence-value" for="confidence">90%</output></div><input id="confidence" type="range" min="90" max="100" step="1" value="90"><div class="range-labels"><span>90%</span><span>100%</span></div><p class="filter-note">Calibrated assignments only. Human-reviewed ads are always eligible.</p>
+<label class="checkbox"><input id="boundaries" type="checkbox" checked> Show planning-unit boundaries</label><label class="checkbox"><input id="basemap" type="checkbox" checked> Show street basemap</label>
+</div>
+<div class="results-heading"><h2 id="results-title">Explore the units</h2><button id="clear" type="button" hidden>Clear selection</button></div>
+<div id="status" role="status" aria-live="polite">Loading your catalogue…</div><div id="results" class="results"></div>
+<footer class="sidebar-footer">Boundaries · SofiaPlan<br><span id="release">Loading release…</span><button id="reload" type="button">Refresh data ↻</button></footer>
+</aside>
+<section class="map-panel" aria-label="Map of Sofia planning units">
+<div id="map"></div><div class="map-heading"><span class="eyebrow">SOFIA, BULGARIA</span><strong id="map-selection">The whole city, one unit at a time.</strong></div>
+<button id="reset" type="button" class="reset-view">↗ Reset view</button>
+<div class="map-key"><span><i class="key-unit"></i> Planning unit</span><span><i class="key-pin"></i> Ads assigned to unit</span></div>
+<div class="accuracy-note"><span class="info-icon">i</span><p><strong>Unit-level locations</strong><br>Markers represent a planning unit, not an apartment address.</p></div>
+</section>
+</main>
+</body></html>

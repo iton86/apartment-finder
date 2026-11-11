@@ -1,0 +1,56 @@
+{
+  "inspected_at": "2026-11-08T15:09:29.072054+00:00",
+  "purpose": "One-feature public discovery samples; not a complete dataset",
+  "samples": [
+    {
+      "layer": "addr_street",
+      "file": "addr_street.native.json",
+      "url": "http://www.isofmap.bg/owsmap?service=WFS&version=1.1.0&request=GetFeature&typeName=ms%3Aaddr_street&maxFeatures=1&outputFormat=geojson&srsName=EPSG%3A7801",
+      "sha256": "e46c48ce27a5de08ab82e68d88b2756cae47235c48eac0ac071b71609548e131",
+      "feature_count": 1,
+      "geometry_type": "MultiLineString",
+      "source_crs": "EPSG:7801 per application configuration; verify axis order before transforming",
+      "note": "Native projected coordinates, not RFC 7946 WGS84 GeoJSON"
+    },
+    {
+      "layer": "addr_address",
+      "file": "addr_address.native.json",
+      "url": "http://www.isofmap.bg/owsmap?service=WFS&version=1.1.0&request=GetFeature&typeName=ms%3Aaddr_address&maxFeatures=1&outputFormat=geojson&srsName=EPSG%3A7801",
+      "sha256": "aec6872aedcdff3dac80b7f30e38ccaf8624b1472d293f65c344e242fbbc6ee2",
+      "feature_count": 1,
+      "geometry_type": "Point",
+      "source_crs": "EPSG:7801 per application configuration; verify axis order before transforming",
+      "note": "Native projected coordinates, not RFC 7946 WGS84 GeoJSON"
+    },
+    {
+      "layer": "bm_street_fill",
+      "file": "bm_street_fill.native.json",
+      "url": "http://www.isofmap.bg/owsmap?service=WFS&version=1.1.0&request=GetFeature&typeName=ms%3Abm_street_fill&maxFeatures=1&outputFormat=geojson&srsName=EPSG%3A7801",
+      "sha256": "a1acb41671ba38ac2f2c69b20932ef3c1d51b32d4d996130db68977e876c1c93",
+      "feature_count": 1,
+      "geometry_type": "LineString",
+      "source_crs": "EPSG:7801 per application configuration; verify axis order before transforming",
+      "note": "Native projected coordinates, not RFC 7946 WGS84 GeoJSON"
+    },
+    {
+      "layer": "street_reg_line",
+      "file": "street_reg_line.native.json",
+      "url": "http://www.isofmap.bg/owsmap?service=WFS&version=1.1.0&request=GetFeature&typeName=ms%3Astreet_reg_line&maxFeatures=1&outputFormat=geojson&srsName=EPSG%3A7801",
+      "sha256": "008febc886b83e4232d0ac81f975a12ce18ecf9c3129676c4660f9a536d39e54",
+      "feature_count": 1,
+      "geometry_type": "LineString",
+      "source_crs": "EPSG:7801 per application configuration; verify axis order before transforming",
+      "note": "Native projected coordinates, not RFC 7946 WGS84 GeoJSON"
+    },
+    {
+      "layer": "reg_axisline",
+      "file": "reg_axisline.native.json",
+      "url": "http://www.isofmap.bg/owsmap?service=WFS&version=1.1.0&request=GetFeature&typeName=ms%3Areg_axisline&maxFeatures=1&outputFormat=geojson&srsName=EPSG%3A7801",
+      "sha256": "8f8c5cef9b4e73688afe766cb6725cf3f9bccbdebf6a00c9d228de07858ec4aa",
+      "feature_count": 1,
+      "geometry_type": "LineString",
+      "source_crs": "EPSG:7801 per application configuration; verify axis order before transforming",
+      "note": "Native projected coordinates, not RFC 7946 WGS84 GeoJSON"
+    }
+  ]
+}
