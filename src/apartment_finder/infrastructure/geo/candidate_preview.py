@@ -8,9 +8,24 @@ from apartment_finder.domain.location_resolution import (
     ListingLocationInput,
     extract_evidence,
     rank_units,
+    normalize_name,
 )
 from apartment_finder.infrastructure.geo.map_repository import PostgisPlanningUnitMapRepository
 from apartment_finder.infrastructure.geo.resolution_repository import PostgisResolutionRepository
+
+
+# Coarse guardrail, not an administrative boundary. Preview must abstain rather
+# than plot an obviously non-Sofia unit; production needs official city polygons.
+SOFIA_PREVIEW_BOUNDS = (23.0, 42.55, 23.65, 42.85)
+
+
+def _sofia_city(city: str) -> bool:
+    return normalize_name(city or "") in {"софия", "sofia"}
+
+
+def _inside_sofia_preview(marker: list[float]) -> bool:
+    west, south, east, north = SOFIA_PREVIEW_BOUNDS
+    return west <= marker[0] <= east and south <= marker[1] <= north
 
 
 class CandidatePreviewRepository:
@@ -44,8 +59,19 @@ class CandidatePreviewRepository:
                     .mappings()
                     .all()
                 )
+        # The catalogue is Sofia-specific. Do not silently project ads from other
+        # settlements into it. The marker check also catches distant candidates.
+        eligible_units = {
+            feature["properties"]["id"]
+            for feature in data["units"]["features"]
+            if _inside_sofia_preview(feature["properties"]["marker"])
+        }
         ads = []
+        unresolved = 0
         for row in rows:
+            if not _sofia_city(row["city"]):
+                unresolved += 1
+                continue
             listing = ListingLocationInput(
                 str(row["id"]),
                 row["description"],
@@ -65,9 +91,21 @@ class CandidatePreviewRepository:
                 for g in evidence
             ]
             result = rank_units(evidence, supports, notes)
-            if not result["candidates"]:
+            candidates = [
+                candidate for candidate in result["candidates"]
+                if candidate["planning_unit_id"] in eligible_units
+            ]
+            # Do not replace a geographically invalid winner with a weaker
+            # runner-up: that would disguise a cross-city matching error.
+            if (
+                not candidates
+                or result["candidates"][0]["planning_unit_id"] not in eligible_units
+                or result["conflict"]
+                or candidates[0]["features"][0] < 0.25
+            ):
+                unresolved += 1
                 continue
-            top = result["candidates"][0]
+            top = candidates[0]
             # No probability, acceptance or human-review claim is made in preview mode.
             ads.append(
                 {
@@ -88,5 +126,10 @@ class CandidatePreviewRepository:
                     "currency": row["price_currency"],
                 }
             )
-        data.update({"ads": ads, "preview_mode": True, "excluded_assignments": 0})
+        data.update({
+            "ads": ads,
+            "preview_mode": True,
+            "excluded_assignments": 0,
+            "unresolved_preview_ads": unresolved,
+        })
         return data
