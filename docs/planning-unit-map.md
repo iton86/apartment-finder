@@ -132,3 +132,16 @@ the confidence slider, and claims no probability. The true planning unit may
 differ. Nothing is copied, saved, accepted or human-reviewed by preview mode.
 The normal map and its confidence gates remain unchanged. Use the regular
 review workflow to accept a mapping after inspecting its evidence.
+
+### Preview geographic guardrails
+
+Preview is limited to listings explicitly tagged Sofia (including `гр. София`
+ and `Sofia`). It abstains when the highest-ranked unit marker is outside a
+conservative Sofia bounding box, when evidence conflicts, or when the top
+candidate's spatial support feature is below 0.25. These ads are counted in
+`unresolved_preview_ads` and are **not** placed on the map. The bounding box
+is a coarse safety check, **not** an official city/municipality boundary;
+it may exclude legitimate peripheral units and cannot guarantee correctness
+inside the box. A future release should use authoritative settlement polygons
+and apply geographic filtering before POI candidate generation. Preview
+continues to be unreviewed and is not an acceptance or probability claim.
